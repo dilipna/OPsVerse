@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,6 +32,33 @@ class Settings(BaseSettings):
     embedding_dim: int = 768
     sparse_model: str = "Qdrant/bm25"
     reranker_model: str = "BAAI/bge-reranker-base"
+
+    # LLM providers (free tiers). Keys use the vendors' canonical env names
+    # (no OPSVERSE_ prefix) so litellm and vendor tooling agree on them; the
+    # prefixed spelling is accepted too. Keys are passed to litellm explicitly
+    # because pydantic-settings reads .env without exporting to os.environ.
+    gemini_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GEMINI_API_KEY", "OPSVERSE_GEMINI_API_KEY"),
+    )
+    groq_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("GROQ_API_KEY", "OPSVERSE_GROQ_API_KEY"),
+    )
+
+    # Chat serving (Phase 3). Fallback models are tried in order when the
+    # primary fails before the first streamed token (see ADR-0004).
+    # gemini-2.5-flash is retired for new keys (404); 3.5-flash is the current
+    # free-tier flash. It thinks by default — "minimal" keeps grounded RAG
+    # answers fast; the max-token budget covers reasoning + answer.
+    chat_model: str = "gemini/gemini-3.5-flash"
+    chat_fallback_models: list[str] = []
+    chat_reasoning_effort: str | None = "minimal"
+    chat_max_tokens: int = 2048
+    chat_temperature: float = 0.2
+    chat_context_k: int = 6
+    chat_llm_timeout_s: float = 45.0
+    chat_retrieval_timeout_s: float = 10.0
 
     minio_endpoint: str = "http://localhost:9000"
     minio_access_key: str = "opsverse"

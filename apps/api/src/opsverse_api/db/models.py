@@ -56,6 +56,29 @@ class Chunk(Base):
     document: Mapped[Document] = relationship(back_populates="chunks")
 
 
+class RequestLedger(Base):
+    """One row per LLM-backed request: tokens, cost, latency, degradation.
+
+    Feeds the Phase 4 production metrics and the Phase 6 cost panel.
+    """
+
+    __tablename__ = "request_ledger"
+
+    id: Mapped[uuid.UUID] = mapped_column(sa.Uuid, primary_key=True, default=uuid.uuid4)
+    route: Mapped[str] = mapped_column(sa.String(64))
+    model: Mapped[str | None] = mapped_column(sa.String(128), default=None)
+    status: Mapped[str] = mapped_column(sa.String(16), default="ok")  # ok|degraded|error
+    prompt_tokens: Mapped[int | None] = mapped_column(sa.Integer, default=None)
+    completion_tokens: Mapped[int | None] = mapped_column(sa.Integer, default=None)
+    cost_usd: Mapped[float | None] = mapped_column(sa.Numeric(12, 8), default=None)
+    latency_ms: Mapped[float | None] = mapped_column(sa.Float, default=None)
+    first_token_ms: Mapped[float | None] = mapped_column(sa.Float, default=None)
+    meta: Mapped[dict[str, Any]] = mapped_column(JSONVariant, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True), default=utcnow, index=True
+    )
+
+
 class IngestJob(Base):
     __tablename__ = "ingest_jobs"
 
