@@ -63,8 +63,18 @@ class Settings(BaseSettings):
     chat_max_tokens: int = 2048
     chat_temperature: float = 0.2
     chat_context_k: int = 6
+    # Reranking measured WORSE on quality (MRR 0.612 vs 0.643 hybrid-only)
+    # and ~9s/query on CPU — see docs/reports/retrieval-ablation-v1.md.
+    chat_rerank: bool = False
     chat_llm_timeout_s: float = 45.0
     chat_retrieval_timeout_s: float = 10.0
+
+    # Eval/benchmark report summaries served by /v1/evals until Phase 4
+    # moves them into Postgres.
+    reports_dir: str = "docs/reports"
+
+    # Browser origins allowed to call the API (the Next.js dev server).
+    cors_origins: list[str] = ["http://localhost:3000"]
 
     minio_endpoint: str = "http://localhost:9000"
     minio_access_key: str = "opsverse"

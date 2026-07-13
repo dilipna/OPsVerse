@@ -160,18 +160,23 @@ class ChatService:
         *,
         context_k: int = 6,
         retrieval_timeout_s: float = 10.0,
+        rerank: bool = False,
     ):
         self._retriever = retriever
         self._llm = llm
         self._context_k = context_k
         self._retrieval_timeout_s = retrieval_timeout_s
+        # Off by default: the v1 retrieval ablation measured the CPU
+        # cross-encoder as slightly quality-negative at ~9s/query.
+        self._rerank = rerank
 
     async def _retrieve(
         self, query: str, k: int, filters: SearchFilters | None
     ) -> tuple[list[RetrievedChunk], list[str]]:
-        """Steps 1-3 of the ladder: rerank -> no rerank -> no retrieval."""
+        """Steps 1-3 of the ladder: (rerank ->) no rerank -> no retrieval."""
         degraded: list[str] = []
-        for rerank in (True, False):
+        attempts = (True, False) if self._rerank else (False,)
+        for rerank in attempts:
             try:
                 with anyio.fail_after(self._retrieval_timeout_s):
                     chunks = await self._retriever.search(
