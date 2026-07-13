@@ -1,0 +1,91 @@
+name: opsverse
+
+# Core dev stack: docker compose -f infra/compose/docker-compose.yml up -d
+# The API container is opt-in:  ... --profile app up -d
+# Later phases add a "full" profile (Langfuse, LiteLLM gateway).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: opsverse
+      POSTGRES_PASSWORD: opsverse
+      POSTGRES_DB: opsverse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opsverse -d opsverse"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  qdrant:
+    image: qdrant/qdrant:latest # TODO: pin to a digest after first pull
+    ports:
+      - "6333:6333" # HTTP
+      - "6334:6334" # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      # Qdrant's image ships no curl/wget; use bash's /dev/tcp to probe the HTTP port.
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  minio:
+    image: minio/minio:latest # TODO: pin to a digest after first pull
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: opsverse
+      MINIO_ROOT_PASSWORD: opsverse-secret
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  api:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      OPSVERSE_DATABASE_URL: postgresql+asyncpg://opsverse:opsverse@postgres:5432/opsverse
+      OPSVERSE_REDIS_URL: redis://redis:6379/0
+      OPSVERSE_QDRANT_URL: http://qdrant:6333
+      OPSVERSE_MINIO_ENDPOINT: http://minio:9000
+    ports:
+      # host 8100: port 8000 is taken by the FIFA2026MLOps model server
+      - "8100:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  qdrant_data:
+  minio_data:

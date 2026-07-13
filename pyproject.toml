@@ -1,0 +1,42 @@
+[project]
+name = "opsverse-ai"
+version = "0.1.0"
+description = "OpsVerse AI — production-grade LLM engineering platform for the DevOps/MLOps/LLMOps community"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["apps/api", "libs/*"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "pyright>=1.1.390",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "httpx>=0.28",
+    "aiosqlite>=0.20",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["apps/api/src", "libs/core/src", "libs/ingestion/src", "libs/rag/src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+include = ["apps", "libs"]
+exclude = ["**/.venv", "**/__pycache__", "**/alembic/versions"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["apps/api/tests", "libs/core/tests", "libs/ingestion/tests", "libs/rag/tests"]
