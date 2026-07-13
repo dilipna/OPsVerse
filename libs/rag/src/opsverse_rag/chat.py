@@ -36,6 +36,12 @@ knowledge base. Start your answer with exactly this line:
 Then answer from general knowledge, being explicit about anything you are
 unsure of. Answer in Markdown."""
 
+IMAGE_DESCRIPTION_PROMPT = """\
+Describe this image for a DevOps documentation search engine. Focus on what is
+technically identifiable: technologies, error messages, commands, configuration
+keys/values, architecture components and their relationships. Transcribe any
+visible text exactly. 2-6 sentences, no preamble."""
+
 MAX_HISTORY_TURNS = 8
 _CITATION_RE = re.compile(r"\[(\d{1,2})\]")
 
@@ -60,6 +66,7 @@ class SourceInfo(BaseModel):
 class ChatSources(BaseModel):
     type: Literal["sources"] = "sources"
     sources: list[SourceInfo]
+    image_description: str | None = None
     degraded: list[str] = []
 
 
@@ -91,6 +98,8 @@ ChatEvent = ChatSources | ChatDelta | ChatDone | ChatError
 class SupportsStream(Protocol):
     def stream(self, messages: list[Message]) -> AsyncIterator[LLMStreamEvent]: ...
 
+    async def complete(self, messages: list[Message]) -> LLMResult: ...
+
 
 class SupportsSearch(Protocol):
     async def search(
@@ -114,14 +123,22 @@ def build_context(chunks: list[RetrievedChunk]) -> str:
 
 
 def build_messages(
-    query: str, chunks: list[RetrievedChunk], history: list[ChatTurn]
+    query: str,
+    chunks: list[RetrievedChunk],
+    history: list[ChatTurn],
+    image_description: str | None = None,
 ) -> list[Message]:
     system = GROUNDED_SYSTEM_PROMPT if chunks else UNGROUNDED_SYSTEM_PROMPT
     messages: list[Message] = [{"role": "system", "content": system}]
     for turn in history[-MAX_HISTORY_TURNS:]:
         messages.append({"role": turn.role, "content": turn.content})
-    user = f"Context blocks:\n\n{build_context(chunks)}\n\nQuestion: {query}" if chunks else query
-    messages.append({"role": "user", "content": user})
+    parts: list[str] = []
+    if chunks:
+        parts.append(f"Context blocks:\n\n{build_context(chunks)}")
+    if image_description:
+        parts.append(f"The user attached an image. Description:\n{image_description}")
+    parts.append(f"Question: {query}" if parts else query)
+    messages.append({"role": "user", "content": "\n\n".join(parts)})
     return messages
 
 
@@ -165,6 +182,23 @@ class ChatService:
                 degraded.append("rerank_skipped" if rerank else "retrieval_skipped")
         return [], degraded
 
+    async def describe_image(self, image_b64: str, mime: str) -> str:
+        result = await self._llm.complete(
+            [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": IMAGE_DESCRIPTION_PROMPT},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:{mime};base64,{image_b64}"},
+                        },
+                    ],
+                }
+            ]
+        )
+        return result.text.strip()
+
     async def stream_chat(
         self,
         query: str,
@@ -172,10 +206,27 @@ class ChatService:
         history: list[ChatTurn] | None = None,
         k: int | None = None,
         filters: SearchFilters | None = None,
+        image_b64: str | None = None,
+        image_mime: str = "image/png",
     ) -> AsyncIterator[ChatEvent]:
         started = time.perf_counter()
-        chunks, degraded = await self._retrieve(query, k or self._context_k, filters)
+        degraded: list[str] = []
+        image_description: str | None = None
+        if image_b64:
+            try:
+                image_description = await self.describe_image(image_b64, image_mime)
+            except Exception:
+                degraded.append("vision_skipped")
+
+        # The image description joins the retrieval query so chunks matching
+        # what's *in* the image (error text, config keys) are found.
+        retrieval_query = f"{query}\n{image_description}" if image_description else query
+        chunks, retrieve_degraded = await self._retrieve(
+            retrieval_query, k or self._context_k, filters
+        )
+        degraded += retrieve_degraded
         yield ChatSources(
+            image_description=image_description,
             sources=[
                 SourceInfo(
                     index=i,
@@ -193,7 +244,7 @@ class ChatService:
             degraded=degraded,
         )
 
-        messages = build_messages(query, chunks, history or [])
+        messages = build_messages(query, chunks, history or [], image_description)
         first_token_ms: float | None = None
         try:
             async for event in self._llm.stream(messages):

@@ -51,8 +51,14 @@ class Settings(BaseSettings):
     # gemini-2.5-flash is retired for new keys (404); 3.5-flash is the current
     # free-tier flash. It thinks by default — "minimal" keeps grounded RAG
     # answers fast; the max-token budget covers reasoning + answer.
+    # Free tier caps 3.5-flash at 20 requests/DAY (measured 2026-07-12), so
+    # 3.1-flash-lite (separate, much larger quota) is the default fallback:
+    # quality while quota lasts, automatic 429 fallback after.
     chat_model: str = "gemini/gemini-3.5-flash"
-    chat_fallback_models: list[str] = []
+    chat_fallback_models: list[str] = ["gemini/gemini-3.1-flash-lite"]
+    # Bulk offline jobs (eval-set generation, judging) default to the lite
+    # model so they never drain the 20/day quality quota.
+    eval_generator_model: str = "gemini/gemini-3.1-flash-lite"
     chat_reasoning_effort: str | None = "minimal"
     chat_max_tokens: int = 2048
     chat_temperature: float = 0.2

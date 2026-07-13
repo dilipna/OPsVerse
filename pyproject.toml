@@ -24,7 +24,7 @@ dev = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["apps/api/src", "libs/core/src", "libs/ingestion/src", "libs/rag/src"]
+src = ["apps/api/src", "libs/core/src", "libs/evals/src", "libs/ingestion/src", "libs/rag/src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
@@ -39,4 +39,10 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["apps/api/tests", "libs/core/tests", "libs/ingestion/tests", "libs/rag/tests"]
+testpaths = [
+    "apps/api/tests",
+    "libs/core/tests",
+    "libs/evals/tests",
+    "libs/ingestion/tests",
+    "libs/rag/tests",
+]
