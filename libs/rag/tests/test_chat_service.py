@@ -117,7 +117,7 @@ async def test_full_pipeline_happy_path():
 
 async def test_rerank_failure_degrades_not_fails():
     retriever = FakeRetriever(fail_rerank=True)
-    service = ChatService(retriever, FakeLLM(["ok [2]"]))
+    service = ChatService(retriever, FakeLLM(["ok [2]"]), rerank=True)
     events = await collect(service)
 
     sources = events[0]
@@ -132,7 +132,9 @@ async def test_rerank_failure_degrades_not_fails():
 
 
 async def test_retrieval_failure_answers_ungrounded():
-    service = ChatService(FakeRetriever(fail_all=True), llm := FakeLLM(["general answer"]))
+    service = ChatService(
+        FakeRetriever(fail_all=True), llm := FakeLLM(["general answer"]), rerank=True
+    )
     events = await collect(service)
 
     sources = events[0]

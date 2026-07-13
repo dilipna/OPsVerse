@@ -9,7 +9,8 @@ Applies to `POST /v1/chat` (SSE). Budgets are targets on the dev stack
 
 | Stage | Target | Measured | Enforced by |
 |---|---|---|---|
-| Retrieval total: embed + hybrid search + rerank (12 pairs, CPU) | ≤ 3 s warm | ~2.7 s (rerank dominates; CPU cross-encoder) | `chat_retrieval_timeout_s` (10 s hard cap) |
+| Retrieval total: embed + hybrid search, no rerank (default since ablation v1) | ≤ 300 ms warm | ~60 ms | `chat_retrieval_timeout_s` (10 s hard cap) |
+| Retrieval with rerank (opt-in, `OPSVERSE_CHAT_RERANK`) | — | ~2.7 s @ k=6, ~9 s @ k=10 (CPU cross-encoder; measured quality-negative — see retrieval-ablation-v1) | same |
 | LLM first token (Gemini 3.5-flash **free tier**) | provider-bound | 7–19 s, grows with prompt size | `chat_llm_timeout_s` |
 | First streamed token, end to end | < 2 s (paid/local serving) | ~18–23 s on free tier | measured (`first_token_ms` in ledger) |
 | Full answer | ≤ 45 s hard cap | ~19–24 s | `chat_llm_timeout_s` |

@@ -19,6 +19,7 @@ node_modules/
 
 # Data & artifacts (DVC-tracked content lives outside git)
 data/
+*.partial.jsonl
 *.gguf
 *.safetensors
 

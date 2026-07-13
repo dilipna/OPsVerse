@@ -66,6 +66,7 @@ def _build_chat_service(app) -> ChatService:
             llm,
             context_k=settings.chat_context_k,
             retrieval_timeout_s=settings.chat_retrieval_timeout_s,
+            rerank=settings.chat_rerank,
         )
     return app.state.chat_service
 

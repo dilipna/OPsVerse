@@ -101,9 +101,29 @@ async def run(dataset_path: Path, out_dir: Path) -> None:
         json.dumps({"dataset": dataset.name, "k": K, "results": raw}, indent=1),
         encoding="utf-8",
     )
+    # summary JSON is what the API/web eval page serves (Phase 4 moves this
+    # into Postgres eval_runs)
+    summary_path = out_dir / f"retrieval-ablation-v{dataset.version}-summary.json"
+    summary_path.write_text(
+        json.dumps(
+            {
+                "report": f"retrieval-ablation-v{dataset.version}",
+                "kind": "retrieval-ablation",
+                "date": stamp,
+                "dataset": dataset.name,
+                "cases": len(dataset.cases),
+                "generator_model": dataset.generator_model,
+                "corpus_stats": dataset.corpus_stats,
+                "k": K,
+                "results": results,
+            },
+            indent=1,
+        ),
+        encoding="utf-8",
+    )
     report_path = out_dir / f"retrieval-ablation-v{dataset.version}.md"
     report_path.write_text(render_report(dataset, results, stamp), encoding="utf-8")
-    print(f"wrote {report_path} and {raw_path}")
+    print(f"wrote {report_path}, {summary_path} and {raw_path}")
 
 
 def render_report(dataset: RetrievalDataset, results: dict[str, dict[str, Any]], date: str) -> str:
