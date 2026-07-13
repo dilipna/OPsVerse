@@ -14,7 +14,9 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any, cast
 
-Message = dict[str, str]
+# content is a str for text-only messages, or a list of typed parts
+# (text / image_url) for multimodal ones — the OpenAI content-parts shape.
+Message = dict[str, Any]
 
 
 class LLMError(Exception):
@@ -85,7 +87,9 @@ class LiteLLMClient:
                 return _result_from_response(resp, model)
             except Exception as exc:  # provider errors span many exception types
                 last_exc = exc
-        raise LLMError(f"all models failed: {self._models}") from last_exc
+        raise LLMError(
+            f"all models failed: {self._models}; last: {type(last_exc).__name__}: {last_exc}"
+        ) from last_exc
 
     async def stream(self, messages: list[Message]) -> AsyncIterator[LLMStreamEvent]:
         """Yield LLMDelta events, then exactly one final LLMResult."""

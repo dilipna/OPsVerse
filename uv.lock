@@ -21,6 +21,7 @@ members = [
     "opsverse-ai",
     "opsverse-api",
     "opsverse-core",
+    "opsverse-evals",
     "opsverse-ingestion",
     "opsverse-rag",
 ]
@@ -2390,6 +2391,31 @@ requires-dist = [
     { name = "minio", specifier = ">=7.2" },
     { name = "pydantic", specifier = ">=2.10" },
     { name = "pydantic-settings", specifier = ">=2.7" },
+]
+
+[[package]]
+name = "opsverse-evals"
+version = "0.1.0"
+source = { editable = "libs/evals" }
+dependencies = [
+    { name = "anyio" },
+    { name = "asyncpg" },
+    { name = "opsverse-core" },
+    { name = "opsverse-rag" },
+    { name = "pydantic" },
+    { name = "qdrant-client" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4" },
+    { name = "asyncpg", specifier = ">=0.30" },
+    { name = "opsverse-core", editable = "libs/core" },
+    { name = "opsverse-rag", editable = "libs/rag" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "qdrant-client", specifier = ">=1.12" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
 ]
 
 [[package]]

@@ -40,9 +40,13 @@ class FakeChatService:
     def __init__(self, error: bool = False):
         self.error = error
         self.last_query = None
+        self.last_image = None
 
-    async def stream_chat(self, query, *, history=None, k=None, filters=None):
+    async def stream_chat(
+        self, query, *, history=None, k=None, filters=None, image_b64=None, image_mime="image/png"
+    ):
         self.last_query = query
+        self.last_image = image_b64
         for event in make_events(self.error):
             yield event
 
@@ -50,6 +54,7 @@ class FakeChatService:
 def wire(env, error: bool = False) -> FakeChatService:
     fake = FakeChatService(error)
     env.app.dependency_overrides[deps.get_chat_service] = lambda: fake
+    env.app.dependency_overrides[deps.get_chat_service_ws] = lambda: fake
     # the ledger writer reads the sessionmaker off app.state
     env.app.state.db_sessionmaker = env.sessionmaker
     return fake
@@ -86,6 +91,23 @@ async def test_chat_non_streaming(env):
     assert data["sources"]["sources"][0]["source"] == "k8s.md"
     assert data["done"]["cited"] == [1]
     assert data["error"] is None
+
+
+def test_chat_websocket_multi_turn(env):
+    from fastapi.testclient import TestClient
+
+    fake = wire(env)
+    with TestClient(env.app) as client, client.websocket_connect("/v1/chat/stream") as ws:
+        # bad payload -> error event, socket stays usable
+        ws.send_json({"nope": True})
+        assert ws.receive_json()["type"] == "error"
+
+        for turn in range(2):
+            ws.send_json({"query": f"turn {turn}", "image_base64": "aGk=", "k": 3})
+            types = [ws.receive_json()["type"] for _ in range(4)]
+            assert types == ["sources", "delta", "delta", "done"]
+    assert fake.last_query == "turn 1"
+    assert fake.last_image == "aGk="
 
 
 async def test_chat_error_recorded(env):

@@ -54,6 +54,13 @@ streaming, and what happens when a provider fails.
    settings (`chat_model`, `chat_reasoning_effort`), and we pin a concrete
    model rather than the floating `gemini-flash-latest` alias so eval numbers
    stay attributable to a model version.
+   **Quota reality (measured 2026-07-12):** the free tier caps 3.5-flash at
+   **20 requests/day** (`GenerateRequestsPerDayPerProjectPerModel-FreeTier`).
+   Consequences: `chat_fallback_models` defaults to `gemini-3.1-flash-lite`
+   (separate, much larger quota) so interactive chat degrades from "best
+   model" to "lite model" instead of erroring; bulk offline jobs (eval-set
+   generation, judging) default to the lite model via `eval_generator_model`
+   and must never point at the 20/day quality model.
 
 ## Consequences
 

@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 
 from arq import create_pool
 from arq.connections import ArqRedis, RedisSettings
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from opsverse_core.llm import LiteLLMClient
@@ -33,24 +33,26 @@ def get_object_store(request: Request) -> ObjectStore:
     return request.app.state.object_store
 
 
-def get_retriever(request: Request) -> Retriever:
+def _build_retriever(app) -> Retriever:
     """Built lazily: embedding/reranker models only load on first search."""
-    if request.app.state.retriever is None:
-        settings = request.app.state.settings
+    if app.state.retriever is None:
+        settings = app.state.settings
         embedder = FastEmbedEmbedder(
             settings.embedding_model, settings.sparse_model, settings.embedding_dim
         )
-        store = QdrantStore(
-            request.app.state.qdrant, settings.qdrant_collection, embedder.dense_dim
-        )
+        store = QdrantStore(app.state.qdrant, settings.qdrant_collection, embedder.dense_dim)
         reranker = CrossEncoderReranker(settings.reranker_model)
-        request.app.state.retriever = Retriever(store, embedder, reranker)
-    return request.app.state.retriever
+        app.state.retriever = Retriever(store, embedder, reranker)
+    return app.state.retriever
 
 
-def get_chat_service(request: Request) -> ChatService:
-    if request.app.state.chat_service is None:
-        settings = request.app.state.settings
+def get_retriever(request: Request) -> Retriever:
+    return _build_retriever(request.app)
+
+
+def _build_chat_service(app) -> ChatService:
+    if app.state.chat_service is None:
+        settings = app.state.settings
         llm = LiteLLMClient(
             [settings.chat_model, *settings.chat_fallback_models],
             {"gemini": settings.gemini_api_key, "groq": settings.groq_api_key},
@@ -59,10 +61,18 @@ def get_chat_service(request: Request) -> ChatService:
             temperature=settings.chat_temperature,
             reasoning_effort=settings.chat_reasoning_effort,
         )
-        request.app.state.chat_service = ChatService(
-            get_retriever(request),
+        app.state.chat_service = ChatService(
+            _build_retriever(app),
             llm,
             context_k=settings.chat_context_k,
             retrieval_timeout_s=settings.chat_retrieval_timeout_s,
         )
-    return request.app.state.chat_service
+    return app.state.chat_service
+
+
+def get_chat_service(request: Request) -> ChatService:
+    return _build_chat_service(request.app)
+
+
+def get_chat_service_ws(websocket: WebSocket) -> ChatService:
+    return _build_chat_service(websocket.app)

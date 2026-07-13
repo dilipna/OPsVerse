@@ -27,17 +27,19 @@ class FakeRetriever:
         self.calls: list[dict] = []
 
     async def search(self, query, *, k=6, rerank=False, filters=None, **kwargs):
-        self.calls.append({"k": k, "rerank": rerank})
+        self.calls.append({"query": query, "k": k, "rerank": rerank})
         if self.fail_all or (self.fail_rerank and rerank):
             raise RuntimeError("boom")
         return self.chunks
 
 
 class FakeLLM:
-    def __init__(self, deltas: list[str], *, fail: bool = False):
+    def __init__(self, deltas: list[str], *, fail: bool = False, vision_fail: bool = False):
         self.deltas = deltas
         self.fail = fail
+        self.vision_fail = vision_fail
         self.messages = None
+        self.complete_messages = None
 
     async def stream(self, messages):
         self.messages = messages
@@ -52,6 +54,12 @@ class FakeLLM:
             completion_tokens=20,
             cost_usd=0.0001,
         )
+
+    async def complete(self, messages):
+        self.complete_messages = messages
+        if self.vision_fail:
+            raise LLMError("vision boom")
+        return LLMResult(text="a grafana dashboard showing CPU throttling", model="gemini/test")
 
 
 def test_build_context_numbers_blocks():
@@ -137,6 +145,44 @@ async def test_retrieval_failure_answers_ungrounded():
     done = events[-1]
     assert isinstance(done, ChatDone)
     assert done.cited == []
+
+
+async def test_image_flows_into_retrieval_and_prompt():
+    retriever = FakeRetriever()
+    llm = FakeLLM(["answer [1]"])
+    service = ChatService(retriever, llm)
+    events = [e async for e in service.stream_chat("why is my pod slow?", image_b64="aGk=")]
+
+    # vision description reaches the sources event
+    sources = events[0]
+    assert isinstance(sources, ChatSources)
+    assert sources.image_description == "a grafana dashboard showing CPU throttling"
+    assert sources.degraded == []
+
+    # the retrieval query was augmented with the description
+    assert "grafana dashboard" in retriever.calls[0]["query"]
+    # the generation prompt carries the description block
+    assert llm.messages is not None
+    assert "attached an image" in llm.messages[-1]["content"]
+    # the vision call actually received the image part
+    assert llm.complete_messages is not None
+    assert llm.complete_messages[0]["content"][1]["image_url"]["url"].startswith(
+        "data:image/png;base64,"
+    )
+
+
+async def test_vision_failure_degrades_not_fails():
+    retriever = FakeRetriever()
+    service = ChatService(retriever, FakeLLM(["ok"], vision_fail=True))
+    events = [e async for e in service.stream_chat("q?", image_b64="aGk=")]
+
+    sources = events[0]
+    assert isinstance(sources, ChatSources)
+    assert sources.image_description is None
+    assert sources.degraded == ["vision_skipped"]
+    # retrieval fell back to the bare query
+    assert retriever.calls[0]["query"] == "q?"
+    assert isinstance(events[-1], ChatDone)
 
 
 async def test_llm_failure_yields_error_event():
