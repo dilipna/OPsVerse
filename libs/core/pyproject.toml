@@ -1,0 +1,17 @@
+[project]
+name = "opsverse-core"
+version = "0.1.0"
+description = "Shared settings, schemas, and clients for OpsVerse services"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "minio>=7.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/opsverse_core"]
