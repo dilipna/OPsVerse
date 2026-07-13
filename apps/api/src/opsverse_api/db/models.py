@@ -56,6 +56,58 @@ class Chunk(Base):
     document: Mapped[Document] = relationship(back_populates="chunks")
 
 
+class JudgeCache(Base):
+    """LLM-judge responses keyed by (judge_model, prompt) hash.
+
+    Free-tier RPM makes judge calls the scarce resource; identical judgments
+    are answered from here so eval runs are cheap to re-run and resumable.
+    """
+
+    __tablename__ = "judge_cache"
+
+    prompt_hash: Mapped[str] = mapped_column(sa.String(64), primary_key=True)
+    judge_model: Mapped[str] = mapped_column(sa.String(128))
+    response: Mapped[dict[str, Any]] = mapped_column(JSONVariant)
+    created_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=utcnow)
+
+
+class EvalRun(Base):
+    __tablename__ = "eval_runs"
+
+    id: Mapped[uuid.UUID] = mapped_column(sa.Uuid, primary_key=True, default=uuid.uuid4)
+    suite: Mapped[str] = mapped_column(sa.String(64))  # e.g. rag-quality
+    dataset: Mapped[str] = mapped_column(sa.String(128))
+    model: Mapped[str | None] = mapped_column(sa.String(128), default=None)
+    judge_model: Mapped[str | None] = mapped_column(sa.String(128), default=None)
+    git_sha: Mapped[str | None] = mapped_column(sa.String(40), default=None)
+    status: Mapped[str] = mapped_column(sa.String(16), default="running")  # running|done|failed
+    params: Mapped[dict[str, Any]] = mapped_column(JSONVariant, default=dict)
+    summary: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, default=None)
+    started_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True), default=None)
+
+    results: Mapped[list["EvalResult"]] = relationship(
+        back_populates="run", cascade="all, delete-orphan"
+    )
+
+
+class EvalResult(Base):
+    __tablename__ = "eval_results"
+    __table_args__ = (sa.UniqueConstraint("run_id", "case_id", "metric"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(sa.Uuid, primary_key=True, default=uuid.uuid4)
+    run_id: Mapped[uuid.UUID] = mapped_column(
+        sa.ForeignKey("eval_runs.id", ondelete="CASCADE"), index=True
+    )
+    case_id: Mapped[str] = mapped_column(sa.String(64))
+    metric: Mapped[str] = mapped_column(sa.String(64))
+    score: Mapped[float] = mapped_column(sa.Float)
+    raw: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, default=None)
+    created_at: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), default=utcnow)
+
+    run: Mapped[EvalRun] = relationship(back_populates="results")
+
+
 class RequestLedger(Base):
     """One row per LLM-backed request: tokens, cost, latency, degradation.
 

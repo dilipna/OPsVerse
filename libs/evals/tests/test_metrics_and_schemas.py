@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from opsverse_evals import RetrievalCase, RetrievalDataset, hit_at_k, mrr_at_k, ndcg_at_k
-from opsverse_evals.generate_retrieval_set import parse_json_reply
+from opsverse_evals.judge import parse_json_reply
 
 RANKED = ["a", "b", "c", "d"]
 
@@ -56,6 +56,19 @@ def test_dataset_jsonl_roundtrip(tmp_path: Path):
     assert loaded.corpus_stats == {"documents": 2, "chunks": 5}
     assert len(loaded.cases) == 1
     assert loaded.cases[0].question == "how do I healthcheck postgres?"
+
+
+def test_faithfulness_score():
+    from opsverse_evals.rag_suite import faithfulness_score
+
+    score, n = faithfulness_score(
+        {"claims": [{"claim": "a", "supported": True}, {"claim": "b", "supported": False}]}
+    )
+    assert score == 0.5
+    assert n == 2
+    # refusals / no claims: nothing asserted -> nothing unfaithful
+    assert faithfulness_score({"claims": []}) == (1.0, 0)
+    assert faithfulness_score({}) == (1.0, 0)
 
 
 def test_parse_json_reply():
