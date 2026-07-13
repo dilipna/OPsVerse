@@ -7,6 +7,9 @@ dependencies = [
     "pydantic>=2.10",
     "pydantic-settings>=2.7",
     "minio>=7.2",
+    # <1.92: 1.92+ adds a Rust extension (litellm-rust) with no Windows wheel,
+    # and this dev machine has no MSVC toolchain to build it.
+    "litellm>=1.60,<1.92",
 ]
 
 [build-system]

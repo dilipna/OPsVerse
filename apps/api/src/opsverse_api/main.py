@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from opsverse_api.db.session import build_sessionmaker
-from opsverse_api.routers import health, ingest, search
+from opsverse_api.routers import chat, health, ingest, search
 from opsverse_core.object_store import ObjectStore
 from opsverse_core.settings import get_settings
 
@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
     app.state.object_store = ObjectStore(settings)
     app.state.arq_pool = None  # created lazily on first enqueue (see deps.py)
     app.state.retriever = None  # created lazily on first search (see deps.py)
+    app.state.chat_service = None  # created lazily on first chat (see deps.py)
     try:
         yield
     finally:
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(ingest.router, prefix="/v1")
     app.include_router(search.router, prefix="/v1")
+    app.include_router(chat.router, prefix="/v1")
     return app
 
 

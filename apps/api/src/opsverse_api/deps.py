@@ -5,8 +5,9 @@ from arq.connections import ArqRedis, RedisSettings
 from fastapi import HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from opsverse_core.llm import LiteLLMClient
 from opsverse_core.object_store import ObjectStore
-from opsverse_rag import QdrantStore, Retriever
+from opsverse_rag import ChatService, QdrantStore, Retriever
 from opsverse_rag.embeddings import FastEmbedEmbedder
 from opsverse_rag.rerank import CrossEncoderReranker
 
@@ -45,3 +46,23 @@ def get_retriever(request: Request) -> Retriever:
         reranker = CrossEncoderReranker(settings.reranker_model)
         request.app.state.retriever = Retriever(store, embedder, reranker)
     return request.app.state.retriever
+
+
+def get_chat_service(request: Request) -> ChatService:
+    if request.app.state.chat_service is None:
+        settings = request.app.state.settings
+        llm = LiteLLMClient(
+            [settings.chat_model, *settings.chat_fallback_models],
+            {"gemini": settings.gemini_api_key, "groq": settings.groq_api_key},
+            timeout_s=settings.chat_llm_timeout_s,
+            max_tokens=settings.chat_max_tokens,
+            temperature=settings.chat_temperature,
+            reasoning_effort=settings.chat_reasoning_effort,
+        )
+        request.app.state.chat_service = ChatService(
+            get_retriever(request),
+            llm,
+            context_k=settings.chat_context_k,
+            retrieval_timeout_s=settings.chat_retrieval_timeout_s,
+        )
+    return request.app.state.chat_service
