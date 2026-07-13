@@ -143,6 +143,7 @@ async def _ingest_github(
 
     stats: dict[str, Any] = {"object_key": tar_key, "files_skipped": 0, "files_failed": 0}
     tool = job.payload.get("tool")
+    path_prefix = job.payload.get("path_prefix")
     with tarfile.open(fileobj=io.BytesIO(response.content), mode="r:gz") as tar:
         processed = 0
         for member in tar.getmembers():
@@ -151,6 +152,8 @@ async def _ingest_github(
             if not member.isfile() or member.size > MAX_REPO_MEMBER_BYTES:
                 continue
             relpath = PurePosixPath(*PurePosixPath(member.name).parts[1:])  # drop tar root dir
+            if path_prefix and not str(relpath).startswith(path_prefix):
+                continue
             name = relpath.name.lower()
             is_dockerfile = name == "dockerfile" or name.startswith("dockerfile.")
             if not is_dockerfile and relpath.suffix.lower() not in REPO_EXTENSIONS:

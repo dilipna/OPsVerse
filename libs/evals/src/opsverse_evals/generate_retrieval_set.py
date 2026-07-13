@@ -12,8 +12,6 @@ Usage:
 
 import argparse
 import asyncio
-import json
-import re
 import sys
 from pathlib import Path
 
@@ -22,6 +20,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from opsverse_core.llm import LiteLLMClient, LLMError
 from opsverse_core.settings import get_settings
+from opsverse_evals.judge import parse_json_reply
 from opsverse_evals.schemas import RetrievalCase, RetrievalDataset
 
 PROMPT = """\
@@ -53,17 +52,6 @@ SAMPLE_SQL = sa.text("""
     WHERE c.embedding_status = 'embedded' AND length(c.text) >= 250
     ORDER BY c.document_id, c.token_count DESC
 """)
-
-
-def parse_json_reply(text: str) -> dict | None:
-    """Extract the JSON object from a reply that may carry code fences."""
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        return None
-    try:
-        return json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return None
 
 
 async def generate(n: int, out: Path, interval_s: float, model: str | None = None) -> None:

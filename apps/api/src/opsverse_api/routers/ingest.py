@@ -25,6 +25,10 @@ class IngestRequest(BaseModel):
     source_type: Literal["url", "github_repo"]
     uri: str = Field(min_length=1, description="URL, or owner/repo for github_repo")
     tool: str | None = None
+    # github_repo only: keep just files under this repo-relative prefix,
+    # e.g. "content/en/docs" for kubernetes/website. Large doc repos exceed
+    # the per-repo file cap; the prefix targets the part worth indexing.
+    path_prefix: str | None = None
 
 
 class JobOut(BaseModel):

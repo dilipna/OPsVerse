@@ -19,6 +19,7 @@ dev = [
     "pytest-asyncio>=0.25",
     "httpx>=0.28",
     "aiosqlite>=0.20",
+    "dvc[s3]>=3.55",
 ]
 
 [tool.ruff]
