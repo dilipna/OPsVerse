@@ -4,12 +4,13 @@ from typing import cast
 import httpx
 from arq.connections import ArqRedis
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from opsverse_api.db.session import build_sessionmaker
-from opsverse_api.routers import chat, health, ingest, search
+from opsverse_api.routers import chat, costs, evals, health, ingest, search
 from opsverse_core.object_store import ObjectStore
 from opsverse_core.settings import get_settings
 
@@ -48,10 +49,18 @@ def create_app() -> FastAPI:
         description="LLM engineering platform for the DevOps/MLOps/LLMOps community.",
         lifespan=lifespan,
     )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_settings().cors_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(health.router)
     app.include_router(ingest.router, prefix="/v1")
     app.include_router(search.router, prefix="/v1")
     app.include_router(chat.router, prefix="/v1")
+    app.include_router(costs.router, prefix="/v1")
+    app.include_router(evals.router, prefix="/v1")
     return app
 
 
