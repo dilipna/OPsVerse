@@ -1,0 +1,26 @@
+{
+ "policy": "Thresholds are pinned to measured baselines on frozen eval sets minus explicit slack; the note records the measured value and date. Tightening is routine; loosening one requires a written justification in the PR.",
+ "thresholds": [
+  {
+   "report": "retrieval-ablation-v1",
+   "mode": "hybrid",
+   "metric": "chunk:mrr@10",
+   "min_score": 0.6,
+   "note": "measured 0.6432 on 2026-07-13 (156-doc corpus)"
+  },
+  {
+   "report": "retrieval-ablation-v1",
+   "mode": "hybrid",
+   "metric": "chunk:hit@5",
+   "min_score": 0.78,
+   "note": "measured 0.83 on 2026-07-13"
+  },
+  {
+   "report": "retrieval-ablation-v1",
+   "mode": "hybrid",
+   "metric": "doc:mrr@10",
+   "min_score": 0.62,
+   "note": "measured 0.6692 on 2026-07-13"
+  }
+ ]
+}

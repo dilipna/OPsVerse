@@ -18,9 +18,11 @@ from pathlib import Path
 from typing import Any
 
 from qdrant_client import AsyncQdrantClient
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from opsverse_core.settings import get_settings
 from opsverse_evals.metrics import hit_at_k, mrr_at_k, ndcg_at_k
+from opsverse_evals.reporting import record_report
 from opsverse_evals.schemas import RetrievalDataset
 from opsverse_rag import QdrantStore, Retriever, SearchMode
 from opsverse_rag.embeddings import FastEmbedEmbedder
@@ -101,29 +103,33 @@ async def run(dataset_path: Path, out_dir: Path) -> None:
         json.dumps({"dataset": dataset.name, "k": K, "results": raw}, indent=1),
         encoding="utf-8",
     )
-    # summary JSON is what the API/web eval page serves (Phase 4 moves this
-    # into Postgres eval_runs)
+    report = {
+        "report": f"retrieval-ablation-v{dataset.version}",
+        "kind": "retrieval-ablation",
+        "date": stamp,
+        "dataset": dataset.name,
+        "cases": len(dataset.cases),
+        "generator_model": dataset.generator_model,
+        "corpus_stats": dataset.corpus_stats,
+        "k": K,
+        "results": results,
+    }
+    # summary JSON stays a committed artifact; the eval_runs row below is
+    # what /v1/evals/reports actually serves
     summary_path = out_dir / f"retrieval-ablation-v{dataset.version}-summary.json"
-    summary_path.write_text(
-        json.dumps(
-            {
-                "report": f"retrieval-ablation-v{dataset.version}",
-                "kind": "retrieval-ablation",
-                "date": stamp,
-                "dataset": dataset.name,
-                "cases": len(dataset.cases),
-                "generator_model": dataset.generator_model,
-                "corpus_stats": dataset.corpus_stats,
-                "k": K,
-                "results": results,
-            },
-            indent=1,
-        ),
-        encoding="utf-8",
-    )
+    summary_path.write_text(json.dumps(report, indent=1), encoding="utf-8")
     report_path = out_dir / f"retrieval-ablation-v{dataset.version}.md"
     report_path.write_text(render_report(dataset, results, stamp), encoding="utf-8")
-    print(f"wrote {report_path}, {summary_path} and {raw_path}")
+
+    engine = create_async_engine(settings.database_url)
+    run_id = await record_report(
+        engine,
+        "retrieval-ablation",
+        report,
+        params={"k": K, "modes": [label for label, _, _ in MODES]},
+    )
+    await engine.dispose()
+    print(f"wrote {report_path}, {summary_path} and {raw_path}; eval_runs row {run_id}")
 
 
 def render_report(dataset: RetrievalDataset, results: dict[str, dict[str, Any]], date: str) -> str:
