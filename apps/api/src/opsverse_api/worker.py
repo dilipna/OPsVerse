@@ -3,6 +3,7 @@
 import hashlib
 import io
 import tarfile
+import time
 import uuid
 from functools import lru_cache, partial
 from pathlib import PurePosixPath
@@ -32,6 +33,9 @@ MAX_REPO_MEMBER_BYTES = 2 * 1024 * 1024
 REPO_EXTENSIONS = SUPPORTED_EXTENSIONS - {".pdf"}
 
 EMBED_BATCH = 32
+# Stop sweeping well before WorkerSettings.job_timeout (600s) and re-enqueue;
+# a killed job wastes its in-flight batch and logs a spurious failure.
+EMBED_SOFT_DEADLINE_S = 420
 
 
 @lru_cache
@@ -209,13 +213,19 @@ async def run_ingest_job(ctx: dict[str, Any], job_id: str) -> None:
 
 
 async def embed_pending_chunks(ctx: dict[str, Any]) -> int:
-    """Embed all pending chunks (dense BGE-M3 + sparse BM25) into Qdrant."""
+    """Embed pending chunks (dense + sparse) into Qdrant, time-boxed.
+
+    Progress commits per batch. Large sweeps stop before arq's job_timeout
+    and re-enqueue themselves, so a corpus of any size embeds without ever
+    hitting (and wasting) the 600s job kill.
+    """
     settings = get_settings()
     embedder = _get_embedder()
     store = QdrantStore(ctx["qdrant"], settings.qdrant_collection, embedder.dense_dim)
     await store.ensure_collection()
+    deadline = time.monotonic() + EMBED_SOFT_DEADLINE_S
     total = 0
-    while True:
+    while time.monotonic() < deadline:
         async with ctx["sessionmaker"]() as session:
             rows = (
                 await session.execute(
@@ -254,6 +264,13 @@ async def embed_pending_chunks(ctx: dict[str, Any]) -> int:
                 chunk.qdrant_point_id = str(chunk.id)
             await session.commit()
             total += len(rows)
+
+    # Deadline reached with work remaining: hand off to a fresh job.
+    # Unique suffix because arq keeps result keys ~1h (a reused id would
+    # silently not enqueue).
+    if (redis := ctx.get("redis")) is not None:
+        await redis.enqueue_job("embed_pending_chunks", _job_id=f"embed-cont-{uuid.uuid4().hex}")
+    return total
 
 
 async def on_startup(ctx: dict[str, Any]) -> None:
