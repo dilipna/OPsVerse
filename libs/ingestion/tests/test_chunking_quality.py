@@ -48,6 +48,26 @@ def test_quality_rejects_short_and_dedups():
     assert stats.duplicates_removed == 2  # one exact + one simhash-near
 
 
+def test_quality_rejects_non_english_prose():
+    bengali = "কুবারনেটিস হরাইজন্টাল পড অটোস্কেলিং প্রতিলিপি সংখ্যা সমন্বয় করে " * 3
+    chinese = "水平自动扩缩容根据观察到的指标调整副本数量 例如处理器使用率" * 4
+    english_with_accents = (
+        "Kubernetes Horizontal Pod Autoscaling — configured via the café-naïve "
+        "operator résumé example — adjusts replica counts based on observed metrics."
+    )
+    yaml_ascii = "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: web\n" * 3
+    kept, stats = apply_quality_gates(
+        [
+            _draft(bengali),
+            _draft(chinese, 1),
+            _draft(english_with_accents, 2),
+            _draft(yaml_ascii, 3),
+        ]
+    )
+    assert stats.reject_reasons["non_english"] == 2
+    assert [c.text for c in kept] == [english_with_accents, yaml_ascii]
+
+
 def test_simhash_distance_properties():
     a = simhash("deploy the application to the cluster with rolling updates enabled")
     b = simhash("deploy the application to the cluster with rolling updates disabled")
