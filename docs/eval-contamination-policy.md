@@ -20,6 +20,8 @@ comparability. Current frozen sets:
 | File | Cases | SHA-256 |
 |---|---|---|
 | `evalsets/retrieval-v1.jsonl` | 100 | `a87f652e0c88cd728ddb5d0f74baeb4b09300444080bd01bc1a94203fcd4fbd6` |
+| `evalsets/retrieval-v2.jsonl` | 100 | `b8958fd3894ae7ae6793ffb8584e091560f60820822712755b390fface495c1c` |
+| `evalsets/ci/retrieval-ci.jsonl` | 25 | subset of retrieval-v1 (first 25 cases); protected via v1 |
 
 (The file hash is recorded at freeze time; git history is the audit trail.
 New frozen sets get a row here in the same PR that adds them.)
