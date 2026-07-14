@@ -126,17 +126,26 @@ async def generate(n: int, out_dir: Path, interval_s: float, model: str | None) 
         reasoning_effort=settings.chat_reasoning_effort,
     )
     guard = ContaminationGuard.from_evalsets_dir(Path("evalsets"))
+    if not guard.hashes:
+        # an empty guard checks nothing and reports success — refuse instead
+        # (typically means running from the wrong directory)
+        raise SystemExit("no frozen eval sets under ./evalsets — refusing to run unguarded")
 
     out_dir.mkdir(parents=True, exist_ok=True)
     partial = out_dir / "instructions-v1.partial.jsonl"
+    drops: Counter[str] = Counter()
     pairs: list[InstructionPair] = []
     if partial.exists():
-        pairs = [
+        loaded = [
             InstructionPair.model_validate_json(line)
             for line in partial.read_text(encoding="utf-8").splitlines()
             if line
         ]
-        print(f"resuming: {len(pairs)} pairs already generated")
+        # resumed pairs must clear the guard too — the frozen eval sets may
+        # have grown since they were generated
+        pairs = [p for p in loaded if not guard.is_contaminated(p.user_text)]
+        drops["eval_contaminated"] += len(loaded) - len(pairs)
+        print(f"resuming: {len(pairs)} pairs kept, {len(loaded) - len(pairs)} dropped by guard")
     done_ids = {p.id for p in pairs}
     deduper = Deduper()
     for pair in pairs:
@@ -150,7 +159,6 @@ async def generate(n: int, out_dir: Path, interval_s: float, model: str | None) 
     await engine.dispose()
     print(f"candidate documents: {len(rows)} (corpus: {n_docs} docs / {n_chunks} chunks)")
 
-    drops: Counter[str] = Counter()
     with partial.open("a", encoding="utf-8") as sink:
         for row, fmt in plan_tasks(list(rows), n):
             pair_id = f"{row['chunk_id']}:{fmt}"

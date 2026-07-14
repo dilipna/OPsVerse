@@ -36,7 +36,7 @@
    "mode": "hybrid",
    "metric": "chunk:mrr@10",
    "min_score": 0.75,
-   "note": "measured 0.8467 on 2026-07-13 (200-chunk CI fixture)"
+   "note": "measured 0.8467 on 2026-07-13; 0.8933 on 2026-07-14 after the fixture was rebuilt on the language-cleaned corpus"
   },
   {
    "report": "rag-quality-smoke",
