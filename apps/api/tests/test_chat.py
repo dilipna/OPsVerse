@@ -93,21 +93,58 @@ async def test_chat_non_streaming(env):
     assert data["error"] is None
 
 
+class RecordingLedger:
+    """Async-sessionmaker stand-in that records added rows.
+
+    The WS test needs it twice over: the test sqlite connection is bound to
+    the pytest event loop and can't be used from TestClient's portal loop,
+    and the lifespan (which TestClient runs) rebuilds db_sessionmaker from
+    real settings — without rewiring, ledger writes land in the developer's
+    live Postgres.
+    """
+
+    def __init__(self):
+        self.rows = []
+
+    def __call__(self):
+        return self
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+    def add(self, row):
+        self.rows.append(row)
+
+    async def commit(self):
+        return None
+
+
 def test_chat_websocket_multi_turn(env):
     from fastapi.testclient import TestClient
 
     fake = wire(env)
-    with TestClient(env.app) as client, client.websocket_connect("/v1/chat/stream") as ws:
-        # bad payload -> error event, socket stays usable
-        ws.send_json({"nope": True})
-        assert ws.receive_json()["type"] == "error"
+    ledger = RecordingLedger()
+    with TestClient(env.app) as client:
+        env.app.state.db_sessionmaker = ledger  # lifespan just clobbered it
+        with client.websocket_connect("/v1/chat/stream") as ws:
+            # bad payload -> error event, socket stays usable
+            ws.send_json({"nope": True})
+            assert ws.receive_json()["type"] == "error"
 
-        for turn in range(2):
-            ws.send_json({"query": f"turn {turn}", "image_base64": "aGk=", "k": 3})
-            types = [ws.receive_json()["type"] for _ in range(4)]
-            assert types == ["sources", "delta", "delta", "done"]
+            for turn in range(2):
+                ws.send_json({"query": f"turn {turn}", "image_base64": "aGk=", "k": 3})
+                types = [ws.receive_json()["type"] for _ in range(4)]
+                assert types == ["sources", "delta", "delta", "done"]
     assert fake.last_query == "turn 1"
     assert fake.last_image == "aGk="
+
+    # both turns hit the recording ledger — guards the rewiring above
+    assert len(ledger.rows) == 2
+    assert {row.route for row in ledger.rows} == {"/v1/chat/stream"}
+    assert all(row.meta["has_image"] for row in ledger.rows)
 
 
 async def test_chat_error_recorded(env):

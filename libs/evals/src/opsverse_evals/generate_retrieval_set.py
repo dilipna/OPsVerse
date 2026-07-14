@@ -140,9 +140,12 @@ async def generate(n: int, out: Path, interval_s: float, model: str | None = Non
             print(f"[{len(cases)}/{n}] {question}", flush=True)
             await asyncio.sleep(interval_s)
 
+    # "retrieval-v2.jsonl" -> version "2"; run_ablation names its report
+    # files by this, so a wrong version would overwrite another set's report
+    stem_version = out.stem.rsplit("-v", 1)[-1]
     dataset = RetrievalDataset(
         name=out.stem,
-        version="1",
+        version=stem_version if stem_version.isdigit() else "1",
         generator_model=generator_model,
         corpus_stats={"documents": n_docs, "chunks": n_chunks},
         cases=cases,
