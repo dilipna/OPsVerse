@@ -1,0 +1,31 @@
+{
+ "report": "rag-quality-smoke",
+ "kind": "rag-quality",
+ "date": "2026-07-14",
+ "dataset": "retrieval-v1",
+ "cases": 20,
+ "generator_model": "gemini/gemini-3.5-flash",
+ "corpus_stats": {
+  "documents": 144,
+  "chunks": 421
+ },
+ "k": 6,
+ "run_id": "c7c35138-57b6-47e7-8bae-219591129e90",
+ "judge_model": "gemini/gemini-3.1-flash-lite",
+ "judge_cache": {
+  "hits": 0,
+  "misses": 40
+ },
+ "results": {
+  "chat": {
+   "judge:answer_relevance": 0.99,
+   "judge:citation_used": 1.0,
+   "judge:faithfulness": 1.0
+  }
+ },
+ "metric_counts": {
+  "answer_relevance": 20,
+  "citation_used": 20,
+  "faithfulness": 20
+ }
+}

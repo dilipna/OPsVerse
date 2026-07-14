@@ -37,6 +37,27 @@
    "metric": "chunk:mrr@10",
    "min_score": 0.75,
    "note": "measured 0.8467 on 2026-07-13 (200-chunk CI fixture)"
+  },
+  {
+   "report": "rag-quality-smoke",
+   "mode": "chat",
+   "metric": "judge:faithfulness",
+   "min_score": 0.9,
+   "note": "measured 1.0 on 2026-07-14 (n=20, retrieval-v1 questions, flash-lite judge); n is small so slack is generous"
+  },
+  {
+   "report": "rag-quality-smoke",
+   "mode": "chat",
+   "metric": "judge:answer_relevance",
+   "min_score": 0.85,
+   "note": "measured 0.99 on 2026-07-14 (n=20)"
+  },
+  {
+   "report": "rag-quality-smoke",
+   "mode": "chat",
+   "metric": "judge:citation_used",
+   "min_score": 0.9,
+   "note": "measured 1.0 on 2026-07-14 (n=20)"
   }
  ]
 }
