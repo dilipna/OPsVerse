@@ -17,8 +17,8 @@ build/
 node_modules/
 .next/
 
-# Data & artifacts (DVC-tracked content lives outside git)
-data/
+# Data & artifacts: DVC-tracked content is ignored via data/.gitignore
+# (written by `dvc add`); the small .dvc pointer files DO belong in git.
 *.partial.jsonl
 *.gguf
 *.safetensors
