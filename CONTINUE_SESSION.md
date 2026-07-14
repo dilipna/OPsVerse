@@ -9,11 +9,9 @@
 Portfolio project #3 (of 3): a production-grade **LLM engineering platform** for the DevOps/MLOps
 community. ProtoPro covers agents; FIFA2026MLOps covers MLOps; **OpsVerse covers LLM engineering**.
 
-**Repo root = this folder** (`C:\Users\Dilip\OneDrive\Pictures\ftrag`). Git initialized, local
-commits pre-approved (commit at the end of each milestone without asking).
-**GitHub remote is wired up and pushed**: `origin` → `https://github.com/dilipna/OPsVerse.git`
-(added + pushed 2026-07-13 on explicit user request). Future pushes still deserve a quick
-"pushing now" mention, but the remote itself no longer needs to be (re-)added.
+**Repo root = this folder** (`C:\Users\Dilip\OneDrive\Pictures\ftrag`). Local commits pre-approved
+(commit at the end of each milestone without asking). **GitHub remote**: `origin` →
+`https://github.com/dilipna/OPsVerse.git`; give a quick "pushing now" heads-up before each push.
 
 ## Hard constraints (user-confirmed, do not revisit)
 
@@ -29,78 +27,89 @@ commits pre-approved (commit at the end of each milestone without asking).
 
 - Everything stays inside this folder. Ask before: deleting non-generated things, starting/stopping
   apps (incl. Docker Desktop), remote git operations, acting outside this folder.
+- The permission classifier may block destructive DB scripts even on generated data — use
+  AskUserQuestion when that happens (it worked for the localized-corpus purge).
 
-## Status after 2026-07-12/13 session (all committed + pushed to origin/main)
+## Status after 2026-07-13/14 session (all committed + pushed to origin/main 2026-07-14)
 
-**52/52 tests; ruff + pyright clean; `next build` clean.** Phases 1–3 COMPLETE (live-verified).
-Phase 4 core scaffold DONE (code merged; the actual smoke run is NOT done — see Next steps #1).
-Commits tell the story — read `git log`.
+**70/70 tests; ruff + pyright clean; `next build` clean. Phases 1–3 COMPLETE, Phase 4 ~COMPLETE,
+Phase 5 pipeline built + pilot-verified.** Everything below was verified live this session unless
+marked otherwise. Commits tell the story — read `git log`.
 
-**IMPORTANT — verify live state before trusting anything below marked "live-verified corpus
-stats": this session ended with Docker Desktop down** (container state lost — Postgres/Qdrant
-contents are still on disk in Docker volumes and will come back once `docker compose up` runs
-again, but nothing was queryable at session end to confirm the embed sweep finished). Treat the
-document/chunk counts below as "as of the last successful query", not as confirmed-current.
+- **Corpus (v3, clean): 1,241 docs / 7,383 chunks, all embedded (Qdrant points == chunks).**
+  Big finding: 279/1,344 docs were *localized* kubernetes/website pages (content/bn, zh-cn, …) —
+  invisible to the English-only embedder. Added a `non_english` ingestion quality gate
+  (>30% non-ASCII letters), purged them (user-approved), re-ingested English
+  `content/en/docs/concepts` (176 docs / 2,470 chunks, 0 failures). Tools: docker 442,
+  mlflow 300, terraform 300, kubernetes 198, unknown 1.
+- **The embed-sweep timeout fix (f58f0c0) is now verified end-to-end**: watched a 427s job stop at
+  the soft deadline, self-re-enqueue (`embed-cont-…`), and the continuation drain to 0. Trustworthy.
+- **DVC is real now**: `data/corpus` (v3) and `data/instructions` (41-pair pilot) are dvc-added and
+  pushed to MinIO (`dvc status -c` = in sync). Note `.gitignore` no longer blankets `data/` — DVC
+  writes `data/.gitignore`; pointer files are committed.
+- **Phase 4 (evaluation platform) essentially complete:**
+  - **RAG-quality smoke ran live** (run `c7c35138`, 20 retrieval-v1 cases via /v1/chat on
+    3.5-flash, flash-lite judge): faithfulness **1.0**, answer_relevance **0.99**, citation_used
+    **1.0**. Caveat (recorded in thresholds file): questions are generated from indexed chunks —
+    this gates regressions, it does not prove general quality.
+  - **Reports live in Postgres**: `eval_runs.summary` holds the renderable report;
+    `/v1/evals/reports` merges Postgres over committed `docs/reports/*-summary.json` (Postgres
+    wins). Serves 3 reports live: ablation v1+v2, rag-quality-smoke.
+  - **Regression gate**: `uv run python -m opsverse_evals.regression` asserts 9 pinned thresholds
+    (evalsets/regression-thresholds.json) — all green. Missing report/mode/metric = failure.
+  - **CI eval gate (ADR-0005, option b)**: `eval-gate.yml` = regression CLI + live retrieval smoke
+    on a committed 200-chunk fixture (`evalsets/ci/`) in a Qdrant service container; secret-free.
+    **NOT yet observed running on GitHub Actions** — verify the workflow passes after the push.
+  - **Contamination policy** (docs/eval-contamination-policy.md) enforced by
+    `opsverse_evals.contamination.ContaminationGuard` (normalized-hash + 5-gram shingle Jaccard
+    ≥0.6). Frozen sets are hashed in the policy table.
+- **Retrieval ablation v2** (evalsets/retrieval-v2.jsonl, frozen, 100 Qs on the clean corpus) —
+  the story changed at scale, full analysis in `docs/reports/retrieval-ablation-v2.md`:
+  chunk mrr@10: **sparse .759 > hybrid+rerank .745 > hybrid .705 > dense .553**.
+  Decisions: chat stays hybrid (generator questions reuse chunk vocabulary → lexical bias;
+  paraphrased evalset is the follow-up before switching); rerank flipped to quality-POSITIVE but
+  stays default-off (6.9s/query CPU vs 300ms budget; revisit = GPU or distilled reranker).
+- **Phase 5 started**: `libs/training` (opsverse-training) — InstructionPair/DatasetManifest
+  schemas, quality filters (scaffold-leak regex, length bounds), Deduper, and
+  `generate_instructions` (3 grounded formats qa/explain/diagnosis, resumable, decontaminated,
+  manifest with drops_by_reason). **Pilot verified live: 41 pairs**, guard protecting all 200
+  frozen questions, 0 contaminated. Spot-checked quality: good.
+  Run it from the REPO ROOT (it refuses to run if ./evalsets is missing — that guard exists
+  because a wrong-cwd run once produced an unguarded dataset).
+- **Test-isolation bug fixed**: the WS chat test used to write fake ledger rows into the LIVE
+  Postgres on every pytest run (TestClient runs the lifespan, which rebuilds
+  app.state.db_sessionmaker from real settings). Now a RecordingLedger + assertions; 15 polluted
+  rows deleted. If /v1/costs ever shows gemini-2.5-flash again, that's the regression signature.
 
-- **Phase 1–2** (foundation, ingestion): as before, plus `/v1/ingest` github_repo now takes
-  `path_prefix` to target doc subtrees of big repos.
-- **Phase 3 COMPLETE**:
-  - `/v1/chat` SSE (events: sources/delta/done/error), citation-grounded, degradation ladder
-    (skip rerank → skip retrieval → error), thin LiteLLM client (ADR-0004), request_ledger
-    (migration 0002) recording model/tokens/cost/latency per request.
-  - `WS /v1/chat/stream`: multi-turn + image upload → Gemini vision description feeds retrieval
-    + prompt (live-verified with a terminal-screenshot PNG).
-  - Provider fallback chain live-verified: 3.5-flash → 3.1-flash-lite on 429.
-  - **Retrieval eval**: `evalsets/retrieval-v1.jsonl` (100 labeled Qs, frozen, corpus-pinned to
-    the ORIGINAL 156-doc corpus) + `docs/reports/retrieval-ablation-v1.md`. Hybrid wins
-    (MRR@10 .643); **rerank measured quality-NEGATIVE + ~9s/query CPU → chat rerank now
-    opt-in via OPSVERSE_CHAT_RERANK (default off)**.
-  - **Minimal web UI** (`apps/web`, Next 16 + Tailwind 4 + react-markdown): / chat (streaming,
-    citations, image attach, degraded badges, stats), /evals, /costs. Custom SSE client, no
-    AI-SDK dep. API has CORS for :3000.
-- **Corpus expanded (ingest jobs all reported `succeeded`)**: kubernetes/website (concepts),
-  docker/docs (manuals), hashicorp/terraform (website/docs), mlflow/mlflow (docs) → last
-  confirmed count **1,344 docs**; chunk count was still climbing (last confirmed: 1,581
-  embedded / 4,292 pending, i.e. **5,873 chunks total**, most NOT yet embedded into Qdrant).
-  **The embed sweep did not finish this session** — see gotcha #9 and Next steps #1.
-- **Phase 4 core (code only, not yet run end-to-end)**: migration 0003 (`judge_cache`,
-  `eval_runs`, `eval_results`) applied; `CachedJudge` (Postgres prompt-hash cache);
-  `opsverse_evals.rag_suite` (faithfulness = claim-level judging, answer_relevance,
-  citation_used) written and unit-tested, but **never actually invoked against a live
-  API** — `docs/reports/rag-quality-smoke-summary.json` does NOT exist yet, no `eval_runs`
-  row exists. `/v1/evals/reports` + `/v1/costs/summary` APIs are live-verified (return
-  correctly, just have no rag-quality data yet — only the retrieval-ablation-v1 report shows).
-- **DVC**: `dvc init` done, remote configured (`s3://opsverse-dvc` on MinIO, creds in
-  gitignored `.dvc/config.local`: opsverse / opsverse-secret) and committed
-  (`.dvc/config`, `.dvc/.gitignore`, `.dvcignore` are in git). **Nothing has been exported or
-  pushed to it yet** — `uv run python -m opsverse_api.export_corpus` was never run, `data/`
-  does not exist, no `dvc add` / `dvc push` has happened. This is real remaining work, not
-  just "re-verify."
+## NOT yet verified / honest gaps
+
+- **eval-gate.yml has never run on GitHub Actions** (written + locally verified only: both its
+  commands pass locally). Check the Actions tab after pushing.
+- **/evals web page renders the 2 new reports**: API endpoint verified live + `next build` clean +
+  the page's generic fallback table is unit-typed, but nobody has *looked* at the page in a
+  browser this session (chat UI itself was live-verified in a prior session).
+- rag-quality thresholds are pinned at n=20 — noisy; fine as a gate, don't quote as "proof".
 
 ## Environment gotchas (will bite you)
 
 1. **Port 8000 TAKEN** (user's WC26 app). OpsVerse API = **8100**; web dev = 3000.
-2. **Gemini free-tier quotas (measured 2026-07-12)**: `gemini-3.5-flash` = **20 requests/DAY**
-   (`...PerDayPerProjectPerModel-FreeTier`, quotaValue 20). `gemini-2.5-flash` 404s for new keys;
-   `gemini-2.0-flash` free quota is 0. `gemini-3.1-flash-lite` has a separate much larger quota —
-   it is the default fallback (`chat_fallback_models`) AND the bulk-job model
-   (`eval_generator_model`). Never point bulk jobs at 3.5-flash.
-3. Gemini 3.5-flash **thinks by default** — `chat_reasoning_effort=minimal` disables (measured
-   89→0 reasoning tokens). litellm warns temperature is deprecated for Gemini 3+.
+2. **Gemini free-tier quotas**: `gemini-3.5-flash` = **20 requests/DAY** (the smoke run consumes
+   ~20 — budget it). `gemini-3.1-flash-lite` = separate much larger quota; it is the fallback AND
+   all bulk jobs (`eval_generator_model`). Never point bulk jobs at 3.5-flash.
+3. Gemini 3.5-flash thinks by default — `chat_reasoning_effort=minimal` disables. litellm warns
+   temperature is deprecated for Gemini 3+.
 4. **litellm must stay <1.92** (1.92+ needs a Rust/MSVC build that fails on this machine).
-5. fastembed 0.8: models per ADR-0003 (bge-base-en-v1.5 dense 768d, Qdrant/bm25 sparse,
-   bge-reranker-base). Qdrant collection `opsverse_kb`.
-6. PowerShell mangles inline JSON in curl -d AND non-ASCII in `-replace` file rewrites (em-dash
-   mojibake) — write request bodies to files; use the Edit tool for file changes.
-7. arq: chained embed jobs need unique `_job_id`s. OneDrive: exclude .venv/node_modules if slow.
-8. Windows: no `link.exe`/MSVC; `Docker Desktop.exe` not at the standard path but daemon comes up.
-9. **`embed_pending_chunks` used to be able to hit arq's 600s `job_timeout` on large sweeps**
-   (happened 3x on the expanded corpus — each kill wasted the in-flight batch but did NOT lose
-   already-committed progress, since it commits per 32-chunk batch). Fixed in commit
-   `f58f0c0` (2026-07-13): the sweep now stops at a 420s soft deadline and self-re-enqueues a
-   fresh job (`embed-cont-<uuid>`) until no chunks are pending. **This fix has NOT yet been
-   exercised against real data** — restart the worker and watch at least one full drain before
-   trusting it.
+5. fastembed 0.8: bge-base-en-v1.5 dense 768d, Qdrant/bm25 sparse, bge-reranker-base (ADR-0003).
+   Qdrant collection `opsverse_kb`. fastembed cache env: `FASTEMBED_CACHE_PATH`.
+6. PowerShell mangles inline JSON in curl -d AND non-ASCII in `-replace` — write request bodies to
+   files; use the Edit tool for file changes. **PowerShell cwd persists between tool calls** — a
+   stray `cd apps/web` once sent a whole pipeline run to the wrong directory.
+7. **Windows console is cp1252** — long-running Python that prints LLM output needs
+   `$env:PYTHONUTF8='1'` or it dies on the first non-Latin character (happened once).
+8. arq: chained embed jobs need unique `_job_id`s. Docker Desktop launches via
+   `Start-Process "shell:AppsFolder\Docker.DockerForWindows.Settings"` (exe not at standard path).
+9. `uv run pytest` is safe for the live DB now (see test-isolation fix), but stay suspicious of
+   any test that touches `app.state` after a lifespan runs.
 
 ## How to bring everything up
 
@@ -114,62 +123,26 @@ uv run arq opsverse_api.worker.WorkerSettings                     # worker (back
 curl http://localhost:8100/health/ready                           # expect 4x ok
 ```
 
-## Next steps, in order (start here — this is a clean checklist, not a recap)
+## Next steps, in order
 
-0. **Bring the stack up first** (per "How to bring everything up" below). Docker Desktop was
-   down at end of session — ask before starting it, then `docker compose up -d --wait`,
-   `alembic upgrade head` (should be a no-op, already at 0003), start API + worker.
-
-1. **Finish the embed sweep for the expanded corpus** (never completed this session):
-   - Check state: `docker exec opsverse-postgres-1 psql -U opsverse -d opsverse -c
-     "SELECT embedding_status, count(*) FROM chunks GROUP BY 1;"`
-   - If any `pending` remain, the restarted worker (with the timeout fix from commit
-     `f58f0c0`) should already be chaining sweeps automatically once one is enqueued — trigger
-     one if none is running: any new `/v1/ingest` call chains a sweep, or enqueue
-     `embed_pending_chunks` directly. Watch it actually reach 0 pending — this exact fix has
-     never been observed working end-to-end.
-
-2. **Export + version the corpus with DVC** (nothing done yet, this is from scratch):
-   ```
-   uv run python -m opsverse_api.export_corpus     # writes data/corpus/{documents,chunks}.jsonl + manifest.json
-   uv run dvc add data/corpus
-   uv run dvc push                                  # needs MinIO up; creds already in .dvc/config.local
-   git add data/corpus.dvc .gitignore && git commit -m "Version corpus v2 snapshot with DVC"
-   ```
-
-3. **Run the Phase 4 RAG-quality smoke live** (code exists, never executed):
-   ```
-   uv run python -m opsverse_evals.rag_suite --n 20   # API must be running on :8100
-   ```
-   Judges on `gemini-3.1-flash-lite` (protects the 20/day quota on 3.5-flash), resumable via
-   `--run-id <id>` if it stalls. Confirm `docs/reports/rag-quality-smoke-summary.json` appears
-   and `/evals` in the web UI renders it, then commit.
-
-4. **Retrieval ablation v2** on the expanded corpus: generate `evalsets/retrieval-v2.jsonl`
-   (the v1 set only covers the original 156-doc corpus; keep v1 frozen for comparability),
-   rerun `run_ablation`, compare v1↔v2 in the report; revisit the rerank-off verdict at the
-   new scale (bigger/more diverse corpus could change the answer).
-5. **Phase 4 completion**: DeepEval-style regression assertions pinned to frozen evalsets;
-   promptfoo prompt-variant testing; **CI eval gate** — open decision: needs a DVC remote +
-   secrets reachable from GitHub Actions (local MinIO isn't); options: (a) GDrive DVC remote,
-   (b) commit a trimmed CI corpus fixture, (c) nightly-only gate on a self-hosted runner.
-   Also: eval dashboard page already renders eval_runs summaries via /v1/evals/reports —
-   move reports fully into Postgres (`eval_runs.summary` exists; endpoint currently reads
-   *-summary.json files).
-6. **Contamination policy doc** (evalsets never enter training data, enforced by hash) —
-   quick doc, belongs to Phase 4/5 boundary.
-7. **Phase 5**: synthetic instruction dataset from the corpus (use flash-lite; 20/day cap makes
-   3.5-flash useless for bulk), Unsloth QLoRA on Colab — plan file has the full task list.
-8. Langfuse (Phase 8) can be started early if evals stall on quota.
-
-## GitHub remote
-
-`origin` = `https://github.com/dilipna/OPsVerse.git`, wired up and pushed 2026-07-13 on
-explicit user request. Local commits remain pre-approved (commit without asking); a `git push`
-after that point should still get a quick heads-up before running, per the user's general
-"confirm risky/shared-state actions" preference — the blanket "ask before remote git ops" rule
-from earlier sessions is superseded only for the one explicit push already done, not as a
-standing "always push freely" grant.
+1. **Verify CI on GitHub**: after push, confirm `ci.yml` AND the new `eval-gate.yml` both pass on
+   Actions (eval-gate needs ~3-4 min; fastembed model download is cached on uv.lock).
+2. **Phase 5 main run — scale the instruction dataset**: the pipeline is verified; now generate
+   in flash-lite-quota-sized batches over several sessions toward ~8–15k pairs
+   (`uv run python -m opsverse_training.generate_instructions --n 300` per sitting; resumable;
+   re-dvc-push `data/instructions` after each batch). Watch `drops_by_reason` — if
+   `skipped_by_generator` climbs, the doc sampling is hitting boilerplate.
+   Consider adding the 4th format (tradeoff/X-vs-Y, needs cross-document chunk pairing) once
+   volume exists.
+3. **Paraphrased retrieval evalset** (retrieval-v3): rephrase v2 questions with the LLM
+   (paraphrase-only prompt, keep gold labels) to remove the lexical bias that flatters BM25 —
+   this decides whether chat's default stays hybrid. Cheap: 100 flash-lite calls.
+4. **Phase 4 leftovers (small)**: promptfoo prompt-variant testing was deferred — decide
+   deliberately whether to add it or record "regression gate + judged smoke covers it" in an ADR.
+5. **Phase 5 training side**: `training/` Colab notebooks (Unsloth QLoRA on Qwen3-4B), preference
+   pairs for DPO, HF Hub model cards — plan §Phase 5 has the full task list. Needs the dataset
+   from step 2 first.
+6. **Langfuse (Phase 8) can start early** if quota stalls eval/dataset work.
 
 ## Repo map (quick)
 
@@ -178,13 +151,18 @@ apps/api        FastAPI: routers/{health,ingest,search,chat,costs,evals}.py, wor
                 export_corpus.py, deps.py, db/, alembic/ (0001..0003)
 apps/web        Next 16 UI: src/app/{page,evals/page,costs/page}.tsx, src/lib/api.ts (SSE client)
 libs/core       settings.py (OPSVERSE_*), llm.py (LiteLLM client + fallback), object_store.py
-libs/ingestion  parsers/, chunking.py, quality.py, pipeline.py
-libs/rag        embeddings.py, store.py, rerank.py, retriever.py, chat.py (ChatService + events)
-libs/evals      metrics.py (hit/MRR/nDCG), schemas.py, generate_retrieval_set.py,
-                run_ablation.py, judge.py (CachedJudge), rag_suite.py
-evalsets/       retrieval-v1.jsonl (frozen, 100 cases, original corpus)
-docs/adr        0001 monorepo · 0002 qdrant · 0003 fastembed swap · 0004 chat serving/LiteLLM/SSE
-docs/reports    retrieval-ablation-v1.{md,json} · rag-quality-smoke-summary.json (after step 1)
-docs/latency-budget.md   budget vs measured + degradation ladder
+libs/ingestion  parsers/, chunking.py, quality.py (incl. non_english gate), pipeline.py
+libs/rag        embeddings.py, store.py, rerank.py, retriever.py, chat.py
+libs/evals      metrics.py, schemas.py, generate_retrieval_set.py, run_ablation.py,
+                judge.py (CachedJudge), rag_suite.py, contamination.py (guard), reporting.py,
+                regression.py (threshold gate), build_ci_fixture.py, ci_retrieval_smoke.py
+libs/training   schemas.py (InstructionPair/Manifest), quality.py, generate_instructions.py
+evalsets/       retrieval-v1.jsonl + retrieval-v2.jsonl (frozen, hashed in policy),
+                regression-thresholds.json, ci/ (fixture: ci-corpus.jsonl + retrieval-ci.jsonl)
+data/           DVC pointers only: corpus.dvc, instructions.dvc (content in MinIO s3://opsverse-dvc)
+docs/adr        0001 monorepo · 0002 qdrant · 0003 fastembed · 0004 chat serving · 0005 CI eval gate
+docs/reports    retrieval-ablation-v1 + v2 (md/json/raw) · rag-quality-smoke-summary.json
+docs/eval-contamination-policy.md   frozen-set registry + guard mechanics
+.github/workflows  ci.yml · eval-gate.yml
 infra/compose   docker-compose.yml (postgres/redis/qdrant/minio; api profile "app", port 8100)
 ```
