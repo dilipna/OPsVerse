@@ -14,7 +14,6 @@ import argparse
 import asyncio
 import json
 import statistics
-import subprocess
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -27,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from opsverse_core.llm import LiteLLMClient
 from opsverse_core.settings import get_settings
 from opsverse_evals.judge import CachedJudge, JudgeError
+from opsverse_evals.reporting import git_sha
 from opsverse_evals.schemas import RetrievalDataset
 
 FAITHFULNESS_PROMPT = """\
@@ -55,15 +55,6 @@ Score how directly the answer addresses the question on a 0.0-1.0 scale
 (1.0 = fully addresses it; a justified "the sources don't cover this" with
 pointers still scores >= 0.5; an off-topic answer scores near 0).
 Return ONLY JSON: {{"score": <float>, "reason": "<one sentence>"}}"""
-
-
-def git_sha() -> str | None:
-    try:
-        return subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-        ).stdout.strip()
-    except (OSError, subprocess.CalledProcessError):
-        return None
 
 
 def faithfulness_score(verdict: dict[str, Any]) -> tuple[float, int]:
@@ -203,16 +194,6 @@ async def run_suite(
         metric: {"mean": round(statistics.mean(vals), 4), "n": len(vals)}
         for metric, vals in sorted(by_metric.items())
     }
-    async with engine.begin() as conn:
-        await conn.execute(
-            sa.text(
-                "UPDATE eval_runs SET status='done', summary=:s, finished_at=now() WHERE id = :r"
-            ),
-            {"s": json.dumps(summary), "r": run_id},
-        )
-    await engine.dispose()
-
-    out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(UTC).strftime("%Y-%m-%d")
     report = {
         "report": "rag-quality-smoke",
@@ -227,9 +208,21 @@ async def run_suite(
         "judge_model": judge.judge_model,
         "judge_cache": {"hits": judge.cache_hits, "misses": judge.cache_misses},
         # same shape the /evals page renders for ablation reports:
-        # mode -> metric -> value
+        # mode -> metric -> value; per-metric n comes along for honesty
         "results": {"chat": {f"judge:{m}": v["mean"] for m, v in summary.items()}},
+        "metric_counts": {m: v["n"] for m, v in summary.items()},
     }
+    # summary holds the renderable report; per-case scores live in eval_results
+    async with engine.begin() as conn:
+        await conn.execute(
+            sa.text(
+                "UPDATE eval_runs SET status='done', summary=:s, finished_at=now() WHERE id = :r"
+            ),
+            {"s": json.dumps(report), "r": run_id},
+        )
+    await engine.dispose()
+
+    out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "rag-quality-smoke-summary.json").write_text(
         json.dumps(report, indent=1), encoding="utf-8"
     )
