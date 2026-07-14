@@ -59,7 +59,7 @@ marked otherwise. Commits tell the story — read `git log`.
     (evalsets/regression-thresholds.json) — all green. Missing report/mode/metric = failure.
   - **CI eval gate (ADR-0005, option b)**: `eval-gate.yml` = regression CLI + live retrieval smoke
     on a committed 200-chunk fixture (`evalsets/ci/`) in a Qdrant service container; secret-free.
-    **NOT yet observed running on GitHub Actions** — verify the workflow passes after the push.
+    **Verified on GitHub Actions 2026-07-14: both CI and Eval Gate passed on commit 172b82d.**
   - **Contamination policy** (docs/eval-contamination-policy.md) enforced by
     `opsverse_evals.contamination.ContaminationGuard` (normalized-hash + 5-gram shingle Jaccard
     ≥0.6). Frozen sets are hashed in the policy table.
