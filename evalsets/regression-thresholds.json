@@ -21,6 +21,22 @@
    "metric": "doc:mrr@10",
    "min_score": 0.62,
    "note": "measured 0.6692 on 2026-07-13"
+  },
+  {
+   "report": "retrieval-ci-smoke",
+   "live": true,
+   "mode": "hybrid",
+   "metric": "chunk:hit@5",
+   "min_score": 0.92,
+   "note": "measured 1.0 on 2026-07-13 (200-chunk CI fixture); checked live by ci_retrieval_smoke, not against a committed report"
+  },
+  {
+   "report": "retrieval-ci-smoke",
+   "live": true,
+   "mode": "hybrid",
+   "metric": "chunk:mrr@10",
+   "min_score": 0.75,
+   "note": "measured 0.8467 on 2026-07-13 (200-chunk CI fixture)"
   }
  ]
 }
