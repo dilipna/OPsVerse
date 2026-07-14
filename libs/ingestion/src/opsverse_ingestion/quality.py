@@ -9,6 +9,12 @@ from opsverse_ingestion.schemas import ChunkDraft, PipelineStats
 
 MIN_TOKENS = 8
 MAX_HAMMING = 3
+# The embedding stack is English-only (bge-base-en, ADR-0003). Doc sites ship
+# localized trees (kubernetes/website content/<locale>/...) that otherwise
+# pass every gate and pollute retrieval — measured 279/1344 docs before this
+# gate existed. Letters, not chars: code/config chunks stay ASCII-heavy and
+# accented names in English prose stay far below the threshold.
+MAX_NON_ASCII_LETTER_RATIO = 0.3
 
 _WORD = re.compile(r"\w+")
 
@@ -43,6 +49,11 @@ def _reject_reason(chunk: ChunkDraft) -> str | None:
     printable = sum(c.isprintable() or c in "\n\t" for c in chunk.text)
     if printable / len(chunk.text) < 0.95:
         return "non_printable"
+    letters = [c for c in chunk.text if c.isalpha()]
+    if letters:
+        non_ascii = sum(1 for c in letters if ord(c) > 127)
+        if non_ascii / len(letters) > MAX_NON_ASCII_LETTER_RATIO:
+            return "non_english"
     return None
 
 

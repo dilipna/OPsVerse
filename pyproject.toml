@@ -25,7 +25,14 @@ dev = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["apps/api/src", "libs/core/src", "libs/evals/src", "libs/ingestion/src", "libs/rag/src"]
+src = [
+    "apps/api/src",
+    "libs/core/src",
+    "libs/evals/src",
+    "libs/ingestion/src",
+    "libs/rag/src",
+    "libs/training/src",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
@@ -46,4 +53,5 @@ testpaths = [
     "libs/evals/tests",
     "libs/ingestion/tests",
     "libs/rag/tests",
+    "libs/training/tests",
 ]
