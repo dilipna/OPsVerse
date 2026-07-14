@@ -26,6 +26,10 @@ class Threshold(BaseModel):
     mode: str  # results key, e.g. hybrid | chat
     metric: str  # e.g. chunk:mrr@10 | judge:faithfulness
     min_score: float
+    # live thresholds are enforced by a runner that produces the report in
+    # memory (ci_retrieval_smoke); run_gate skips them since no committed
+    # *-summary.json exists to check
+    live: bool = False
     note: str = ""
 
 
@@ -62,6 +66,8 @@ def run_gate(reports_dir: Path, thresholds: list[Threshold]) -> list[str]:
 
     violations: list[str] = []
     for threshold in thresholds:
+        if threshold.live:
+            continue
         violation = check_report(reports.get(threshold.report), threshold)
         if violation:
             violations.append(violation)
