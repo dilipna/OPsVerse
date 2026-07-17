@@ -60,6 +60,20 @@
    "note": "measured 0.7742 on 2026-07-14"
   },
   {
+   "report": "retrieval-ablation-v3",
+   "mode": "hybrid",
+   "metric": "chunk:mrr@10",
+   "min_score": 0.6,
+   "note": "measured 0.6555 on 2026-07-17 (paraphrased set -- the paraphrase-robustness gate)"
+  },
+  {
+   "report": "retrieval-ablation-v3",
+   "mode": "hybrid",
+   "metric": "doc:mrr@10",
+   "min_score": 0.67,
+   "note": "measured 0.7296 on 2026-07-17"
+  },
+  {
    "report": "rag-quality-smoke",
    "mode": "chat",
    "metric": "judge:faithfulness",

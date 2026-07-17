@@ -1,0 +1,63 @@
+{
+ "report": "retrieval-ablation-v3",
+ "kind": "retrieval-ablation",
+ "date": "2026-07-17",
+ "dataset": "retrieval-v3",
+ "cases": 100,
+ "generator_model": "gemini/gemini-3.1-flash-lite",
+ "corpus_stats": {
+  "documents": 1241,
+  "chunks": 7383
+ },
+ "k": 10,
+ "results": {
+  "dense": {
+   "latency_ms_per_query": 33.1,
+   "chunk:hit@1": 0.47,
+   "chunk:hit@3": 0.65,
+   "chunk:hit@5": 0.71,
+   "chunk:hit@10": 0.77,
+   "chunk:mrr@10": 0.5703,
+   "chunk:ndcg@10": 0.6185,
+   "doc:hit@1": 0.58,
+   "doc:hit@5": 0.77,
+   "doc:mrr@10": 0.6649
+  },
+  "sparse": {
+   "latency_ms_per_query": 7.6,
+   "chunk:hit@1": 0.47,
+   "chunk:hit@3": 0.71,
+   "chunk:hit@5": 0.8,
+   "chunk:hit@10": 0.88,
+   "chunk:mrr@10": 0.6105,
+   "chunk:ndcg@10": 0.6761,
+   "doc:hit@1": 0.54,
+   "doc:hit@5": 0.84,
+   "doc:mrr@10": 0.6677
+  },
+  "hybrid": {
+   "latency_ms_per_query": 24.2,
+   "chunk:hit@1": 0.53,
+   "chunk:hit@3": 0.74,
+   "chunk:hit@5": 0.84,
+   "chunk:hit@10": 0.9,
+   "chunk:mrr@10": 0.6555,
+   "chunk:ndcg@10": 0.7151,
+   "doc:hit@1": 0.62,
+   "doc:hit@5": 0.88,
+   "doc:mrr@10": 0.7296
+  },
+  "hybrid+rerank": {
+   "latency_ms_per_query": 10594.2,
+   "chunk:hit@1": 0.52,
+   "chunk:hit@3": 0.74,
+   "chunk:hit@5": 0.82,
+   "chunk:hit@10": 0.9,
+   "chunk:mrr@10": 0.6445,
+   "chunk:ndcg@10": 0.7064,
+   "doc:hit@1": 0.58,
+   "doc:hit@5": 0.84,
+   "doc:mrr@10": 0.6987
+  }
+ }
+}
