@@ -5,6 +5,7 @@ from arq.connections import ArqRedis, RedisSettings
 from fastapi import HTTPException, Request, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from opsverse_core.gateway import LLMGateway
 from opsverse_core.llm import LiteLLMClient
 from opsverse_core.object_store import ObjectStore
 from opsverse_rag import ChatService, QdrantStore, Retriever
@@ -53,17 +54,29 @@ def get_retriever(request: Request) -> Retriever:
 def _build_chat_service(app) -> ChatService:
     if app.state.chat_service is None:
         settings = app.state.settings
+        model_chain = [settings.chat_model, *settings.chat_fallback_models]
         llm = LiteLLMClient(
-            [settings.chat_model, *settings.chat_fallback_models],
+            model_chain,
             {"gemini": settings.gemini_api_key, "groq": settings.groq_api_key},
             timeout_s=settings.chat_llm_timeout_s,
             max_tokens=settings.chat_max_tokens,
             temperature=settings.chat_temperature,
             reasoning_effort=settings.chat_reasoning_effort,
         )
+        # Gateway (Phase 6): Redis response cache + daily budget kill-switch,
+        # wrapping the client. Falls back to pass-through if Redis is down.
+        gateway = LLMGateway(
+            llm,
+            app.state.redis,
+            model_id=",".join(model_chain),
+            cache_enabled=settings.gateway_cache_enabled,
+            cache_ttl_s=settings.gateway_cache_ttl_s,
+            daily_budget_usd=settings.gateway_daily_budget_usd,
+        )
+        app.state.gateway = gateway
         app.state.chat_service = ChatService(
             _build_retriever(app),
-            llm,
+            gateway,
             context_k=settings.chat_context_k,
             retrieval_timeout_s=settings.chat_retrieval_timeout_s,
             rerank=settings.chat_rerank,
