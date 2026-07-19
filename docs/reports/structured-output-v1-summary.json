@@ -1,0 +1,15 @@
+{
+ "report": "structured-output-v1",
+ "kind": "structured-output",
+ "date": "2026-07-19",
+ "dataset": "structured-output-v1",
+ "cases": 12,
+ "generator_model": "gemini/gemini-3.1-flash-lite",
+ "results": {
+  "json-fidelity": {
+   "json_parse_rate": 1.0,
+   "schema_valid_rate": 1.0,
+   "field_accuracy": 1.0
+  }
+ }
+}
