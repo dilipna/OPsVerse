@@ -5,6 +5,7 @@ description = "OpsVerse ingestion: parsing, source-aware chunking, quality gates
 requires-python = ">=3.12"
 dependencies = [
     "opsverse-core",
+    "opsverse-security",
     "pydantic>=2.10",
     "pyyaml>=6.0",
     "beautifulsoup4>=4.12",
@@ -16,6 +17,7 @@ pdf = ["docling>=2.15"]
 
 [tool.uv.sources]
 opsverse-core = { workspace = true }
+opsverse-security = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

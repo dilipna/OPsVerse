@@ -31,6 +31,7 @@ src = [
     "libs/evals/src",
     "libs/ingestion/src",
     "libs/rag/src",
+    "libs/security/src",
     "libs/training/src",
 ]
 
@@ -53,5 +54,6 @@ testpaths = [
     "libs/evals/tests",
     "libs/ingestion/tests",
     "libs/rag/tests",
+    "libs/security/tests",
     "libs/training/tests",
 ]

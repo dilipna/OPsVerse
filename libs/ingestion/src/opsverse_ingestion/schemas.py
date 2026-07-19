@@ -42,6 +42,9 @@ class PipelineStats(BaseModel):
     chunks_rejected: int = 0
     duplicates_removed: int = 0
     reject_reasons: dict[str, int] = Field(default_factory=dict)
+    secrets_redacted: int = 0
+    quarantined: bool = False  # ingest-time injection scan flagged this document
+    quarantine_reasons: list[str] = Field(default_factory=list)
 
 
 def estimate_tokens(text: str) -> int:

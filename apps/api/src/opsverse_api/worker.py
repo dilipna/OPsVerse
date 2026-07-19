@@ -53,7 +53,9 @@ async def _run_pipeline(raw: bytes, source: str, tool: str | None) -> PipelineRe
 def _apply_result(session: AsyncSession, document: Document, result: PipelineResult) -> None:
     document.doc_type = result.doc_type.value
     document.tool = result.tool
-    document.status = "ready"
+    # Quarantined docs (injection scan flagged) keep their metadata for audit
+    # but contribute no chunks to retrieval.
+    document.status = "quarantined" if result.stats.quarantined else "ready"
     for draft in result.chunks:
         session.add(
             Chunk(
@@ -74,6 +76,9 @@ def _merge_stats(total: dict[str, Any], result: PipelineResult) -> None:
     total["duplicates_removed"] = (
         total.get("duplicates_removed", 0) + result.stats.duplicates_removed
     )
+    total["secrets_redacted"] = total.get("secrets_redacted", 0) + result.stats.secrets_redacted
+    if result.stats.quarantined:
+        total["quarantined"] = total.get("quarantined", 0) + 1
 
 
 async def _ingest_upload(
