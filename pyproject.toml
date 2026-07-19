@@ -9,7 +9,7 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["apps/api", "libs/*"]
+members = ["apps/api", "apps/mcp-server", "libs/*"]
 
 [dependency-groups]
 dev = [
@@ -27,6 +27,7 @@ target-version = "py312"
 line-length = 100
 src = [
     "apps/api/src",
+    "apps/mcp-server/src",
     "libs/core/src",
     "libs/evals/src",
     "libs/ingestion/src",
@@ -50,6 +51,7 @@ venv = ".venv"
 asyncio_mode = "auto"
 testpaths = [
     "apps/api/tests",
+    "apps/mcp-server/tests",
     "libs/core/tests",
     "libs/evals/tests",
     "libs/ingestion/tests",
