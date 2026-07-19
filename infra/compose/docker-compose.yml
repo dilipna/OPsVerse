@@ -85,7 +85,50 @@ services:
       minio:
         condition: service_healthy
 
+  # --- Observability (Phase 8): opt-in `full` profile ------------------------
+  # docker compose -f infra/compose/docker-compose.yml --profile full up -d
+  # Langfuse v2 self-host = one app container + its own Postgres. Project API
+  # keys are bootstrapped headlessly via LANGFUSE_INIT_* so no UI click is
+  # needed; the same keys go in .env (OPSVERSE_LANGFUSE_*). UI on :3001.
+  langfuse-db:
+    profiles: ["full"]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+      POSTGRES_DB: langfuse
+    volumes:
+      - langfuse_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse -d langfuse"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  langfuse:
+    profiles: ["full"]
+    image: langfuse/langfuse:2
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    ports:
+      - "3002:3000"
+    environment:
+      DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      NEXTAUTH_URL: http://localhost:3002
+      NEXTAUTH_SECRET: opsverse-langfuse-nextauth-secret
+      SALT: opsverse-langfuse-salt
+      TELEMETRY_ENABLED: "false"
+      LANGFUSE_INIT_ORG_ID: opsverse
+      LANGFUSE_INIT_PROJECT_ID: opsverse
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: pk-lf-opsverse-public
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: sk-lf-opsverse-secret
+      LANGFUSE_INIT_USER_EMAIL: dev@opsverse.local
+      LANGFUSE_INIT_USER_NAME: opsverse
+      LANGFUSE_INIT_USER_PASSWORD: opsverse-dev-password
+
 volumes:
   pgdata:
   qdrant_data:
   minio_data:
+  langfuse_db:

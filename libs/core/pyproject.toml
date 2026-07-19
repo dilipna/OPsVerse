@@ -10,6 +10,8 @@ dependencies = [
     # <1.92: 1.92+ adds a Rust extension (litellm-rust) with no Windows wheel,
     # and this dev machine has no MSVC toolchain to build it.
     "litellm>=1.60,<1.92",
+    # v2 SDK pairs with the self-hosted Langfuse v2 server (ADR-0010).
+    "langfuse>=2.50,<3.0",
 ]
 
 [build-system]
