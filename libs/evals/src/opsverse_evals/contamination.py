@@ -52,9 +52,14 @@ def jaccard(a: set[tuple[str, ...]], b: set[tuple[str, ...]]) -> float:
 
 
 def frozen_evalsets(root: Path) -> list[Path]:
-    """All frozen eval sets under `root` (evalsets/). Partials are working
-    files, not frozen artifacts."""
-    return sorted(p for p in root.glob("*.jsonl") if ".partial" not in p.name)
+    """Frozen *retrieval* eval sets under `root` (evalsets/), recursively.
+
+    Retrieval question sets are the ones whose questions must be kept out of
+    training data. Other frozen sets live under evalsets/ too (e.g. the
+    security red-team set has a different schema); those are matched out by
+    the retrieval-* naming convention. Partials are working files, not frozen.
+    """
+    return sorted(p for p in root.rglob("retrieval-*.jsonl") if ".partial" not in p.name)
 
 
 def load_eval_questions(paths: Iterable[Path]) -> list[str]:
