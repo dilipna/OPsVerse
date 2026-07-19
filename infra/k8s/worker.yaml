@@ -1,0 +1,32 @@
+# arq worker: consumes ingest/embed jobs from the Redis queue. No Service
+# (nothing calls it directly). Kept at 1 replica — embedding is CPU-bound and
+# the sweep self-re-enqueues, so throughput scales with CPU, not pod count.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opsverse-worker
+  namespace: opsverse
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: opsverse-worker }
+  template:
+    metadata:
+      labels: { app: opsverse-worker }
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/dilipna/opsverse-api:latest
+          command: ["arq", "opsverse_api.worker.WorkerSettings"]
+          envFrom:
+            - configMapRef: { name: opsverse-config }
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: DB_PASSWORD }
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: GEMINI_API_KEY }
+          resources:
+            requests: { cpu: "500m", memory: "1Gi" }
+            limits: { cpu: "2", memory: "2Gi" }
