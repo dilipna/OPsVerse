@@ -28,7 +28,8 @@ routing/caching/quota-aware design is a direct consequence of it.
 | **LLM gateway** — Redis response cache + daily budget kill-switch | cache hit **184× faster, $0** vs paid call ([ADR-0008](docs/adr/0008-gateway-as-library-not-proxy.md)) |
 | **Observability** — every request traced (retrieval scores → tokens → cost) | Langfuse self-host; live trace verified via API ([ADR-0010](docs/adr/0010-observability-langfuse-v2-facade.md)) |
 | **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |
-| **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | Phase 5 pipeline; QLoRA training script pinned & resumable |
+| **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 593 pairs; QLoRA training script pinned & resumable |
+| **Inference lab** — one OpenAI-compatible harness for Ollama/vLLM/SGLang | measurement math unit-tested ([ADR-0011](docs/adr/0011-inference-lab-openai-compatible-harness.md)); GPU run pending |
 
 **85 tests · ruff + pyright clean · CI + eval-gate green.**
 
@@ -112,7 +113,8 @@ training/         Colab QLoRA scripts (Qwen3-4B → OpsLM), SFT prep, README
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
 docs/adr          9 architecture decision records
 docs/reports      retrieval ablations, RAG-quality, security detection
-infra/compose     local dev stack   ·   infra/k8s   documented manifests (artifact, not operated)
+benchmarks/       inference lab: engine-agnostic harness (Ollama/vLLM/SGLang) + methodology
+infra/compose     local dev stack (+ `full` profile: Langfuse)   ·   infra/k8s   documented manifests
 ```
 
 ## Development
@@ -135,4 +137,5 @@ uv run python -m opsverse_evals.regression   # eval regression gate
 [0007](docs/adr/0007-layered-security-heuristics-over-presidio.md) security ·
 [0008](docs/adr/0008-gateway-as-library-not-proxy.md) gateway ·
 [0009](docs/adr/0009-qwen3-4b-qlora-for-opslm.md) OpsLM fine-tune ·
-[0010](docs/adr/0010-observability-langfuse-v2-facade.md) observability
+[0010](docs/adr/0010-observability-langfuse-v2-facade.md) observability ·
+[0011](docs/adr/0011-inference-lab-openai-compatible-harness.md) inference lab
