@@ -2,6 +2,20 @@
  "policy": "Thresholds are pinned to measured baselines on frozen eval sets minus explicit slack; the note records the measured value and date. Tightening is routine; loosening one requires a written justification in the PR.",
  "thresholds": [
   {
+   "report": "structured-output-v1",
+   "mode": "json-fidelity",
+   "metric": "json_parse_rate",
+   "min_score": 0.9,
+   "note": "measured 1.0 on 2026-07-19 (flash-lite baseline); OpsLM must not regress JSON emission"
+  },
+  {
+   "report": "structured-output-v1",
+   "mode": "json-fidelity",
+   "metric": "field_accuracy",
+   "min_score": 0.8,
+   "note": "measured 1.0 on 2026-07-19; generous slack (small n=12 set, tool-use fidelity gate)"
+  },
+  {
    "report": "retrieval-ablation-v1",
    "mode": "hybrid",
    "metric": "chunk:mrr@10",

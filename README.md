@@ -23,7 +23,8 @@ routing/caching/quota-aware design is a direct consequence of it.
 | **Hybrid RAG** (BGE dense + BM25 sparse, RRF fusion, citations, SSE streaming) | 1,241 docs / 7,383 chunks; hybrid MRR@10 **0.705** ([ablation v2](docs/reports/retrieval-ablation-v2.md)) |
 | **Paraphrase-robust retrieval** — proved hybrid > sparse under reworded queries | sparse drops **−0.149** MRR on paraphrases, hybrid only −0.049 ([ablation v3](docs/reports/retrieval-ablation-v3.md)) |
 | **RAG answer quality** (LLM-judged, cached) | faithfulness **1.0**, answer-relevance **0.99**, citation-use **1.0** (n=20) |
-| **Evaluation platform** — Postgres eval store, pinned regression gate, CI eval gate | 13 thresholds, green on GitHub Actions ([ADR-0005](docs/adr/0005-ci-eval-gate-committed-fixture.md)) |
+| **Evaluation platform** — Postgres eval store, pinned regression gate, CI eval gate | 15 thresholds, green on GitHub Actions ([ADR-0005](docs/adr/0005-ci-eval-gate-committed-fixture.md)) |
+| **Tool-use / structured-output eval** — deterministic JSON-fidelity gate | base model 1.0 parse/schema/field; the "did SFT break JSON?" check ([ADR-0012](docs/adr/0012-structured-output-tool-use-eval.md)) |
 | **Security** — injection quarantine, secret redaction, red-team classifier | TPR **1.0**, specificity **1.0** ([ADR-0007](docs/adr/0007-layered-security-heuristics-over-presidio.md)) |
 | **LLM gateway** — Redis response cache + daily budget kill-switch | cache hit **184× faster, $0** vs paid call ([ADR-0008](docs/adr/0008-gateway-as-library-not-proxy.md)) |
 | **Observability** — every request traced (retrieval scores → tokens → cost) | Langfuse self-host; live trace verified via API ([ADR-0010](docs/adr/0010-observability-langfuse-v2-facade.md)) |
@@ -138,4 +139,5 @@ uv run python -m opsverse_evals.regression   # eval regression gate
 [0008](docs/adr/0008-gateway-as-library-not-proxy.md) gateway ·
 [0009](docs/adr/0009-qwen3-4b-qlora-for-opslm.md) OpsLM fine-tune ·
 [0010](docs/adr/0010-observability-langfuse-v2-facade.md) observability ·
-[0011](docs/adr/0011-inference-lab-openai-compatible-harness.md) inference lab
+[0011](docs/adr/0011-inference-lab-openai-compatible-harness.md) inference lab ·
+[0012](docs/adr/0012-structured-output-tool-use-eval.md) tool-use eval
