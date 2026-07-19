@@ -24,6 +24,7 @@ members = [
     "opsverse-evals",
     "opsverse-ingestion",
     "opsverse-rag",
+    "opsverse-security",
     "opsverse-training",
 ]
 
@@ -3035,6 +3036,7 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "httpx" },
     { name = "opsverse-core" },
+    { name = "opsverse-security" },
     { name = "pydantic" },
     { name = "pyyaml" },
 ]
@@ -3050,6 +3052,7 @@ requires-dist = [
     { name = "docling", marker = "extra == 'pdf'", specifier = ">=2.15" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "opsverse-core", editable = "libs/core" },
+    { name = "opsverse-security", editable = "libs/security" },
     { name = "pydantic", specifier = ">=2.10" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
@@ -3075,6 +3078,17 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10" },
     { name = "qdrant-client", specifier = ">=1.12" },
 ]
+
+[[package]]
+name = "opsverse-security"
+version = "0.1.0"
+source = { editable = "libs/security" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.10" }]
 
 [[package]]
 name = "opsverse-training"

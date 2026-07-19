@@ -93,6 +93,20 @@
    "metric": "judge:citation_used",
    "min_score": 0.9,
    "note": "measured 1.0 on 2026-07-14 (n=20)"
+  },
+  {
+   "report": "security-redteam-v1",
+   "mode": "injection-heuristic",
+   "metric": "tpr_recall",
+   "min_score": 0.85,
+   "note": "measured 1.0 on 2026-07-17 (15 attacks; small curated set, generous slack)"
+  },
+  {
+   "report": "security-redteam-v1",
+   "mode": "injection-heuristic",
+   "metric": "specificity",
+   "min_score": 0.95,
+   "note": "measured 1.0 on 2026-07-17 (18 adversarial-benign DevOps sentences)"
   }
  ]
 }

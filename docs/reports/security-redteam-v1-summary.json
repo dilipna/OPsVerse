@@ -1,0 +1,29 @@
+{
+ "report": "security-redteam-v1",
+ "kind": "security-detection",
+ "date": "2026-07-19",
+ "dataset": "security-redteam-v1",
+ "cases": 33,
+ "results": {
+  "injection-heuristic": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "precision": 1.0
+  }
+ },
+ "detail": {
+  "tpr_recall": 1.0,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "attacks": 15,
+  "benign": 18,
+  "confusion": {
+   "tp": 15,
+   "fp": 0,
+   "tn": 18,
+   "fn": 0
+  },
+  "missed_attacks": [],
+  "false_alarms": []
+ }
+}

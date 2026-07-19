@@ -9,6 +9,7 @@ from opsverse_api.db.models import RequestLedger
 from opsverse_api.deps import get_chat_service, get_chat_service_ws
 from opsverse_rag import ChatService, ChatTurn, SearchFilters
 from opsverse_rag.chat import ChatDelta, ChatDone, ChatError, ChatEvent, ChatSources
+from opsverse_security import scan_injection
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,10 @@ async def _write_ledger(
                         "degraded": done.degraded if done else [],
                         "cited": done.cited if done else [],
                         "error": error,
+                        # query-time injection is flagged, not blocked (ADR-0007):
+                        # this is read-only RAG and DevOps vocab makes blocking
+                        # on heuristics an FPR trap. Surfaced for audit/alerting.
+                        "injection_flags": scan_injection(body.query).matched,
                     },
                 )
             )
