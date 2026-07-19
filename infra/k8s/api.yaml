@@ -1,0 +1,69 @@
+# Stateless API: all state lives in the datastores, so the HPA scales it
+# freely. Readiness hits /health/ready (checks PG/Redis/Qdrant/MinIO), so a
+# pod receives traffic only once its dependencies are actually reachable.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opsverse-api
+  namespace: opsverse
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: opsverse-api }
+  template:
+    metadata:
+      labels: { app: opsverse-api }
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/dilipna/opsverse-api:latest
+          command: ["uvicorn", "opsverse_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+          envFrom:
+            - configMapRef: { name: opsverse-config }
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: DB_PASSWORD }
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: GEMINI_API_KEY }
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /health/ready, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health/live, port: 8000 }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "250m", memory: "512Mi" }
+            limits: { cpu: "1", memory: "1Gi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opsverse-api
+  namespace: opsverse
+spec:
+  selector: { app: opsverse-api }
+  ports: [{ port: 80, targetPort: 8000 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: opsverse-api
+  namespace: opsverse
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: opsverse-api
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 70 }

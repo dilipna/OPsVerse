@@ -1,0 +1,21 @@
+# TLS is left to the cluster (cert-manager annotation shown but commented) so
+# this artifact stays portable across ingress controllers.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opsverse
+  namespace: opsverse
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120" # SSE/WS chat streaming
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: opsverse.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: opsverse-api
+                port: { number: 80 }

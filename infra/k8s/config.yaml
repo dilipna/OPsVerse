@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opsverse-config
+  namespace: opsverse
+data:
+  # In-cluster service DNS names (see stateful.yaml / redis.yaml).
+  OPSVERSE_DATABASE_URL: postgresql+asyncpg://opsverse:$(DB_PASSWORD)@postgres:5432/opsverse
+  OPSVERSE_REDIS_URL: redis://redis:6379/0
+  OPSVERSE_QDRANT_URL: http://qdrant:6333
+  OPSVERSE_MINIO_ENDPOINT: http://minio:9000
+  OPSVERSE_CHAT_MODEL: gemini/gemini-3.5-flash
+  OPSVERSE_GATEWAY_DAILY_BUDGET_USD: "1.0"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opsverse-secrets
+  namespace: opsverse
+# PLACEHOLDER ONLY. In production these come from an external-secrets /
+# sealed-secrets operator and are never committed. Values are base64 in a
+# real Secret; stringData is used here for readability of the artifact.
+type: Opaque
+stringData:
+  DB_PASSWORD: "change-me"
+  GEMINI_API_KEY: "change-me"
+  MINIO_ROOT_USER: "opsverse"
+  MINIO_ROOT_PASSWORD: "change-me"
