@@ -50,6 +50,7 @@ class LiteLLMClient:
         max_tokens: int = 2048,
         temperature: float = 0.2,
         reasoning_effort: str | None = None,
+        api_base: str | None = None,
     ):
         if not models:
             raise ValueError("at least one model is required")
@@ -59,6 +60,11 @@ class LiteLLMClient:
         self._max_tokens = max_tokens
         self._temperature = temperature
         self._reasoning_effort = reasoning_effort
+        # For self-hosted OpenAI-compatible servers (vLLM/SGLang serving
+        # OpsLM): the base URL litellm should POST to. Ollama has its own
+        # default base and doesn't need this. Enables the Phase-5 before/after
+        # eval against any served model.
+        self._api_base = api_base
 
     def _api_key_for(self, model: str) -> str | None:
         provider = model.split("/", 1)[0]
@@ -75,6 +81,8 @@ class LiteLLMClient:
         }
         if self._reasoning_effort is not None:
             kwargs["reasoning_effort"] = self._reasoning_effort
+        if self._api_base is not None:
+            kwargs["api_base"] = self._api_base
         return kwargs
 
     async def complete(self, messages: list[Message]) -> LLMResult:

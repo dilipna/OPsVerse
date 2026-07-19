@@ -62,6 +62,7 @@ def _build_chat_service(app) -> ChatService:
             max_tokens=settings.chat_max_tokens,
             temperature=settings.chat_temperature,
             reasoning_effort=settings.chat_reasoning_effort,
+            api_base=settings.chat_api_base,
         )
         # Gateway (Phase 6): Redis response cache + daily budget kill-switch,
         # wrapping the client. Falls back to pass-through if Redis is down.
