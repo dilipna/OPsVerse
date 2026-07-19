@@ -69,6 +69,16 @@ class Settings(BaseSettings):
     chat_llm_timeout_s: float = 45.0
     chat_retrieval_timeout_s: float = 10.0
 
+    # Gateway (Phase 6, ADR-0008): a library layer over the LiteLLM client,
+    # not a separate proxy binary. Exact-match response cache in Redis + a
+    # daily USD kill-switch. Both no-op gracefully when Redis is down.
+    gateway_cache_enabled: bool = True
+    gateway_cache_ttl_s: int = 24 * 3600
+    # Daily spend ceiling across all gateway calls; 0 disables the kill-switch.
+    # Tiny by default because the whole stack runs on free tiers — the point
+    # is to prove the control exists, not to permit real spend.
+    gateway_daily_budget_usd: float = 1.0
+
     # Eval/benchmark report summaries served by /v1/evals until Phase 4
     # moves them into Postgres.
     reports_dir: str = "docs/reports"

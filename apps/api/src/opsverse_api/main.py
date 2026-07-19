@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI):
     app.state.arq_pool = None  # created lazily on first enqueue (see deps.py)
     app.state.retriever = None  # created lazily on first search (see deps.py)
     app.state.chat_service = None  # created lazily on first chat (see deps.py)
+    app.state.gateway = None  # LLM gateway, created with the chat service
     try:
         yield
     finally:
