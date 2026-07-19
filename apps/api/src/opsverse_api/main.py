@@ -13,6 +13,7 @@ from opsverse_api.db.session import build_sessionmaker
 from opsverse_api.routers import chat, costs, evals, health, ingest, search
 from opsverse_core.object_store import ObjectStore
 from opsverse_core.settings import get_settings
+from opsverse_core.tracing import build_tracer
 
 
 @asynccontextmanager
@@ -31,6 +32,10 @@ async def lifespan(app: FastAPI):
     app.state.retriever = None  # created lazily on first search (see deps.py)
     app.state.chat_service = None  # created lazily on first chat (see deps.py)
     app.state.gateway = None  # LLM gateway, created with the chat service
+    # Tracer is built once: NullTracer unless OPSVERSE_LANGFUSE_HOST is set.
+    app.state.tracer = build_tracer(
+        settings.langfuse_host, settings.langfuse_public_key, settings.langfuse_secret_key
+    )
     try:
         yield
     finally:

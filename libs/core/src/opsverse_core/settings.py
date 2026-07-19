@@ -79,6 +79,13 @@ class Settings(BaseSettings):
     # is to prove the control exists, not to permit real spend.
     gateway_daily_budget_usd: float = 1.0
 
+    # Observability (Phase 8, ADR-0010): self-hosted Langfuse traces. Disabled
+    # unless a host is set, so the core stack and tests never need Langfuse up.
+    # The compose `full` profile bootstraps these exact keys headlessly.
+    langfuse_host: str | None = None  # e.g. http://localhost:3002
+    langfuse_public_key: str = "pk-lf-opsverse-public"
+    langfuse_secret_key: str = "sk-lf-opsverse-secret"
+
     # Eval/benchmark report summaries served by /v1/evals until Phase 4
     # moves them into Postgres.
     reports_dir: str = "docs/reports"

@@ -80,6 +80,7 @@ def _build_chat_service(app) -> ChatService:
             context_k=settings.chat_context_k,
             retrieval_timeout_s=settings.chat_retrieval_timeout_s,
             rerank=settings.chat_rerank,
+            tracer=app.state.tracer,
         )
     return app.state.chat_service
 

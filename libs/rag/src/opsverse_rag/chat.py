@@ -17,6 +17,7 @@ import anyio
 from pydantic import BaseModel
 
 from opsverse_core.llm import LLMDelta, LLMResult, LLMStreamEvent, Message
+from opsverse_core.tracing import NullTracer, Tracer
 from opsverse_rag.schemas import RetrievedChunk, SearchFilters
 
 GROUNDED_SYSTEM_PROMPT = """\
@@ -161,6 +162,7 @@ class ChatService:
         context_k: int = 6,
         retrieval_timeout_s: float = 10.0,
         rerank: bool = False,
+        tracer: Tracer | None = None,
     ):
         self._retriever = retriever
         self._llm = llm
@@ -169,6 +171,8 @@ class ChatService:
         # Off by default: the v1 retrieval ablation measured the CPU
         # cross-encoder as slightly quality-negative at ~9s/query.
         self._rerank = rerank
+        # NullTracer by default: tracing is a no-op unless Langfuse is wired.
+        self._tracer: Tracer = tracer or NullTracer()
 
     async def _retrieve(
         self, query: str, k: int, filters: SearchFilters | None
@@ -216,19 +220,32 @@ class ChatService:
     ) -> AsyncIterator[ChatEvent]:
         started = time.perf_counter()
         degraded: list[str] = []
+        trace = self._tracer.trace(
+            "chat",
+            input=query,
+            metadata={"has_image": image_b64 is not None, "k": k or self._context_k},
+        )
         image_description: str | None = None
         if image_b64:
-            try:
-                image_description = await self.describe_image(image_b64, image_mime)
-            except Exception:
-                degraded.append("vision_skipped")
+            with trace.span("vision", input="<image>") as span:
+                try:
+                    image_description = await self.describe_image(image_b64, image_mime)
+                    span.update(output=image_description)
+                except Exception:
+                    degraded.append("vision_skipped")
+                    span.update(level="WARNING", status_message="vision_skipped")
 
         # The image description joins the retrieval query so chunks matching
         # what's *in* the image (error text, config keys) are found.
         retrieval_query = f"{query}\n{image_description}" if image_description else query
-        chunks, retrieve_degraded = await self._retrieve(
-            retrieval_query, k or self._context_k, filters
-        )
+        with trace.span("retrieval", input=retrieval_query) as span:
+            chunks, retrieve_degraded = await self._retrieve(
+                retrieval_query, k or self._context_k, filters
+            )
+            span.update(
+                output=[{"id": c.id, "source": c.source, "score": c.score} for c in chunks],
+                metadata={"n_chunks": len(chunks), "degraded": retrieve_degraded},
+            )
         degraded += retrieve_degraded
         yield ChatSources(
             image_description=image_description,
@@ -251,6 +268,7 @@ class ChatService:
 
         messages = build_messages(query, chunks, history or [], image_description)
         first_token_ms: float | None = None
+        gen_span = trace.span("generation", input=messages, metadata={"grounded": bool(chunks)})
         try:
             async for event in self._llm.stream(messages):
                 if isinstance(event, LLMDelta):
@@ -258,9 +276,24 @@ class ChatService:
                         first_token_ms = (time.perf_counter() - started) * 1000
                     yield ChatDelta(text=event.text)
                 elif isinstance(event, LLMResult):
+                    cited = extract_citations(event.text, len(chunks))
+                    gen_span.update(
+                        output=event.text,
+                        metadata={
+                            "model": event.model,
+                            "prompt_tokens": event.prompt_tokens,
+                            "completion_tokens": event.completion_tokens,
+                            "cost_usd": event.cost_usd,
+                            "first_token_ms": first_token_ms,
+                            "cited": cited,
+                            "cached": "(cached)" in event.model,
+                        },
+                    )
+                    gen_span.end()
+                    trace.update(output=event.text)
                     yield ChatDone(
                         model=event.model,
-                        cited=extract_citations(event.text, len(chunks)),
+                        cited=cited,
                         prompt_tokens=event.prompt_tokens,
                         completion_tokens=event.completion_tokens,
                         cost_usd=event.cost_usd,
@@ -269,4 +302,8 @@ class ChatService:
                         degraded=degraded,
                     )
         except Exception as exc:  # step 4: the LLM itself failed
+            gen_span.update(level="ERROR", status_message=str(exc))
+            gen_span.end()
             yield ChatError(message=f"generation failed: {exc}")
+        finally:
+            self._tracer.flush()

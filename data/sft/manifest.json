@@ -1,0 +1,24 @@
+{
+ "source": "data\\instructions\\instructions-v1.jsonl",
+ "total_pairs": 593,
+ "contaminated_dropped": 0,
+ "train": 534,
+ "val": 59,
+ "by_format": {
+  "diagnosis": 202,
+  "qa": 196,
+  "explain": 195
+ },
+ "by_tool": {
+  "kubernetes": 134,
+  "docker": 267,
+  "mlflow": 157,
+  "terraform": 34,
+  "unknown": 1
+ },
+ "format": "chat/messages (TRL SFTTrainer ready)",
+ "decontamination": {
+  "guard": "opsverse_evals.contamination.ContaminationGuard",
+  "eval_questions_protected": 296
+ }
+}
