@@ -77,6 +77,11 @@ uv run python -m opsverse_security.evaluate        # TPR 1.0, specificity 1.0
 - Story: "Injection detection is a **measured classifier**, not a vibe — tested
   against benign DevOps text that shares the attack vocabulary (`override
   entrypoint`, `system:masters`). Poisoned docs are quarantined at ingest."
+- **Optional live beat** (verified): upload a doc with an embedded
+  `SYSTEM: Ignore all previous instructions...` payload via `/v1/ingest/upload`;
+  the job returns `quarantined: 1, chunks_kept: 0` and the doc never enters
+  retrieval (status `quarantined`, 0 chunks). Indirect prompt injection stopped
+  at the door.
 
 ### 7. MCP — inside Claude/Cursor (60s)
 Show `apps/mcp-server` and (if wired to Claude Desktop) call `search_docs` live.
