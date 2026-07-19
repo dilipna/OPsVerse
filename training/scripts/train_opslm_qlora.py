@@ -20,6 +20,22 @@ Design choices (see docs/adr — ADR for LoRA/QLoRA is written alongside P5):
 
 import argparse
 import os
+from typing import Any
+
+
+def format_chat(tokenizer: Any, batch: dict[str, list]) -> dict[str, list[str]]:
+    """Render each example's chat `messages` to a single training string.
+
+    Module-level (not a closure) so it is unit-testable without a GPU: the
+    only integration risk in this script is that the SFT `messages` shape
+    feeds `apply_chat_template` correctly, and that is exactly what this does.
+    """
+    return {
+        "text": [
+            tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
+            for messages in batch["messages"]
+        ]
+    }
 
 
 def main() -> None:
@@ -80,16 +96,11 @@ def main() -> None:
             return load_dataset("json", data_files=files)["train"]
         return load_dataset(args.data_repo, split=split)
 
-    def format_chat(batch):
-        return {
-            "text": [
-                tokenizer.apply_chat_template(m, tokenize=False, add_generation_prompt=False)
-                for m in batch["messages"]
-            ]
-        }
+    def _fmt(batch: dict[str, list]) -> dict[str, list[str]]:
+        return format_chat(tokenizer, batch)
 
-    train = load_split("train").map(format_chat, batched=True)
-    val = load_split("val").map(format_chat, batched=True)
+    train = load_split("train").map(_fmt, batched=True)
+    val = load_split("val").map(_fmt, batched=True)
 
     trainer = SFTTrainer(
         model=model,
