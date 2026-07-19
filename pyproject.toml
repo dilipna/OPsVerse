@@ -25,6 +25,9 @@ dev = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+# Colab notebooks use shell magics (!pip, %cd) and interactive idioms that
+# are not held to the library lint bar.
+extend-exclude = ["*.ipynb"]
 src = [
     "apps/api/src",
     "apps/mcp-server/src",
