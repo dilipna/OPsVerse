@@ -65,6 +65,23 @@ Manual:
   ~8–15k pairs is more `generate_instructions --n` batches (flash-lite quota),
   then re-run `prepare_sft`.
 
+## The before/after eval (no code change — env vars only)
+
+Serve OpsLM, then point the platform's chat model at it and run the Phase-4
+smoke; run it once on base (default Gemini path) and once on OpsLM:
+
+```bash
+# Ollama (from the pushed GGUF) — litellm has a default base:
+OPSVERSE_CHAT_MODEL=ollama/opslm uv run python -m opsverse_evals.rag_suite --n 20
+
+# vLLM/SGLang (OpenAI-compatible) — set the api_base:
+OPSVERSE_CHAT_MODEL=openai/OpsLM-v1 OPSVERSE_CHAT_API_BASE=http://localhost:8000/v1 \
+  uv run python -m opsverse_evals.rag_suite --n 20
+```
+
+`OPSVERSE_CHAT_API_BASE` is plumbed through the LiteLLM client for exactly
+this; the eval gate OpsLM must clear already exists.
+
 ## Next (after the first run)
 
 - Before/after report: base Qwen3-4B vs OpsLM-v1 on the domain eval + the

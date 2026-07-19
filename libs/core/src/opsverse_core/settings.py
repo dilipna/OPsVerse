@@ -56,6 +56,11 @@ class Settings(BaseSettings):
     # quality while quota lasts, automatic 429 fallback after.
     chat_model: str = "gemini/gemini-3.5-flash"
     chat_fallback_models: list[str] = ["gemini/gemini-3.1-flash-lite"]
+    # Set when the chat model is a self-hosted OpenAI-compatible server
+    # (vLLM/SGLang serving OpsLM), e.g. http://localhost:8000/v1. This is how
+    # the Phase-5 before/after eval points the platform at the fine-tuned
+    # model. Leave None for Gemini/Ollama.
+    chat_api_base: str | None = None
     # Bulk offline jobs (eval-set generation, judging) default to the lite
     # model so they never drain the 20/day quality quota.
     eval_generator_model: str = "gemini/gemini-3.1-flash-lite"
