@@ -53,10 +53,22 @@ the actual OpsLM training run (Colab, off-machine) remain, plus polish.
 - **94 tests green; 11 ADRs; CI + eval-gate green on every push.** All 11 phases now have committed
   artifacts (Phases 5 training-run and 7 GPU-run are the only pending executions, both off-machine).
 
+## Demo-polish added at end of session (committed)
+
+- `apps/mcp-server/README.md` — Claude Desktop + Cursor config (demo step 7 turnkey). MCP re-verified
+  live after the gateway/tracing changes: 5 tools, real search, 5 reports.
+- `training/notebooks/opslm_qlora_colab.ipynb` — turnkey Colab training (set HF token, upload SFT,
+  run). Valid nbformat.
+- `docs/blog/01-eval-first-changed-my-retrieval-twice.md` — the rerank-off + sparse-leakage story;
+  every number cross-checked against the committed reports.
+- **Web UI verified**: `/`, `/evals`, `/costs` all compile + serve 200; their data endpoints return
+  content (5 reports; cost rows incl. the `(cached)` row). A browser *render* screenshot is still nice
+  to grab, but the surface is confirmed working.
+- Ruff now excludes `*.ipynb` (Colab magics) — CI stayed green.
+
 ## NOT verified / honest gaps
 
-- **`/evals` and `/costs` web pages not eyeballed in a browser this session** (APIs verified live,
-  `next build` clean previously). Worth a 2-minute look before the demo.
+- Langfuse **trace screenshot** for the README not captured (traces verified via API; need a browser).
 - **OpsLM is not trained** — the pipeline is committed and the SFT data is ready; the Colab run + the
   before/after (base vs OpsLM) eval are the remaining flagship deliverable.
 - rag-quality thresholds are n=20 (noisy — fine as a gate, don't quote as proof).
