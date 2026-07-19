@@ -38,6 +38,12 @@ corpus (Postgres/DVC)
 
 ## Running the training (Colab)
 
+**Turnkey:** open [`notebooks/opslm_qlora_colab.ipynb`](notebooks/opslm_qlora_colab.ipynb)
+in Colab (T4 runtime), set your HF username + token, upload
+`data/sft/{train,val}.jsonl`, run. It wraps the steps below.
+
+Manual:
+
 1. Push `data/sft/` to an HF dataset repo (or upload the two JSONL files).
 2. New Colab notebook, T4 runtime:
    ```python
