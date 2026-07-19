@@ -46,7 +46,12 @@ the actual OpsLM training run (Colab, off-machine) remain, plus polish.
   stack & all tests run with zero Langfuse. **Verified live**: a `/v1/chat` produced a `chat` trace
   with `retrieval` (chunk ids+scores) and `generation` (model, $0.0038, 1976 tokens, cited [1,2,3,4],
   cache flag) spans, queried back through the Langfuse API.
+- **Phase 7 Inference lab** (`benchmarks/`, ADR-0011) — engine-agnostic OpenAI-compatible harness
+  (Ollama/vLLM/SGLang), TTFT + throughput across a concurrency sweep; measurement math unit-tested.
+  Committed-and-tested scaffolding; the GPU run is pending OpsLM (same honest pattern as Phase 5).
 - `docs/demo-runbook.md` — the 8-minute conference walkthrough.
+- **94 tests green; 11 ADRs; CI + eval-gate green on every push.** All 11 phases now have committed
+  artifacts (Phases 5 training-run and 7 GPU-run are the only pending executions, both off-machine).
 
 ## NOT verified / honest gaps
 
