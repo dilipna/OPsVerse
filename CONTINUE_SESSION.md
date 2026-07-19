@@ -50,7 +50,13 @@ the actual OpsLM training run (Colab, off-machine) remain, plus polish.
   (Ollama/vLLM/SGLang), TTFT + throughput across a concurrency sweep; measurement math unit-tested.
   Committed-and-tested scaffolding; the GPU run is pending OpsLM (same honest pattern as Phase 5).
 - `docs/demo-runbook.md` — the 8-minute conference walkthrough.
-- **94 tests green; 11 ADRs; CI + eval-gate green on every push.** All 11 phases now have committed
+- **Structured-output / tool-use eval** (`opsverse_evals.structured_eval`, ADR-0012) — deterministic
+  JSON-fidelity gate (parse/schema/field accuracy), no judge. Base flash-lite 1.0/1.0/1.0 live;
+  pinned in the regression gate. This is the Phase-5 "did SFT break JSON/tool-calling?" check —
+  re-run on served OpsLM and compare.
+- **Before/after eval is now env-vars-only**: `OPSVERSE_CHAT_MODEL` + `OPSVERSE_CHAT_API_BASE` point
+  the platform at a served OpsLM (Ollama or vLLM/SGLang); `rag_suite` / `structured_eval` then just run.
+- **104 tests green; 12 ADRs; CI + eval-gate green on every push.** All 11 phases have committed
   artifacts (Phases 5 training-run and 7 GPU-run are the only pending executions, both off-machine).
 
 ## Demo-polish added at end of session (committed)

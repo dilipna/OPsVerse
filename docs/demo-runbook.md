@@ -69,6 +69,10 @@ uv run python -m opsverse_evals.regression         # 13 pinned thresholds, all g
   set that proved hybrid beats sparse under real reworded queries — sparse's
   earlier win was vocabulary leakage. Honest numbers, including the ones that
   changed my mind."
+- If asked about tool-use: `uv run python -m opsverse_evals.structured_eval --n 12`
+  — a **deterministic** JSON-fidelity gate (parse / schema / field accuracy).
+  "This is the check for whether fine-tuning breaks tool calling — run it on
+  base vs OpsLM and compare the delta. Tool-use reliability is a number here."
 
 ### 6. Security (45s) — terminal
 ```bash
