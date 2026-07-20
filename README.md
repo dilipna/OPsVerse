@@ -114,10 +114,10 @@ libs/rag          hybrid retrieval, RRF, rerank, citation-grounded chat + degrad
 libs/evals        IR metrics, ablation, LLM-judge (cached), regression gate, CI smoke, contamination guard
 libs/security     injection heuristic, secret redaction, red-team evaluator
 libs/training     synthetic instruction dataset pipeline (generate · quality · decontaminate)
-training/         Colab QLoRA scripts (Qwen3-4B → OpsLM), SFT prep, README
+training/         QLoRA run (Qwen3-4B → OpsLM): scripts, Colab notebook, headless Kaggle kernel, SFT prep
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
-docs/adr          9 architecture decision records
-docs/reports      retrieval ablations, RAG-quality, security detection
+docs/adr          12 architecture decision records
+docs/reports      6 live reports: retrieval ablations, RAG-quality, security, structured-output
 benchmarks/       inference lab: engine-agnostic harness (Ollama/vLLM/SGLang) + methodology
 infra/compose     local dev stack (+ `full` profile: Langfuse)   ·   infra/k8s   documented manifests
 ```
@@ -125,7 +125,7 @@ infra/compose     local dev stack (+ `full` profile: Langfuse)   ·   infra/k8s 
 ## Development
 
 ```bash
-uv run pytest -q            # 85 tests
+uv run pytest -q            # 104 tests
 uv run ruff check .         # lint
 uv run pyright              # types
 uv run python -m opsverse_evals.regression   # eval regression gate
@@ -145,3 +145,8 @@ uv run python -m opsverse_evals.regression   # eval regression gate
 [0010](docs/adr/0010-observability-langfuse-v2-facade.md) observability ·
 [0011](docs/adr/0011-inference-lab-openai-compatible-harness.md) inference lab ·
 [0012](docs/adr/0012-structured-output-tool-use-eval.md) tool-use eval
+
+## Writing
+
+- [We built the eval harness before the model — and the numbers changed our retrieval design twice](docs/blog/01-eval-first-changed-my-retrieval-twice.md)
+- [The document is the attack surface — RAG security at ingest, measured like a classifier](docs/blog/02-the-document-is-the-attack-surface.md)
