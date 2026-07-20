@@ -32,7 +32,11 @@ routing/caching/quota-aware design is a direct consequence of it.
 | **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 593 pairs; QLoRA training script pinned & resumable |
 | **Inference lab** — one OpenAI-compatible harness for Ollama/vLLM/SGLang | measurement math unit-tested ([ADR-0011](docs/adr/0011-inference-lab-openai-compatible-harness.md)); GPU run pending |
 
-**85 tests · ruff + pyright clean · CI + eval-gate green.**
+**104 tests · ruff + pyright clean · CI + eval-gate green.**
+
+A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
+
+![Langfuse trace detail of a /chat request showing retrieval (0.90s) and generation (15.08s) spans](docs/assets/langfuse-trace.png)
 
 ---
 
