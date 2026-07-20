@@ -34,15 +34,24 @@ production judgment here." Depth > breadth; honest numbers always.
 - The permission classifier may block destructive-looking DB scripts even on regenerable data —
   use AskUserQuestion when that happens.
 
-## Current status (2026-07-19, all committed + pushed, HEAD = 6a7525f)
+## Current status (2026-07-20, all committed + pushed, HEAD = 7876f16)
 
-**104 tests · ruff + pyright clean · 12 ADRs · CI + Eval Gate green on GitHub Actions.**
+**110 tests · ruff + pyright clean · 13 ADRs · CI + Eval Gate green on GitHub Actions.**
 ALL 11 phases have committed artifacts. Everything below marked ✅ was **verified live** against
 the running stack, not just written.
 
+**NEW 2026-07-20 — Streaming ingestion (ADR-0013), verified live.** A Redis-Streams intake path
+alongside the arq job queue: `libs/core/streaming.py` (StreamProducer/StreamConsumer behind a
+StreamRedis Protocol — consumer group, at-least-once XACK, XAUTOCLAIM reclaim, DLQ) + concrete
+DB/pipeline binding in `apps/api/stream_ingest.py` (reuses `ingest_bytes` incl. ADR-0007
+quarantine/redaction, and the `embed_pending_chunks` sweep). 6 unit tests vs an in-memory
+FakeStreamRedis. **Live proof today:** published a clean K8s doc → 3 chunks ready + embedded;
+published a poisoned doc → quarantined, 0 chunks. Run consumer: `uv run python -m
+opsverse_api.stream_ingest`; publish a file: `... --publish <path> [--tool k8s]`.
+
 | Phase | State |
 |---|---|
-| 1–2 Foundation / Ingestion | ✅ 1,241 docs / 7,383 chunks, all embedded (Qdrant = chunk count) |
+| 1–2 Foundation / Ingestion | ✅ 1,241 docs / 7,383 chunks, all embedded (Qdrant = chunk count); **+ streaming intake path (ADR-0013)** |
 | 3 Hybrid RAG serving | ✅ SSE/WS chat, citations, degradation ladder, vision input |
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
 | 5 OpsLM fine-tune | 🟡 pipeline DONE+tested (593-pair dataset, SFT split, Colab notebook, before/after wiring) — **training run itself NOT executed** |
@@ -104,9 +113,10 @@ Phase-4 harness per ADR-0011). Commit raw JSONs.
 - HF Spaces live demo (trimmed corpus, rate-limited) — public URL for the talk.
 - ✅ Second blog post DONE 2026-07-19: `docs/blog/02-the-document-is-the-attack-surface.md`
   (security quarantine story), linked from README. Demo video still open.
-- Instruction dataset scale to 900 (`generate_instructions --n 900`) STARTED 2026-07-19 in
-  background — resumable; if it died, re-run the same command (partial file picks up where it
-  left off), then `dvc add data/instructions && dvc push`, commit the .dvc + manifest.
+- Instruction dataset scale to 900 (`generate_instructions --n 900`): **partial at 749/900** in
+  `data/instructions/instructions-v1.partial.jsonl` (background job was stopped by process
+  teardown). Resume by re-running the same command — it picks up from the partial. When it hits
+  900, finalize: `dvc add data/instructions && dvc push`, commit the .dvc + manifest.
 
 ## Honest gaps (do not overclaim in the demo)
 
