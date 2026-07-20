@@ -60,14 +60,17 @@ twice, off by default. All numbers in `docs/reports/`, narrative in
 
 ## LEFTOVER WORK — prioritized for the next session(s)
 
-### 1. OpsLM training run (THE flagship gap; needs the user's HF token — ask for it)
-Everything is turnkey; this is execution, not building:
-1. Open `training/notebooks/opslm_qlora_colab.ipynb` in Colab (T4 runtime).
-2. Set HF username, paste HF token (write access). **No data upload needed** — `data/sft/`
-   (534/59 rows, validated 100% well-formed TRL chat format) is committed to git, so the
-   notebook's repo clone already contains it; its assert passes right after `git clone`.
-3. Run (~3–4 h; resumable via `--resume`, checkpoints push to Hub every 50 steps).
-   Output: `<user>/OpsLM-v1` — merged 16-bit + GGUF Q4_K_M.
+### 1. OpsLM training run — USER CHOSE THE KAGGLE PATH (planned 2026-07-20)
+The user's HF token is verified: **HF user = `dhf1234`**, fine-grained with `repo.write`
+(it was pasted into the 2026-07-19 chat — after the run, remind them to revoke/rotate it).
+The Colab laptop-free alternative is fully prepped in `training/kaggle/` (kernel-metadata.json,
+notebook with `HF_USER = "dhf1234"` already set, README with all driving commands):
+1. User does one-time Kaggle setup: phone-verify account, download `kaggle.json`
+   (Settings → API → Create New Token), add `HF_TOKEN` secret in the notebook editor.
+2. Claude: edit `KAGGLE_USERNAME` in kernel-metadata.json, `kaggle kernels push -p training/kaggle`,
+   poll `kaggle kernels status`. First push fails fast until the secret is attached — expected.
+3. ~3–4 h on T4; resumable (set `RESUME = True`, push again). Output: `dhf1234/OpsLM-v1`
+   (merged 16-bit + GGUF Q4_K_M). Colab notebook remains as fallback.
 
 ### 2. Before/after eval (once OpsLM exists; env-vars-only, no code changes)
 ```bash
@@ -99,8 +102,11 @@ Phase-4 harness per ADR-0011). Commit raw JSONs.
 
 ### 5. Nice-to-have (only if time)
 - HF Spaces live demo (trimmed corpus, rate-limited) — public URL for the talk.
-- Second blog post (gateway/cache or security quarantine story). Demo video.
-- Scale instruction dataset further (`generate_instructions --n 900`, resumable) for OpsLM-v2/DPO.
+- ✅ Second blog post DONE 2026-07-19: `docs/blog/02-the-document-is-the-attack-surface.md`
+  (security quarantine story), linked from README. Demo video still open.
+- Instruction dataset scale to 900 (`generate_instructions --n 900`) STARTED 2026-07-19 in
+  background — resumable; if it died, re-run the same command (partial file picks up where it
+  left off), then `dvc add data/instructions && dvc push`, commit the .dvc + manifest.
 
 ## Honest gaps (do not overclaim in the demo)
 
@@ -168,6 +174,8 @@ data/             corpus.dvc + instructions.dvc (DVC pointers; content in MinIO 
 ## Session-start checklist for next Claude
 
 1. Read this file. 2. Ask before starting Docker Desktop, bring the stack up, verify
-`/health/ready` + `regression` 15/15. 3. Ask the user if they have their **HF token** — if yes,
-leftover item 1 (OpsLM training) is the session; if no, do item 4 (demo polish) and whatever of
-item 5 fits. 4. Commit per milestone, heads-up before pushes, update this file at session end.
+`/health/ready` + `regression` 15/15. 3. The session IS leftover item 1: the Kaggle training run
+(see item 1 for exactly what the user must hand over — `kaggle.json` + `HF_TOKEN` secret attached).
+While it trains (~3–4 h, poll via `kaggle kernels status`), do the remaining item-5 bits and prep
+item 2's before/after eval. 4. Commit per milestone, heads-up before pushes, update this file at
+session end.
