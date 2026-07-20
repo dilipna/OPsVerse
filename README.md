@@ -105,10 +105,10 @@ Config is `.env` (copy `.env.example`); every variable is `OPSVERSE_`-prefixed.
 ## Repository layout
 
 ```
-apps/api          FastAPI: routers (health/ingest/search/chat/costs/evals), worker, db, alembic
+apps/api          FastAPI: routers (health/ingest/search/chat/costs/evals), arq worker, stream consumer, db, alembic
 apps/web          Next.js UI (chat · evals · costs)
 apps/mcp-server   MCP stdio server (search/chat/evals/costs as tools)
-libs/core         settings, thin LiteLLM client, LLM gateway (cache/budget), object store
+libs/core         settings, thin LiteLLM client, LLM gateway (cache/budget), Redis-Streams ingestion, object store
 libs/ingestion    parsing, source-aware chunking, quality gates (dedup, language, security)
 libs/rag          hybrid retrieval, RRF, rerank, citation-grounded chat + degradation ladder
 libs/evals        IR metrics, ablation, LLM-judge (cached), regression gate, CI smoke, contamination guard
@@ -116,7 +116,7 @@ libs/security     injection heuristic, secret redaction, red-team evaluator
 libs/training     synthetic instruction dataset pipeline (generate · quality · decontaminate)
 training/         QLoRA run (Qwen3-4B → OpsLM): scripts, Colab notebook, headless Kaggle kernel, SFT prep
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
-docs/adr          12 architecture decision records
+docs/adr          13 architecture decision records
 docs/reports      6 live reports: retrieval ablations, RAG-quality, security, structured-output
 benchmarks/       inference lab: engine-agnostic harness (Ollama/vLLM/SGLang) + methodology
 infra/compose     local dev stack (+ `full` profile: Langfuse)   ·   infra/k8s   documented manifests
@@ -144,7 +144,8 @@ uv run python -m opsverse_evals.regression   # eval regression gate
 [0009](docs/adr/0009-qwen3-4b-qlora-for-opslm.md) OpsLM fine-tune ·
 [0010](docs/adr/0010-observability-langfuse-v2-facade.md) observability ·
 [0011](docs/adr/0011-inference-lab-openai-compatible-harness.md) inference lab ·
-[0012](docs/adr/0012-structured-output-tool-use-eval.md) tool-use eval
+[0012](docs/adr/0012-structured-output-tool-use-eval.md) tool-use eval ·
+[0013](docs/adr/0013-streaming-ingestion-redis-streams.md) streaming ingestion
 
 ## Writing
 
