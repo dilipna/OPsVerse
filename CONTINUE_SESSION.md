@@ -90,12 +90,12 @@ Serve OpsLM with each engine, then per engine:
 Then write `docs/reports/inference-benchmark-v1.md` from the JSONs (+ quality-vs-quant via the
 Phase-4 harness per ADR-0011). Commit raw JSONs.
 
-### 4. Demo-day polish (quick wins, no GPU)
-- **Langfuse trace screenshot** for the README (browser: http://localhost:3002, login
-  `dev@opsverse.local` / `opsverse-dev-password`) — the P8 "money shot". Only unverified visual.
-- Eyeball `/`, `/evals`, `/costs` in a browser once (all serve 200 with live data; just never
-  visually inspected). `/evals` should show **6 reports** incl. structured-output-v1.
-- Rehearse `docs/demo-runbook.md` once end-to-end (mind the 20/day quota).
+### 4. Demo-day polish — DONE 2026-07-19 except the human rehearsal
+- ✅ Langfuse trace screenshot captured headlessly (Playwright in scratchpad), committed at
+  `docs/assets/langfuse-trace.png`, embedded in README. Retrieval 0.90s / generation 15.08s spans.
+- ✅ `/`, `/evals`, `/costs` visually inspected via headless screenshots — all render correctly;
+  `/evals` shows all **6 reports** incl. structured-output-v1. README test count fixed 85→104.
+- ⬜ Rehearse `docs/demo-runbook.md` once end-to-end (user task; mind the 20/day quota).
 
 ### 5. Nice-to-have (only if time)
 - HF Spaces live demo (trimmed corpus, rate-limited) — public URL for the talk.
@@ -107,7 +107,6 @@ Phase-4 harness per ADR-0011). Commit raw JSONs.
 - OpsLM does not exist yet — say "the pipeline is committed and gated; the run is a Colab session".
 - Phase 7 has no numbers yet — the harness is tested, the comparison is pending.
 - rag-quality thresholds are n=20, structured-output n=12 — regression gates, not proof points.
-- Langfuse span attributes verified via API; the UI screenshot hasn't been captured.
 
 ## Environment gotchas (WILL bite you)
 
