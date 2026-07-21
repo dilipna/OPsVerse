@@ -8,8 +8,14 @@ driven from a terminal via the Kaggle API — push, walk away, poll. Free tier:
 
 1. Kaggle account must be **phone-verified** (Settings → Phone verification) —
    otherwise kernels get no GPU and no internet.
-2. Settings → API → **Create New Token** → save the downloaded `kaggle.json`
-   to `~/.kaggle/kaggle.json` (Windows: `C:\Users\<you>\.kaggle\kaggle.json`).
+2. Settings → API → **Create New Token**. Kaggle's current tokens are the
+   `KGAT_...` kind: nothing downloads, the token string is shown once. Auth the
+   CLI by exporting it (NOT the old `kaggle.json` / `KAGGLE_KEY` flow):
+
+   ```bash
+   export KAGGLE_API_TOKEN=KGAT_xxxxxxxx        # or ~/.kaggle/access_token
+   kaggle competitions list                     # verifies auth
+   ```
 3. Open any notebook in the Kaggle editor → Add-ons → **Secrets** → add
    `HF_TOKEN` = a HF token with write access. Attach it to the kernel after the
    first push (Secrets are per-notebook; the first push creates the notebook,
@@ -19,10 +25,11 @@ driven from a terminal via the Kaggle API — push, walk away, poll. Free tier:
 
 ```bash
 pip install kaggle
+export KAGGLE_API_TOKEN=KGAT_xxxxxxxx           # PowerShell: $env:KAGGLE_API_TOKEN='KGAT_...'
 cd training/kaggle
 
 # 1. Set the kernel id: edit kernel-metadata.json, replace KAGGLE_USERNAME
-#    with the Kaggle username from kaggle.json.
+#    with your Kaggle username (the account that owns the token).
 
 # 2. Push = upload + start a headless "Run All":
 kaggle kernels push -p .

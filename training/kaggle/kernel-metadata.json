@@ -1,5 +1,5 @@
 {
-  "id": "KAGGLE_USERNAME/opslm-qlora-train",
+  "id": "dpat100/opslm-qlora-train",
   "title": "OpsLM QLoRA train (Qwen3-4B)",
   "code_file": "opslm_qlora_kaggle.ipynb",
   "language": "python",
