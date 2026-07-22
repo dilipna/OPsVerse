@@ -54,7 +54,7 @@ opsverse_api.stream_ingest`; publish a file: `... --publish <path> [--tool k8s]`
 | 1–2 Foundation / Ingestion | ✅ 1,241 docs / 7,383 chunks, all embedded (Qdrant = chunk count); **+ streaming intake path (ADR-0013)** |
 | 3 Hybrid RAG serving | ✅ SSE/WS chat, citations, degradation ladder, vision input |
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
-| 5 OpsLM fine-tune | 🟡 pipeline DONE+tested (593-pair dataset, SFT split, Colab notebook, before/after wiring) — **training run itself NOT executed** |
+| 5 OpsLM fine-tune | ✅ **TRAINED 2026-07-22 on Colab T4** — merged 16-bit + LoRA adapter + resumable ckpt live at `dhf1234/OpsLM-v1` (verified via HF API). GGUF Q4_K_M export was the last step. **Before/after eval + serving still pending a GPU session.** |
 | 6 LLM gateway | ✅ Redis cache (hit = 184× faster, $0) + daily budget kill-switch (ADR-0008) |
 | 7 Inference lab | 🟡 harness + **5 inference-opt techniques** written & unit-tested (ADR-0011, ADR-0014) — **GPU run NOT executed** |
 | 8 Observability | ✅ Langfuse v2 self-host (`full` profile, :3002) + tracing facade; live trace verified via API (ADR-0010) |
