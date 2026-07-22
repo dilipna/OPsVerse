@@ -61,10 +61,13 @@ def main() -> None:
     args = parser.parse_args()
 
     # Imports are inside main so `--help` works on a machine without CUDA/unsloth.
+    # unsloth must be imported before trl/transformers/peft so its optimizations
+    # patch those libraries (it warns and can OOM otherwise) — hence the
+    # non-alphabetical, isort-suppressed order.
+    from unsloth import FastLanguageModel, is_bfloat16_supported  # noqa: I001
+    from unsloth.chat_templates import get_chat_template
     from datasets import load_dataset
     from trl import SFTConfig, SFTTrainer
-    from unsloth import FastLanguageModel, is_bfloat16_supported
-    from unsloth.chat_templates import get_chat_template
 
     # T4 (Turing) has no bf16; only Ampere+ does. Pick precision from the GPU so
     # the same script trains on a free T4 (fp16) and an A100 (bf16) unchanged.
@@ -108,7 +111,8 @@ def main() -> None:
 
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
+        # TRL >=0.13 renamed `tokenizer` -> `processing_class` (transformers 4.46+).
+        processing_class=tokenizer,
         train_dataset=train,
         eval_dataset=val,
         args=SFTConfig(
