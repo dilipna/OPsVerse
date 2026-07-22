@@ -1,0 +1,372 @@
+/* OpsLM — terminal/brutalist. Red on black, monospace, sharp edges.
+   Hand-tuned; deliberately not a rounded-card SaaS template. */
+
+:root {
+  --bg: #080808;
+  --panel: #0d0d0d;
+  --ink: #e6e6e6;
+  --dim: #8a8a8a;
+  --faint: #4a4a4a;
+  --red: #ff2b2b;
+  --red-deep: #b30000;
+  --red-glow: rgba(255, 43, 43, 0.35);
+  --grid: rgba(255, 43, 43, 0.06);
+  --mono: "JetBrains Mono", "SFMono-Regular", "Menlo", "Consolas",
+    "Liberation Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* faint red grid + scanlines — the "CRT" texture, kept subtle */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.16) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+a {
+  color: var(--red);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+::selection {
+  background: var(--red);
+  color: #000;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- top bar ---- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--faint);
+  padding: 16px 0;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  letter-spacing: 0.04em;
+}
+.brand b {
+  color: var(--red);
+  font-weight: 700;
+}
+.brand span {
+  color: var(--dim);
+  font-size: 12px;
+}
+.navlinks {
+  display: flex;
+  gap: 22px;
+  font-size: 13px;
+  color: var(--dim);
+}
+.navlinks a {
+  color: var(--dim);
+}
+.navlinks a:hover {
+  color: var(--red);
+  text-decoration: none;
+}
+
+/* ---- hero ---- */
+.hero {
+  padding: 64px 0 40px;
+  border-bottom: 1px solid var(--faint);
+}
+.tag {
+  color: var(--red);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-size: clamp(34px, 6vw, 68px);
+  line-height: 1.02;
+  margin: 14px 0 0;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.hero h1 .glow {
+  color: var(--red);
+  text-shadow: 0 0 22px var(--red-glow);
+}
+.hero p.lede {
+  max-width: 640px;
+  color: var(--dim);
+  margin: 20px 0 0;
+  font-size: 16px;
+}
+.cursor {
+  display: inline-block;
+  width: 11px;
+  height: 1.05em;
+  background: var(--red);
+  margin-left: 4px;
+  transform: translateY(2px);
+  animation: blink 1.05s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.metarow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin-top: 28px;
+  font-size: 12.5px;
+  color: var(--faint);
+}
+.metarow b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---- section scaffolding ---- */
+section {
+  padding: 44px 0;
+  border-bottom: 1px solid var(--faint);
+}
+.kicker {
+  color: var(--red);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+/* ---- spec grid ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1px;
+  background: var(--faint);
+  border: 1px solid var(--faint);
+}
+.cell {
+  background: var(--panel);
+  padding: 20px 18px;
+}
+.cell h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--red);
+  letter-spacing: 0.04em;
+}
+.cell p {
+  margin: 0;
+  color: var(--dim);
+  font-size: 13.5px;
+}
+
+/* ---- terminal chat ---- */
+.term {
+  border: 1px solid var(--faint);
+  background: #060606;
+  box-shadow: 0 0 0 1px #000, 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+.term .bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--faint);
+  background: linear-gradient(180deg, #101010, #0a0a0a);
+}
+.dot {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--red-deep);
+}
+.dot.live {
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red-glow);
+}
+.bar .path {
+  margin-left: 8px;
+  color: var(--dim);
+  font-size: 12px;
+}
+.bar .status {
+  margin-left: auto;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.bar .status.online {
+  color: var(--red);
+}
+
+.log {
+  height: 420px;
+  overflow-y: auto;
+  padding: 18px 16px;
+  font-size: 14px;
+}
+.log::-webkit-scrollbar {
+  width: 10px;
+}
+.log::-webkit-scrollbar-thumb {
+  background: var(--faint);
+}
+
+.line {
+  margin: 0 0 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.line .who {
+  color: var(--red);
+  user-select: none;
+}
+.line.user .who {
+  color: var(--ink);
+}
+.line .body {
+  color: var(--ink);
+}
+.line.user .body {
+  color: var(--dim);
+}
+.line.sys {
+  color: var(--faint);
+  font-size: 12.5px;
+}
+
+.composer {
+  display: flex;
+  border-top: 1px solid var(--faint);
+}
+.composer .prompt {
+  color: var(--red);
+  padding: 14px 4px 14px 16px;
+  user-select: none;
+}
+.composer input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  padding: 14px 12px;
+}
+.composer input::placeholder {
+  color: var(--faint);
+}
+.composer button {
+  background: var(--red);
+  color: #000;
+  border: 0;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0 22px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.composer button:hover {
+  background: #ff4b4b;
+}
+.composer button:disabled {
+  background: var(--red-deep);
+  color: #300;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin-top: 12px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.chip {
+  border: 1px solid var(--faint);
+  color: var(--dim);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.chip:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* ---- footer ---- */
+footer {
+  padding: 30px 0 60px;
+  color: var(--faint);
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .navlinks {
+    display: none;
+  }
+  .log {
+    height: 340px;
+  }
+}
