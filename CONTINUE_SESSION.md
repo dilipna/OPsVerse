@@ -36,7 +36,7 @@ production judgment here." Depth > breadth; honest numbers always.
 
 ## Current status (2026-07-20, all committed + pushed, HEAD = 7876f16)
 
-**110 tests · ruff + pyright clean · 13 ADRs · CI + Eval Gate green on GitHub Actions.**
+**126 tests · ruff + pyright clean · 14 ADRs · CI + Eval Gate green on GitHub Actions.**
 ALL 11 phases have committed artifacts. Everything below marked ✅ was **verified live** against
 the running stack, not just written.
 
@@ -56,7 +56,7 @@ opsverse_api.stream_ingest`; publish a file: `... --publish <path> [--tool k8s]`
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
 | 5 OpsLM fine-tune | 🟡 pipeline DONE+tested (593-pair dataset, SFT split, Colab notebook, before/after wiring) — **training run itself NOT executed** |
 | 6 LLM gateway | ✅ Redis cache (hit = 184× faster, $0) + daily budget kill-switch (ADR-0008) |
-| 7 Inference lab | 🟡 harness written, math unit-tested (ADR-0011) — **GPU run NOT executed** |
+| 7 Inference lab | 🟡 harness + **5 inference-opt techniques** written & unit-tested (ADR-0011, ADR-0014) — **GPU run NOT executed** |
 | 8 Observability | ✅ Langfuse v2 self-host (`full` profile, :3002) + tracing facade; live trace verified via API (ADR-0010) |
 | 9 Security | ✅ red-team classifier TPR 1.0 / spec 1.0; **injection quarantine verified end-to-end live** (poisoned upload → 0 chunks); secret redaction at ingest (ADR-0007) |
 | 10 MCP server | ✅ 5 tools verified live over stdio; Claude Desktop/Cursor config in `apps/mcp-server/README.md` |
@@ -101,6 +101,13 @@ Serve OpsLM with each engine, then per engine:
 `python benchmarks/harness.py --base-url <engine>/v1 --model opslm --concurrency 1,4,16 --requests 32 --out benchmarks/results/<engine>.json`
 Then write `docs/reports/inference-benchmark-v1.md` from the JSONs (+ quality-vs-quant via the
 Phase-4 harness per ADR-0011). Commit raw JSONs.
+**NEW (ADR-0014, 2026-07-20): 5 inference-optimization techniques are implemented + unit-tested
+in `benchmarks/techniques/` (speculative decoding, guided/structured decoding, quant Pareto
+frontier) + harness upgrades (inter-token latency/TPOT, prefix-cache probe).** During the GPU run,
+also produce the measured payoffs: speculative acceptance rate + tokens/s (vLLM ngram spec),
+guided-decoding json_parse_rate→1.0 via the structured evalset, the quant frontier (FP16/Q8/Q4
+latency × quality), prefix-cache TTFT drop, and multi-LoRA per-adapter latency. Serve flags +
+what-number-proves-what are in `benchmarks/README.md`. This is the LLM-inference-engineer story.
 
 ### 4. Demo-day polish — DONE 2026-07-19 except the human rehearsal
 - ✅ Langfuse trace screenshot captured headlessly (Playwright in scratchpad), committed at

@@ -11,6 +11,7 @@ this machine.
 | Piece | State |
 |---|---|
 | Benchmark harness (`harness.py`) | ✅ written; measurement math **unit-tested** |
+| Inference techniques (`techniques/`) | ✅ implemented + **unit-tested** (speculative, guided decoding, quant frontier) |
 | One-engine-per-notebook runners | ✅ documented below (thin wrappers) |
 | **Actual benchmark run on GPU** | ⏳ pending — needs a Colab/Kaggle T4 + OpsLM (Phase 5) |
 | Report (`docs/reports/inference-benchmark-v1.md`) | ⏳ blocked on the run |
@@ -44,6 +45,26 @@ python benchmarks/harness.py --base-url http://localhost:11434/v1 \
 Each notebook: install (pinned), pull/serve OpsLM, run `harness.py` at the
 concurrency sweep, save JSON to `results/`. Same prompts, same sweep, same
 harness → comparable numbers.
+
+## Inference-optimization techniques (ADR-0014)
+
+Each technique ships as tested code now; the measured payoff lands when OpsLM is
+served. `techniques/` holds the algorithm/meter; the harness or the Phase-4 eval
+produces the number.
+
+| Technique | How it's measured on the served model | Serve flag (sketch) |
+|---|---|---|
+| **Speculative decoding** (prompt-lookup n-gram) | acceptance rate + tokens/s vs baseline; `speculative.py` proves it's *lossless* vs greedy and amortizes target passes | vLLM `--speculative-config '{"method":"ngram",...}'` |
+| **Guided / structured decoding** | `json_parse_rate`→1.0 + field-accuracy via the structured-output evalset (ADR-0012), guided-on vs off; `constrained.py` is the token-masking FSM | vLLM `--guided-decoding-backend xgrammar` |
+| **Quantization frontier** | FP16/Q8/Q4 latency (harness) × quality (Phase-4 eval) → Pareto + knee via `frontier.py` | GGUF `Q8_0`/`Q4_K_M`, AWQ |
+| **Prefix caching** (APC / RadixAttention) | TTFT drop on shared-prefix requests: `shared_prefix_prompts` + `prefix_cache_speedup` | vLLM `--enable-prefix-caching` |
+| **Multi-LoRA serving** (S-LoRA) | per-adapter latency + swap overhead; OpsLM *is* a LoRA — serve base + adapter and hit both `model` names | vLLM `--enable-lora --lora-modules opslm=<path>` |
+| **Continuous batching / TPOT** | throughput vs concurrency sweep + **inter-token latency** (steady-state decode metric, distinct from TTFT) | native to vLLM/SGLang |
+
+```bash
+# unit tests for the technique implementations (no GPU needed)
+uv run pytest benchmarks/tests -q
+```
 
 ## Quantization vs quality
 

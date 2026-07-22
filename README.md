@@ -31,6 +31,7 @@ routing/caching/quota-aware design is a direct consequence of it.
 | **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |
 | **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 593 pairs; QLoRA training script pinned & resumable |
 | **Inference lab** — one OpenAI-compatible harness for Ollama/vLLM/SGLang | measurement math unit-tested ([ADR-0011](docs/adr/0011-inference-lab-openai-compatible-harness.md)); GPU run pending |
+| **Inference-optimization techniques** — speculative decoding, guided decoding, quant frontier | lossless-verified + token-masking + Pareto, all unit-tested ([ADR-0014](docs/adr/0014-inference-optimization-techniques.md)); served numbers pending |
 
 **104 tests · ruff + pyright clean · CI + eval-gate green.**
 
@@ -116,9 +117,9 @@ libs/security     injection heuristic, secret redaction, red-team evaluator
 libs/training     synthetic instruction dataset pipeline (generate · quality · decontaminate)
 training/         QLoRA run (Qwen3-4B → OpsLM): scripts, Colab notebook, headless Kaggle kernel, SFT prep
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
-docs/adr          13 architecture decision records
+docs/adr          14 architecture decision records
 docs/reports      6 live reports: retrieval ablations, RAG-quality, security, structured-output
-benchmarks/       inference lab: engine-agnostic harness (Ollama/vLLM/SGLang) + methodology
+benchmarks/       inference lab: engine-agnostic harness + techniques/ (speculative, guided decoding, quant frontier)
 infra/compose     local dev stack (+ `full` profile: Langfuse)   ·   infra/k8s   documented manifests
 ```
 
@@ -145,7 +146,8 @@ uv run python -m opsverse_evals.regression   # eval regression gate
 [0010](docs/adr/0010-observability-langfuse-v2-facade.md) observability ·
 [0011](docs/adr/0011-inference-lab-openai-compatible-harness.md) inference lab ·
 [0012](docs/adr/0012-structured-output-tool-use-eval.md) tool-use eval ·
-[0013](docs/adr/0013-streaming-ingestion-redis-streams.md) streaming ingestion
+[0013](docs/adr/0013-streaming-ingestion-redis-streams.md) streaming ingestion ·
+[0014](docs/adr/0014-inference-optimization-techniques.md) inference optimization
 
 ## Writing
 
