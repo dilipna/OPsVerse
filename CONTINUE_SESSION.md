@@ -120,10 +120,9 @@ what-number-proves-what are in `benchmarks/README.md`. This is the LLM-inference
 - HF Spaces live demo (trimmed corpus, rate-limited) — public URL for the talk.
 - ✅ Second blog post DONE 2026-07-19: `docs/blog/02-the-document-is-the-attack-surface.md`
   (security quarantine story), linked from README. Demo video still open.
-- Instruction dataset scale to 900 (`generate_instructions --n 900`): **partial at 749/900** in
-  `data/instructions/instructions-v1.partial.jsonl` (background job was stopped by process
-  teardown). Resume by re-running the same command — it picks up from the partial. When it hits
-  900, finalize: `dvc add data/instructions && dvc push`, commit the .dvc + manifest.
+- ✅ Instruction dataset scaled DONE 2026-07-22: **838 pairs** (593→838; `--n 900`, 838 kept after
+  quality/dedup/decontam). `dvc add`+`dvc push` to MinIO done, pointer committed. Ready for a
+  future OpsLM-v2 / DPO round.
 
 ## Honest gaps (do not overclaim in the demo)
 
