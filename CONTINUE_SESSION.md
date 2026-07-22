@@ -116,8 +116,19 @@ what-number-proves-what are in `benchmarks/README.md`. This is the LLM-inference
   `/evals` shows all **6 reports** incl. structured-output-v1. README test count fixed 85→104.
 - ⬜ Rehearse `docs/demo-runbook.md` once end-to-end (user task; mind the 20/day quota).
 
+### NEW 2026-07-22 — demo site + DPO + live serving (all committed, CI green)
+- **`opslm-demo/`**: standalone Next.js demo site (black/red terminal aesthetic), live OpsLM
+  chat via an edge proxy with a demo fallback. **Deploy: Vercel → import repo → Root Directory
+  `opslm-demo`.** Set `OPSLM_ENDPOINT` env var to the HF Space `/v1` for the live model.
+- **`infra/hf-space-opslm/`**: free-CPU HF Docker Space serving the OpsLM GGUF (OpenAI-compatible).
+  Deploy per its README; it's the always-on free backend for the site's chat.
+- **DPO pipeline (ADR-0015)**: `libs/training/preferences.py` (+tests), `generate_preferences.py`,
+  `training/scripts/train_opslm_dpo.py`, `training/notebooks/opslm_dpo_colab.ipynb`. To make
+  OpsLM-v2: run `generate_preferences` (bulk quota) → `dvc add data/dpo` → DPO Colab session.
+- **TOKENS TO ROTATE** (passed through chat): HF write token + both `KGAT_` Kaggle tokens.
+
 ### 5. Nice-to-have (only if time)
-- HF Spaces live demo (trimmed corpus, rate-limited) — public URL for the talk.
+- HF Spaces live demo — ✅ scaffolded (`infra/hf-space-opslm/`), user deploys.
 - ✅ Second blog post DONE 2026-07-19: `docs/blog/02-the-document-is-the-attack-surface.md`
   (security quarantine story), linked from README. Demo video still open.
 - ✅ Instruction dataset scaled DONE 2026-07-22: **838 pairs** (593→838; `--n 900`, 838 kept after
