@@ -181,9 +181,7 @@ class StreamConsumer:
         return value.decode() if isinstance(value, bytes) else str(value)
 
     async def _delivery_count(self, entry_id: str) -> int:
-        pending = await self._redis.xpending_range(
-            self._stream, self._group, entry_id, entry_id, 1
-        )
+        pending = await self._redis.xpending_range(self._stream, self._group, entry_id, entry_id, 1)
         if not pending:
             return 1
         item = pending[0]

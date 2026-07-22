@@ -47,7 +47,11 @@ def test_adversarial_scorer_still_yields_schema_valid_json():
 def test_cooperative_scorer_emits_intended_content():
     # A model that spells "high" then closes, and prefers 'true'.
     plan = {
-        "": ["h"], "h": ["i"], "hi": ["g"], "hig": ["h"], "high": ['"'],
+        "": ["h"],
+        "h": ["i"],
+        "hi": ["g"],
+        "hig": ["h"],
+        "high": ['"'],
     }
 
     def scorer(prefix_out: str) -> list[str]:

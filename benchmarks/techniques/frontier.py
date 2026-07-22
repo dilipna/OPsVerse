@@ -75,9 +75,7 @@ def knee_point(frontier: list[ConfigPoint]) -> ConfigPoint | None:
     return min(frontier, key=distance)
 
 
-def frontier_table(
-    points: list[ConfigPoint], *, quality_floor: float | None = None
-) -> list[dict]:
+def frontier_table(points: list[ConfigPoint], *, quality_floor: float | None = None) -> list[dict]:
     """Render configs for a report: latency, quality, whether each is on the
     frontier, and whether it clears an optional hard quality floor. Sorted by
     latency ascending (fastest first)."""
