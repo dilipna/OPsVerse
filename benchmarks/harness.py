@@ -45,6 +45,16 @@ class RequestResult:
     def tokens_per_s(self) -> float:
         return self.output_tokens / self.latency_s if self.latency_s > 0 else 0.0
 
+    @property
+    def inter_token_s(self) -> float | None:
+        """Inter-token latency (a.k.a. TPOT): decode time after the first token,
+        per subsequent token. This is the metric continuous batching and
+        speculative decoding move; TTFT is dominated by prefill instead. None
+        when there is no second token to measure a gap from."""
+        if self.ttft_s is None or self.output_tokens < 2:
+            return None
+        return (self.latency_s - self.ttft_s) / (self.output_tokens - 1)
+
 
 def percentile(values: list[float], pct: float) -> float:
     """Linear-interpolated percentile; pct in [0,100]. Empty -> 0."""
@@ -60,18 +70,41 @@ def percentile(values: list[float], pct: float) -> float:
     return ordered[lo] + (ordered[hi] - ordered[lo]) * frac
 
 
+def shared_prefix_prompts(system_prefix: str, suffixes: list[str]) -> list[str]:
+    """Build prompts that share a long common prefix, for the prefix-cache probe.
+
+    Automatic prefix caching (vLLM APC / SGLang RadixAttention) reuses the KV
+    cache of a shared prefix across requests, so the second+ requests skip
+    prefill of that prefix and their TTFT drops. Sending a big shared system
+    prefix with varying tails is how you make that effect measurable.
+    """
+    return [f"{system_prefix}\n\n{suffix}" for suffix in suffixes]
+
+
+def prefix_cache_speedup(cold_ttft_s: float, warm_ttft_s: float) -> float:
+    """TTFT reduction attributable to a prefix-cache hit, as a fraction in
+    [0, 1] (0.0 = no benefit). Negative deltas clamp to 0 — a warm request is
+    never legitimately slower, so treat noise as "no speedup"."""
+    if cold_ttft_s <= 0:
+        return 0.0
+    return max(0.0, (cold_ttft_s - warm_ttft_s) / cold_ttft_s)
+
+
 def summarize(results: list[RequestResult], wall_clock_s: float) -> dict[str, Any]:
     """Aggregate a concurrency level's requests into the reported metrics."""
     ok = [r for r in results if r.ok]
     ttfts = [r.ttft_s for r in ok if r.ttft_s is not None]
     latencies = [r.latency_s for r in ok]
     tps = [r.tokens_per_s for r in ok]
+    itls = [r.inter_token_s for r in ok if r.inter_token_s is not None]
     total_out = sum(r.output_tokens for r in ok)
     return {
         "requests": len(results),
         "ok": len(ok),
         "errors": len(results) - len(ok),
         "ttft_s": {"p50": round(percentile(ttfts, 50), 4), "p95": round(percentile(ttfts, 95), 4)},
+        # inter-token latency (TPOT): the steady-state decode metric
+        "itl_s": {"p50": round(percentile(itls, 50), 4), "p95": round(percentile(itls, 95), 4)},
         "latency_s": {
             "p50": round(percentile(latencies, 50), 4),
             "p95": round(percentile(latencies, 95), 4),
@@ -165,7 +198,13 @@ def main() -> None:
 
 
 # expose the dataclass constructor name expected by tests
-__all__ = ["RequestResult", "percentile", "summarize"]
+__all__ = [
+    "RequestResult",
+    "percentile",
+    "prefix_cache_speedup",
+    "shared_prefix_prompts",
+    "summarize",
+]
 
 
 if __name__ == "__main__":
