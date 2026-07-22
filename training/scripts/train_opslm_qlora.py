@@ -63,8 +63,12 @@ def main() -> None:
     # Imports are inside main so `--help` works on a machine without CUDA/unsloth.
     from datasets import load_dataset
     from trl import SFTConfig, SFTTrainer
-    from unsloth import FastLanguageModel
+    from unsloth import FastLanguageModel, is_bfloat16_supported
     from unsloth.chat_templates import get_chat_template
+
+    # T4 (Turing) has no bf16; only Ampere+ does. Pick precision from the GPU so
+    # the same script trains on a free T4 (fp16) and an A100 (bf16) unchanged.
+    use_bf16 = is_bfloat16_supported()
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=args.base_model,
@@ -121,6 +125,8 @@ def main() -> None:
             eval_steps=args.save_steps,
             save_steps=args.save_steps,
             output_dir=args.output_dir,
+            bf16=use_bf16,
+            fp16=not use_bf16,
             push_to_hub=True,
             hub_model_id=args.push_repo,
             hub_token=args.hf_token,
