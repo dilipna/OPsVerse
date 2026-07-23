@@ -10,20 +10,21 @@
 Portfolio project #3 (of 3): a production-grade **LLM engineering platform** for DevOps/MLOps.
 ProtoPro covers agents; FIFA2026MLOps covers MLOps; **OpsVerse covers LLM engineering**.
 **Repo root = this folder** (`C:\Users\Dilip\OneDrive\Pictures\ftrag`).
-GitHub: `origin` = `https://github.com/dilipna/OPsVerse.git` — everything is pushed, working tree clean.
+GitHub: `origin` = `https://github.com/dilipna/OPsVerse.git` — everything pushed, working tree clean.
 
-**CONTEXT THAT MATTERS: the user demos this at an international conference the week of
-2026-07-21 and it may lead to a job.** Treat every decision with "would a hiring panel see
-production judgment here." Depth > breadth; honest numbers always.
+**CONTEXT THAT MATTERS: the user demos this at an international conference (week of 2026-07-21)
+and it may lead to a job — target roles: AI Engineer / LLM Engineer / LLM Inference Engineer at
+top companies.** Treat every decision with "would a hiring panel see production judgment here."
+Depth > breadth; honest numbers always; a claim without a measured number is a liability.
 
 ## Hard constraints (user-confirmed, do not revisit)
 
 | Thing | Decision |
 |---|---|
-| GPU | Free tiers only (Colab T4 / Kaggle) — training/benchmarks happen OFF this machine |
+| GPU | Free tiers only — training happens OFF this machine (Colab T4; Kaggle blocked, see below) |
 | LLM APIs | Free tiers only (Gemini; Groq key never provided) |
-| Base model | Qwen3-4B → "OpsLM" published to HF Hub |
-| Deployment | Docker Compose primary; K8s manifests as docs only; HF Spaces live demo later |
+| Base model | Qwen3-4B → "OpsLM" — **TRAINED + published at `dhf1234/OpsLM-v1`** |
+| Deployment | Docker Compose local; K8s manifests as docs; **demo site live on Vercel**; always-on model serving = Oracle Cloud Free Tier (HF Spaces now PRO-only) |
 | Order | Evaluation platform BEFORE fine-tuning (done — this ordering is a talking point) |
 
 ## User working rules
@@ -31,138 +32,128 @@ production judgment here." Depth > breadth; honest numbers always.
 - Everything stays inside this folder. **Ask before**: starting/stopping apps (incl. Docker
   Desktop), deleting non-generated things, acting outside this folder.
 - Local commits at each milestone WITHOUT asking; quick "pushing now" heads-up before each `git push`.
+- The user wants simple, numbered, non-technical steps for anything they must do themselves
+  (Colab/Vercel/Oracle console). Give screen-by-screen when they're in an unfamiliar UI.
 - The permission classifier may block destructive-looking DB scripts even on regenerable data —
   use AskUserQuestion when that happens.
 
-## Current status (2026-07-20, all committed + pushed, HEAD = 7876f16)
+## Current status (2026-07-22, all committed + pushed, HEAD = 3f4679a)
 
-**126 tests · ruff + pyright clean · 14 ADRs · CI + Eval Gate green on GitHub Actions.**
-ALL 11 phases have committed artifacts. Everything below marked ✅ was **verified live** against
-the running stack, not just written.
-
-**NEW 2026-07-20 — Streaming ingestion (ADR-0013), verified live.** A Redis-Streams intake path
-alongside the arq job queue: `libs/core/streaming.py` (StreamProducer/StreamConsumer behind a
-StreamRedis Protocol — consumer group, at-least-once XACK, XAUTOCLAIM reclaim, DLQ) + concrete
-DB/pipeline binding in `apps/api/stream_ingest.py` (reuses `ingest_bytes` incl. ADR-0007
-quarantine/redaction, and the `embed_pending_chunks` sweep). 6 unit tests vs an in-memory
-FakeStreamRedis. **Live proof today:** published a clean K8s doc → 3 chunks ready + embedded;
-published a poisoned doc → quarantined, 0 chunks. Run consumer: `uv run python -m
-opsverse_api.stream_ingest`; publish a file: `... --publish <path> [--tool k8s]`.
+**132 tests · ruff check + format clean · pyright clean · 15 ADRs · CI + Eval Gate green.**
+ALL 11 phases have committed artifacts; **OpsLM is trained and live on the Hub.**
 
 | Phase | State |
 |---|---|
-| 1–2 Foundation / Ingestion | ✅ 1,241 docs / 7,383 chunks, all embedded (Qdrant = chunk count); **+ streaming intake path (ADR-0013)** |
+| 1–2 Foundation / Ingestion | ✅ 1,243 docs / 7,386 chunks embedded; **+ Redis-Streams intake path (ADR-0013), verified live** |
 | 3 Hybrid RAG serving | ✅ SSE/WS chat, citations, degradation ladder, vision input |
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
-| 5 OpsLM fine-tune | ✅ **TRAINED 2026-07-22 on Colab T4** — merged 16-bit + LoRA adapter + resumable ckpt live at `dhf1234/OpsLM-v1` (verified via HF API). GGUF Q4_K_M export was the last step. **Before/after eval + serving still pending a GPU session.** |
+| 5 OpsLM fine-tune | ✅ **TRAINED on Colab T4 → `dhf1234/OpsLM-v1`**: merged 16-bit + LoRA adapter + **GGUF Q4_K_M** (`qwen3-4b-base.Q4_K_M.gguf`), all verified on the Hub. **+ DPO pipeline for v2 (ADR-0015).** Before/after eval still pending a serving session. |
 | 6 LLM gateway | ✅ Redis cache (hit = 184× faster, $0) + daily budget kill-switch (ADR-0008) |
-| 7 Inference lab | 🟡 harness + **5 inference-opt techniques** written & unit-tested (ADR-0011, ADR-0014) — **GPU run NOT executed** |
-| 8 Observability | ✅ Langfuse v2 self-host (`full` profile, :3002) + tracing facade; live trace verified via API (ADR-0010) |
-| 9 Security | ✅ red-team classifier TPR 1.0 / spec 1.0; **injection quarantine verified end-to-end live** (poisoned upload → 0 chunks); secret redaction at ingest (ADR-0007) |
+| 7 Inference lab | 🟡 harness + **5 inference-opt techniques** written & unit-tested (ADR-0011, ADR-0014) — **GPU/served-model numbers NOT yet produced** |
+| 8 Observability | ✅ Langfuse v2 self-host (:3002) + tracing facade; live trace verified + screenshot in README (ADR-0010) |
+| 9 Security | ✅ red-team classifier TPR 1.0 / spec 1.0; **injection quarantine verified live** (poisoned → 0 chunks) on both ingest paths; secret redaction (ADR-0007) |
 | 10 MCP server | ✅ 5 tools verified live over stdio; Claude Desktop/Cursor config in `apps/mcp-server/README.md` |
-| 11 Packaging | ✅ flagship README, architecture doc, K8s manifests (YAML validated), demo runbook, blog post |
+| 11 Packaging | ✅ flagship README, architecture doc, K8s manifests, demo runbook, **2 blog posts**, **live Vercel demo site** |
 
 Key eval story (the demo's backbone): v1 hybrid wins → v2 sparse "wins" (corpus 15×) → v3
 paraphrase set proves the sparse win was vocabulary leakage; hybrid vindicated. Rerank measured
-twice, off by default. All numbers in `docs/reports/`, narrative in
+twice, off by default. Numbers in `docs/reports/`; narrative in
 `docs/blog/01-eval-first-changed-my-retrieval-twice.md`.
 
-## LEFTOVER WORK — prioritized for the next session(s)
+## What shipped this session (2026-07-22)
 
-### 1. OpsLM training run — USER CHOSE THE KAGGLE PATH (planned 2026-07-20)
-The user's HF token is verified: **HF user = `dhf1234`**, fine-grained with `repo.write`
-(it was pasted into the 2026-07-19 chat — after the run, remind them to revoke/rotate it).
-The Colab laptop-free alternative is fully prepped in `training/kaggle/` (kernel-metadata.json,
-notebook with `HF_USER = "dhf1234"` already set, README with all driving commands):
-1. User does one-time Kaggle setup: phone-verify account, download `kaggle.json`
-   (Settings → API → Create New Token), add `HF_TOKEN` secret in the notebook editor.
-2. Claude: edit `KAGGLE_USERNAME` in kernel-metadata.json, `kaggle kernels push -p training/kaggle`,
-   poll `kaggle kernels status`. First push fails fast until the secret is attached — expected.
-3. ~3–4 h on T4; resumable (set `RESUME = True`, push again). Output: `dhf1234/OpsLM-v1`
-   (merged 16-bit + GGUF Q4_K_M). Colab notebook remains as fallback.
+- **OpsLM TRAINED** on Colab T4 (after fixing 3 version-drift bugs — see gotchas). Live at
+  `dhf1234/OpsLM-v1` (merged 16-bit + adapter + GGUF Q4_K_M).
+- **Instruction dataset scaled 593 → 838 pairs** (`generate_instructions --n 900`); DVC-pushed.
+- **Streaming ingestion** (ADR-0013): `libs/core/streaming.py` + `apps/api/stream_ingest.py`, 6 tests, verified live.
+- **Inference-optimization lab** (ADR-0014): `benchmarks/techniques/` — speculative decoding
+  (lossless + acceptance meter), guided/structured decoding (schema FSM), quant Pareto frontier;
+  harness TPOT + prefix-cache probe. 16 tests.
+- **DPO pipeline** (ADR-0015): `libs/training/preferences.py` (+6 tests), `generate_preferences.py`,
+  `training/scripts/train_opslm_dpo.py`, `training/notebooks/opslm_dpo_colab.ipynb`.
+- **Demo site DEPLOYED**: `opslm-demo/` (Next.js, black/red terminal aesthetic) → live at
+  **https://ops-verse.vercel.app** (public, no login wall). Chat is in **○ demo mode** (canned,
+  labelled answers) until a model endpoint is wired.
+- **Always-on free serving** scaffolded: `infra/oracle-opslm/` (Oracle Cloud Free ARM VM +
+  Ollama + token-gated Caddy). `infra/hf-space-opslm/` kept but **HF now requires PRO** for
+  Docker/Gradio Spaces — noted in its README.
 
-### 2. Before/after eval (once OpsLM exists; env-vars-only, no code changes)
+## LEFTOVER WORK — prioritized
+
+### 1. Take the demo chat LIVE (always-on, free) — `infra/oracle-opslm/`
+User chose always-on. Path: Oracle Cloud "Always Free" A1 ARM VM (4 cores/24 GB) → run
+`setup.sh` (installs Ollama, loads OpsLM GGUF, token-gated Caddy on :8080) → set Vercel env
+`OPSLM_ENDPOINT` / `OPSLM_MODEL=opslm` / `OPSLM_API_KEY` → redeploy → console flips to `● model
+online`. Full guide in `infra/oracle-opslm/README.md`. **Caveat:** Oracle free A1 often returns
+"Out of host capacity" — retry different AD/time. User may want screen-by-screen help.
+
+### 2. Before/after eval + Phase-7 inference numbers (needs OpsLM SERVED on a GPU/endpoint)
+Both env-vars-only against a served OpsLM. Baseline (Gemini) already recorded.
 ```bash
-# baseline (Gemini path) — already recorded; rerun if wanted:
-uv run python -m opsverse_evals.rag_suite --n 20
-uv run python -m opsverse_evals.structured_eval --n 12
-# OpsLM via Ollama (from the GGUF):
 OPSVERSE_CHAT_MODEL=ollama/opslm uv run python -m opsverse_evals.rag_suite --n 20
 OPSVERSE_CHAT_MODEL=ollama/opslm uv run python -m opsverse_evals.structured_eval --n 12
-# OpsLM via vLLM/SGLang (OpenAI-compatible):
-OPSVERSE_CHAT_MODEL=openai/OpsLM-v1 OPSVERSE_CHAT_API_BASE=http://localhost:8000/v1 uv run ...
+# inference bench + technique numbers (vLLM/Ollama serving OpsLM):
+python benchmarks/harness.py --base-url <engine>/v1 --model opslm --concurrency 1,4,16 --requests 32 --out benchmarks/results/<engine>.json
 ```
-Write the before/after report into `docs/reports/` (same shape as the others so `/evals` renders
-it), pin thresholds, commit. The structured-output eval is the "did SFT break tool-calling?" check.
-NOTE: rag_suite's chat calls burn the 20/day 3.5-flash quota — budget demo rehearsal around it.
+Write reports into `docs/reports/` (same shape → `/evals` renders them). Fill in the 5 technique
+payoffs: speculative acceptance rate + tokens/s, guided-decoding json_parse_rate→1.0, quant
+frontier (FP16/Q8/Q4), prefix-cache TTFT drop, multi-LoRA. Serve flags + what-proves-what in
+`benchmarks/README.md`. **This is the LLM-inference-engineer story.** NOTE: rag_suite chat calls
+burn the 20/day gemini-3.5-flash quota — budget around demo rehearsal.
 
-### 3. Phase 7 GPU benchmark run (Colab; after OpsLM exists)
-Serve OpsLM with each engine, then per engine:
-`python benchmarks/harness.py --base-url <engine>/v1 --model opslm --concurrency 1,4,16 --requests 32 --out benchmarks/results/<engine>.json`
-Then write `docs/reports/inference-benchmark-v1.md` from the JSONs (+ quality-vs-quant via the
-Phase-4 harness per ADR-0011). Commit raw JSONs.
-**NEW (ADR-0014, 2026-07-20): 5 inference-optimization techniques are implemented + unit-tested
-in `benchmarks/techniques/` (speculative decoding, guided/structured decoding, quant Pareto
-frontier) + harness upgrades (inter-token latency/TPOT, prefix-cache probe).** During the GPU run,
-also produce the measured payoffs: speculative acceptance rate + tokens/s (vLLM ngram spec),
-guided-decoding json_parse_rate→1.0 via the structured evalset, the quant frontier (FP16/Q8/Q4
-latency × quality), prefix-cache TTFT drop, and multi-LoRA per-adapter latency. Serve flags +
-what-number-proves-what are in `benchmarks/README.md`. This is the LLM-inference-engineer story.
+### 3. DPO → OpsLM-v2 (optional depth; pipeline ready)
+`uv run python -m opsverse_training.generate_preferences` (bulk quota; reads committed
+`data/sft/`, writes `data/dpo/{train,val}.jsonl`) → `dvc add data/dpo && dvc push` → run
+`training/notebooks/opslm_dpo_colab.ipynb` (Colab T4, ~1–2h) → OpsLM-v2. Then before/after v1-vs-v2.
 
-### 4. Demo-day polish — DONE 2026-07-19 except the human rehearsal
-- ✅ Langfuse trace screenshot captured headlessly (Playwright in scratchpad), committed at
-  `docs/assets/langfuse-trace.png`, embedded in README. Retrieval 0.90s / generation 15.08s spans.
-- ✅ `/`, `/evals`, `/costs` visually inspected via headless screenshots — all render correctly;
-  `/evals` shows all **6 reports** incl. structured-output-v1. README test count fixed 85→104.
-- ⬜ Rehearse `docs/demo-runbook.md` once end-to-end (user task; mind the 20/day quota).
+### 4. USER TASKS (not code)
+- **Rehearse `docs/demo-runbook.md`** once end-to-end (mind the 20/day quota).
+- **Rotate 3 tokens** (all passed through chat): HF write token + both Kaggle `KGAT_` tokens.
 
-### NEW 2026-07-22 — demo site + DPO + live serving (all committed, CI green)
-- **`opslm-demo/`**: standalone Next.js demo site (black/red terminal aesthetic), live OpsLM
-  chat via an edge proxy with a demo fallback. **Deploy: Vercel → import repo → Root Directory
-  `opslm-demo`.** Set `OPSLM_ENDPOINT` env var to the HF Space `/v1` for the live model.
-- **`infra/hf-space-opslm/`**: free-CPU HF Docker Space serving the OpsLM GGUF (OpenAI-compatible).
-  Deploy per its README; it's the always-on free backend for the site's chat.
-- **DPO pipeline (ADR-0015)**: `libs/training/preferences.py` (+tests), `generate_preferences.py`,
-  `training/scripts/train_opslm_dpo.py`, `training/notebooks/opslm_dpo_colab.ipynb`. To make
-  OpsLM-v2: run `generate_preferences` (bulk quota) → `dvc add data/dpo` → DPO Colab session.
-- **TOKENS TO ROTATE** (passed through chat): HF write token + both `KGAT_` Kaggle tokens.
+### 5. Possible next upskill (researched 2026-07-22, user asked about it)
+Top-2026 signal says the biggest remaining gap vs the market is **agents + agent/trace-based
+evaluation** (OpsVerse has RAG+fine-tune+MCP; agents is the missing 4th pattern). Highest-leverage
+future addition: an agentic layer over the existing MCP tools with step-level tool-use/task-completion
+evals gated in CI. Only if the user wants it — it crosses the "OpsVerse ≠ agents" scope line.
 
-### 5. Nice-to-have (only if time)
-- HF Spaces live demo — ✅ scaffolded (`infra/hf-space-opslm/`), user deploys.
-- ✅ Second blog post DONE 2026-07-19: `docs/blog/02-the-document-is-the-attack-surface.md`
-  (security quarantine story), linked from README. Demo video still open.
-- ✅ Instruction dataset scaled DONE 2026-07-22: **838 pairs** (593→838; `--n 900`, 838 kept after
-  quality/dedup/decontam). `dvc add`+`dvc push` to MinIO done, pointer committed. Ready for a
-  future OpsLM-v2 / DPO round.
+## Honest gaps (do not overclaim)
 
-## Honest gaps (do not overclaim in the demo)
-
-- OpsLM does not exist yet — say "the pipeline is committed and gated; the run is a Colab session".
-- Phase 7 has no numbers yet — the harness is tested, the comparison is pending.
-- rag-quality thresholds are n=20, structured-output n=12 — regression gates, not proof points.
+- **OpsLM exists** (v1, SFT) — but the **before/after eval numbers don't exist yet** (needs serving).
+  Say "trained and published; the measured before/after is the next serving session."
+- Phase 7 inference techniques are **implemented + unit-tested**, but the **served numbers are pending**.
+- Demo-site chat is **demo mode** until the Oracle endpoint is wired — describe it as such, don't
+  claim it's live-calling the fine-tune yet.
+- rag-quality thresholds n=20, structured-output n=12 — regression gates, not proof points.
 
 ## Environment gotchas (WILL bite you)
 
 1. **Docker Desktop shuts down between sessions.** ASK the user first, then:
    `Start-Process "shell:AppsFolder\Docker.DockerForWindows.Settings"` and poll `docker info`.
-2. **Ports**: API **8100** (8000 taken by user's WC26 app), web 3000, Langfuse **3002**.
-3. **Gemini quotas**: `gemini-3.5-flash` = **20 req/DAY** (chat only). ALL bulk jobs (eval gen,
-   judging, instruction gen, structured eval) use `gemini-3.1-flash-lite` — never point bulk at 3.5.
-4. **Pins**: `litellm >=1.60,<1.92` (MSVC build fails ≥1.92); `langfuse >=2.50,<3.0` (pairs with
-   the v2 server). fastembed cache env: `FASTEMBED_CACHE_PATH`.
-5. **PowerShell**: no heredocs; parens/quotes in `git commit -m` break parsing — **write commit
-   messages to a scratchpad file, `git commit -F <file>`**. `$env:PYTHONUTF8='1'` for any Python
-   printing LLM output (cp1252 console). cwd persists between tool calls (a stray `cd` once sent a
-   pipeline's output to the wrong dir — generators refuse to run without `./evalsets` for this).
+   Only OpsVerse's own containers matter (the `wc26-mlops-*` ones belong to the user's other app).
+2. **Ports**: API **8100** (8000 taken by WC26 app), web 3000, Langfuse **3002**.
+3. **Gemini quotas**: `gemini-3.5-flash` = **20 req/DAY** (chat only). ALL bulk jobs use
+   `gemini-3.1-flash-lite` — never point bulk at 3.5.
+4. **Pins**: `litellm >=1.60,<1.92`; `langfuse >=2.50,<3.0`. fastembed cache: `FASTEMBED_CACHE_PATH`.
+5. **PowerShell**: no heredocs; write commit messages to a scratchpad file + `git commit -F`, or
+   use the Bash tool with `git commit -m` heredoc. `$env:PYTHONUTF8='1'` for any Python printing
+   LLM output. cwd persists between tool calls.
 6. `git push` prints its banner to stderr — PowerShell shows red "NativeCommandError" but
    `old..new main -> main` = success.
-7. Bash tool blocks sleep-then-check chains: use Monitor with an until-loop, or `run_in_background`.
-8. Long background jobs (instruction gen etc.) die if the Claude process exits — they are
-   resumable by design; on session start check partial files (`*.partial.jsonl`) before assuming loss.
-9. `uv run pytest` is safe for the live DB (WS-test leak fixed); pyright scope is bare
-   `uv run pyright` (training/ + notebooks excluded on purpose — unsloth/trl aren't installed here).
+7. **CI runs BOTH `ruff check` AND `ruff format --check`.** Always run `uv run ruff format --check .`
+   before committing — lint-clean is not format-clean (this bit us once, went red).
+8. **Colab/Kaggle version drift** (fixed in the training scripts, keep in mind for new ones):
+   T4 (Turing) has **no bf16** → use `is_bfloat16_supported()` to pick fp16; TRL ≥0.13 renamed
+   `SFTTrainer(tokenizer=)` → `processing_class=`; import `unsloth` BEFORE trl/transformers.
+9. **Kaggle:** free GPU needs **phone verification, which the user CANNOT do** (number already used)
+   → Colab is the training path. Kaggle API token is the new `KGAT_` kind (auth via
+   `KAGGLE_API_TOKEN` env var, not kaggle.json). `training/kaggle/` exists but is unusable without
+   phone verification.
+10. **Vercel:** the repo root is a Python monorepo, so a Vercel project MUST set **Root Directory =
+    `opslm-demo`** or it tries to build Python and fails. Turn OFF Deployment Protection for a public link.
+11. Long background jobs are resumable by design; on session start check `*.partial.jsonl` before
+    assuming loss. `uv run pytest` is safe for the live DB. pyright scope excludes training/+notebooks.
 
-## How to bring everything up
+## How to bring the local stack up
 
 ```bash
 docker compose -f infra/compose/docker-compose.yml --profile full up -d --wait   # ASK before Docker Desktop; `full` = +Langfuse
@@ -170,7 +161,7 @@ uv sync --all-packages
 (cd apps/api && uv run alembic upgrade head)              # no-op, head = 0003
 $env:OPSVERSE_LANGFUSE_HOST='http://localhost:3002'; uv run uvicorn opsverse_api.main:app --port 8100   # background
 uv run arq opsverse_api.worker.WorkerSettings             # background
-(cd apps/web && npm run dev)                              # :3000 (remember: cwd persists — cd back!)
+(cd apps/web && npm run dev)                              # :3000 (cwd persists — cd back!)
 curl http://localhost:8100/health/ready                   # expect 4x ok
 uv run python -m opsverse_evals.regression                # expect 15/15 PASS
 ```
@@ -178,31 +169,31 @@ uv run python -m opsverse_evals.regression                # expect 15/15 PASS
 ## Repo map (quick)
 
 ```
-apps/api          FastAPI: routers/{health,ingest,search,chat,costs,evals}, worker, deps (gateway+tracer wiring), alembic 0001..0003
-apps/web          Next.js UI: / (chat), /evals, /costs
-apps/mcp-server   MCP stdio server, 5 tools (opsverse-mcp) + Claude Desktop/Cursor README
-libs/core         settings, llm.py (LiteLLM client, api_base), gateway.py (cache/budget), tracing.py (Langfuse facade), object_store
-libs/ingestion    parsers, chunking, quality.py (dedup+non_english+security wiring), pipeline
-libs/rag          embeddings, store, rerank, retriever, chat.py (ChatService + trace spans)
-libs/evals        metrics, ablation, judge (CachedJudge), rag_suite, regression (gate), ci_retrieval_smoke,
-                  contamination (guard), paraphrase_evalset, structured_eval, reporting, build_ci_fixture
-libs/security     injection.py, redact.py, evaluate.py (red-team TPR/FPR)
-libs/training     schemas, quality, generate_instructions (resumable, decontaminated)
-training/         scripts/{prepare_sft,train_opslm_qlora}.py, notebooks/opslm_qlora_colab.ipynb, README
-benchmarks/       harness.py (tested) + README + tests/    evalsets/  retrieval-v1/v2/v3, ci/, security-redteam-v1,
-                  structured-output-v1, regression-thresholds.json (15, hashed sets in the contamination policy)
-docs/adr          0001..0012        docs/reports   6 live reports        docs/blog  eval-first post
-docs/demo-runbook.md · docs/architecture.md · docs/eval-contamination-policy.md · docs/latency-budget.md
-infra/compose     core + `full` profile (langfuse, langfuse-db)   infra/k8s   documented manifests
-data/             corpus.dvc + instructions.dvc (DVC pointers; content in MinIO s3://opsverse-dvc)
-                  data/sft/{train,val}.jsonl + manifest ARE committed to git (small; Colab clone gets them)
+apps/api          FastAPI: routers/{health,ingest,search,chat,costs,evals}, worker, stream_ingest, alembic 0001..0003
+apps/web          Next.js internal UI: / (chat), /evals, /costs   (localhost only)
+apps/mcp-server   MCP stdio server, 5 tools + Claude Desktop/Cursor README
+libs/core         settings, llm.py, gateway.py (cache/budget), tracing.py, streaming.py (Redis Streams), object_store
+libs/ingestion    parsers, chunking, quality.py, pipeline
+libs/rag          embeddings, store, rerank, retriever, chat.py
+libs/evals        metrics, ablation, judge, rag_suite, regression, ci_retrieval_smoke, contamination, structured_eval, reporting
+libs/security     injection.py, redact.py, evaluate.py
+libs/training     schemas, quality, generate_instructions, preferences.py (DPO), generate_preferences.py
+training/         scripts/{prepare_sft,train_opslm_qlora,train_opslm_dpo}.py, notebooks/{opslm_qlora,opslm_dpo}_colab.ipynb, kaggle/ (unusable)
+benchmarks/       harness.py + techniques/{speculative,constrained,frontier}.py + tests   (ADR-0011, ADR-0014)
+opslm-demo/       Next.js Vercel demo site (LIVE: ops-verse.vercel.app); app/api/chat = edge proxy to OPSLM_ENDPOINT
+infra/oracle-opslm    always-on free serving: setup.sh + Caddy + README   (the live-model backend path)
+infra/hf-space-opslm  llama.cpp OpenAI server (HF Spaces now PRO — kept as reusable app.py)
+infra/compose     core + `full` profile (langfuse)   infra/k8s   documented manifests
+docs/adr          0001..0015        docs/reports   6 live reports        docs/blog  2 posts
+data/             corpus.dvc + instructions.dvc (content in MinIO); data/sft/{train,val}.jsonl committed to git
 ```
 
 ## Session-start checklist for next Claude
 
-1. Read this file. 2. Ask before starting Docker Desktop, bring the stack up, verify
-`/health/ready` + `regression` 15/15. 3. The session IS leftover item 1: the Kaggle training run
-(see item 1 for exactly what the user must hand over — `kaggle.json` + `HF_TOKEN` secret attached).
-While it trains (~3–4 h, poll via `kaggle kernels status`), do the remaining item-5 bits and prep
-item 2's before/after eval. 4. Commit per milestone, heads-up before pushes, update this file at
-session end.
+1. Read this file. 2. Working tree is clean at `3f4679a`; no rebuild needed unless changing code.
+3. Ask the user what they want this session. Most likely: (a) Oracle setup to take the chat live
+   (item 1), (b) a GPU serving session for the before/after eval + inference numbers (item 2), or
+   (c) DPO → v2 (item 3). Items 1 and 3 need the user's HF/Oracle accounts; walk them screen-by-screen.
+4. If touching local code: bring the stack up, verify `/health/ready` + `regression` 15/15.
+5. Commit per milestone, `ruff check` + `ruff format --check` before every commit, heads-up before
+   pushes, update this file at session end.
