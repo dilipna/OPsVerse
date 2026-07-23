@@ -8,7 +8,16 @@ app_port: 7860
 pinned: false
 ---
 
-# OpsLM inference Space (free CPU)
+# OpsLM inference Space (llama.cpp)
+
+> **NOTE (2026-07):** Hugging Face now requires a **PRO plan** for Docker *and*
+> Gradio Spaces — only Static Spaces are free. So this Space is no longer a
+> free path. For an always-on **$0** endpoint, use `../oracle-opslm/` (Oracle
+> Cloud Always Free ARM VM). This folder is kept because the `app.py` server is
+> reusable on any host with Docker/Python.
+
+---
+
 
 Serves the committed OpsLM GGUF (`Q4_K_M`) with llama.cpp behind an
 OpenAI-compatible `/v1/chat/completions`, so the Vercel demo site can call the
