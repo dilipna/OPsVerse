@@ -12,13 +12,57 @@ this machine.
 |---|---|
 | Benchmark harness (`harness.py`) | ✅ written; measurement math **unit-tested** |
 | Inference techniques (`techniques/`) | ✅ implemented + **unit-tested** (speculative, guided decoding, quant frontier) |
-| One-engine-per-notebook runners | ✅ documented below (thin wrappers) |
-| **Actual benchmark run on GPU** | ⏳ pending — needs a Colab/Kaggle T4 + OpsLM (Phase 5) |
+| Session driver (`run_suite.py`) | ✅ sweep + prefix-cache/structured probes; **unit-tested + smoke-tested against a mock OpenAI server** |
+| Report generator (`report.py`) | ✅ renders comparison tables + Pareto frontier from committed JSON |
+| Colab runner (`notebooks/opslm_inference_bench_colab.ipynb`) | ✅ turnkey: vLLM FP16 → AWQ → Ollama Q4 → control run |
+| **Actual benchmark run on GPU** | ⏳ pending — needs one Colab T4 session (~90 min) |
 | Report (`docs/reports/inference-benchmark-v1.md`) | ⏳ blocked on the run |
 
 Nothing here reports numbers that weren't measured. The harness is engine-
 agnostic (any OpenAI-compatible `/v1/chat/completions`), so the three engines
 share one measurement path — differences are the engines, not the harness.
+
+## How a session works
+
+```
+run_suite.py  ──▶ benchmarks/results/<engine>-<quant>.json   (one file per config, committed)
+                                │
+Phase-4 eval  ──▶ quality score ┤
+                                ▼
+report.py     ──▶ docs/reports/inference-benchmark-v1.md
+```
+
+One `run_suite.py` invocation == one (engine, quantization) pair. Every result
+file is stamped with GPU, engine version, and timestamp, because a latency
+number without them is not a measurement.
+
+```bash
+python benchmarks/run_suite.py --base-url http://localhost:8000/v1 \
+    --model dhf1234/OpsLM-v1 --engine vllm --quant fp16 \
+    --concurrency 1,4,16 --requests 32 \
+    --out benchmarks/results/vllm-opslm-fp16.json
+
+python benchmarks/report.py --results benchmarks/results \
+    --quality fp16=0.94 --quality awq=0.91 --quality q4_k_m=0.88 \
+    --out docs/reports/inference-benchmark-v1.md
+```
+
+### Controls, not just measurements
+
+The sweep alone cannot attribute a result to a feature. Two probes ship with an
+explicit control:
+
+- **Prefix caching** — the suite measures cold-vs-warm TTFT with the cache on;
+  the notebook re-runs it with `--no-enable-prefix-caching`. The *difference
+  between the two runs* isolates the cache. A single warm-request measurement
+  is indistinguishable from ordinary warm-up and is not evidence.
+- **Guided decoding** — parse rate is measured with the constraint off, then on.
+  Guided-on is 1.0 by construction, so the unguided baseline is the informative
+  half.
+
+Configurations with no quality score are **excluded from the frontier** rather
+than defaulted, because a speed-only frontier recommends the smallest
+quantization by construction — the exact error the frontier exists to prevent.
 
 ## What it measures
 
