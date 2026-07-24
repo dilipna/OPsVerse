@@ -67,5 +67,16 @@ that ADR-0011 already established.
 - Turing (T4, sm_75) has **no bfloat16** — every server launches with `--dtype float16`,
   and AWQ uses the plain GEMM kernel rather than Marlin (Ampere+). Both are noted at the
   launch site, since a future Ampere run should drop them.
+- **`import vllm` fails after a correct install** with
+  `ImportError: libcudart.so.13: cannot open shared object file`, even when the driver,
+  torch, and vLLM are all consistently CUDA 13 (confirmed on Colab: driver 580.82,
+  torch `2.11.0+cu130`, vLLM 0.25.1). This is not a version mismatch — torch loads CUDA
+  libraries from its own bundled `torch/lib/`, but vLLM's compiled extension is a separate
+  shared object resolved via the dynamic loader's search path, which the `nvidia-*` CUDA
+  wheels never populate. The notebook now locates `libcudart` under the installed
+  `nvidia-*` packages, adds it to `LD_LIBRARY_PATH` (for the `vllm serve` subprocess) and
+  preloads it with `ctypes.CDLL(..., RTLD_GLOBAL)` (for in-process imports, needed by the
+  AWQ section). Verified via the `vllm` CLI rather than `import vllm`, since the CLI
+  exercises the same subprocess path `serve()` uses.
 - The networked path is smoke-tested against a mock OpenAI-compatible server, so a timed
   Colab session is not the first place the code runs.
