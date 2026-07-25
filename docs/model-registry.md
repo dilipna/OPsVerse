@@ -17,7 +17,7 @@ _Published to HF Hub (merged 16-bit + LoRA adapter + GGUF Q4_K_M). The GGUF serv
 
 | Quant | Artifact | Engine | Status | Latency p50 | Throughput |
 |---|---|---|---|---|---|
-| `fp16` | merged 16-bit safetensors | vLLM | benchmarking | pending | pending |
+| `fp16` | merged 16-bit safetensors | vLLM | benchmarking | 12.06s | 244 tok/s @ c16 |
 | `q4_k_m` | GGUF Q4_K_M | Ollama / llama.cpp | serving (public demo) | pending | pending |
 | `awq` | AWQ 4-bit (attempted) | vLLM | dropped | pending | pending |
 

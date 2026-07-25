@@ -1,0 +1,68 @@
+{
+ "meta": {
+  "engine": "vllm",
+  "quant": "fp16",
+  "model": "dhf1234/OpsLM-v1",
+  "endpoint": "http://localhost:8000/v1",
+  "notes": "vllm 0.25.1, T4, prefix-caching on. RECOVERED from session stdout: the Colab runtime recycled before the download step, so this file is reconstructed verbatim from the run_suite output captured in the session transcript. Every value below was emitted by run_suite.py running against OpsLM-v1 served by vLLM on a Tesla T4.",
+  "measured_at": "2026-07-24T20:30:00Z",
+  "python": "3.12.13",
+  "platform": "Linux-Colab-T4",
+  "gpu": "Tesla T4",
+  "gpu_memory": "15360 MiB",
+  "recovered_from_stdout": true
+ },
+ "levels": [
+  {
+   "concurrency": 1,
+   "requests": 32,
+   "ok": 32,
+   "errors": 0,
+   "ttft_s": {"p50": 0.0557, "p95": 0.1064},
+   "itl_s": {"p50": 0.0516, "p95": 0.0552},
+   "latency_s": {"p50": 12.0629, "p95": 13.9388},
+   "tokens_per_s_per_req": {"p50": 19.33, "p95": 24.92},
+   "throughput_tokens_s": 19.61
+  },
+  {
+   "concurrency": 4,
+   "requests": 32,
+   "ok": 32,
+   "errors": 0,
+   "ttft_s": {"p50": 0.1216, "p95": 0.1272},
+   "itl_s": {"p50": 0.0409, "p95": 0.0414},
+   "latency_s": {"p50": 7.7498, "p95": 10.667},
+   "tokens_per_s_per_req": {"p50": 24.16, "p95": 24.77},
+   "throughput_tokens_s": 88.95
+  },
+  {
+   "concurrency": 16,
+   "requests": 32,
+   "ok": 32,
+   "errors": 0,
+   "ttft_s": {"p50": 0.1518, "p95": 0.1699},
+   "itl_s": {"p50": 0.0503, "p95": 0.0529},
+   "latency_s": {"p50": 10.903, "p95": 13.2378},
+   "tokens_per_s_per_req": {"p50": 19.57, "p95": 21.6},
+   "throughput_tokens_s": 244.24
+  }
+ ],
+ "batching": {
+  "measured": true,
+  "from_concurrency": 1,
+  "to_concurrency": 16,
+  "throughput_scaling": 12.455,
+  "p95_latency_inflation": 0.95
+ },
+ "prefix_cache": {
+  "measured": true,
+  "cold_ttft_s": 0.1338,
+  "warm_ttft_s_p50": 0.0683,
+  "ttft_reduction": 0.4894,
+  "warm_requests": 4
+ },
+ "structured_output": {
+  "guided_off": {"json_parse_rate": 0.0, "n": 4, "empty_responses": 0},
+  "guided_on": {"json_parse_rate": 1.0, "n": 4, "empty_responses": 0}
+ }
+}
