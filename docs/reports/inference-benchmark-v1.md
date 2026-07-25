@@ -6,31 +6,33 @@
 ## Measurement conditions
 
 - **Hardware:** Tesla T4
-- **Measured:** 2026-07-24
-- **Configurations:** 1
+- **Measured:** 2026-07-25
+- **Configurations:** 2
 - **Output tokens** are approximated by streamed-chunk count (see `harness.py`).
   The approximation is identical across engines, so comparisons hold even where
   the absolute token count does not.
 
-- `vllm/fp16` · model `dhf1234/OpsLM-v1` · `vllm-opslm-fp16.json` — vllm 0.25.1, T4, prefix-caching on. RECOVERED from session stdout: the Colab runtime recycled before the download step, so this file is reconstructed verbatim from the run_suite output captured in the session transcript. Every value below was emitted by run_suite.py running against OpsLM-v1 served by vLLM on a Tesla T4.
+- `vllm/fp16` · model `dhf1234/OpsLM-v1` · `vllm-opslm-fp16.json` — vllm 0.25.1, T4, prefix-caching on
+- `vllm/fp16-noprefixcache` · model `dhf1234/OpsLM-v1` · `vllm-opslm-fp16-noprefix.json` — CONTROL: prefix caching disabled — isolates the cache effect
 
 ## Serving metrics at concurrency 1
 
 | Config | TTFT p50 (s) | TTFT p95 (s) | ITL p50 (s) | Throughput (tok/s) | Errors |
 |---|---|---|---|---|---|
-| `vllm/fp16` | 0.056 | 0.106 | 0.0516 | 19.61 | 0 |
+| `vllm/fp16` | 0.059 | 0.121 | 0.0602 | 17.42 | 0 |
+| `vllm/fp16-noprefixcache` | 0.070 | 0.102 | 0.0452 | 21.32 | 0 |
 
 ## Serving metrics at concurrency 4
 
 | Config | TTFT p50 (s) | TTFT p95 (s) | ITL p50 (s) | Throughput (tok/s) | Errors |
 |---|---|---|---|---|---|
-| `vllm/fp16` | 0.122 | 0.127 | 0.0409 | 88.95 | 0 |
+| `vllm/fp16` | 0.126 | 0.128 | 0.0420 | 89.66 | 0 |
 
 ## Serving metrics at concurrency 16
 
 | Config | TTFT p50 (s) | TTFT p95 (s) | ITL p50 (s) | Throughput (tok/s) | Errors |
 |---|---|---|---|---|---|
-| `vllm/fp16` | 0.152 | 0.170 | 0.0503 | 244.24 | 0 |
+| `vllm/fp16` | 0.156 | 0.173 | 0.0514 | 233.18 | 0 |
 
 ## Continuous batching
 
@@ -41,7 +43,7 @@ costs per-request tail latency.
 
 | Config | Sweep | Throughput scaling | p95 latency inflation |
 |---|---|---|---|
-| `vllm/fp16` | 1→16 | 12.46x | 0.95x |
+| `vllm/fp16` | 1→16 | 13.39x | 0.81x |
 
 ## Feature probes
 
@@ -51,11 +53,12 @@ the informative number is the unguided baseline it is compared against.
 
 | Config | Prefix-cache TTFT reduction | JSON parse rate (guided off → on) |
 |---|---|---|
-| `vllm/fp16` | 48.9% | 0.00 → 1.00 |
+| `vllm/fp16` | 47.8% | 0.00 → 1.00 |
+| `vllm/fp16-noprefixcache` | 0.0% | 0.00 → 1.00 |
 
 ## Quantization: quality vs. latency frontier
 
 No configuration has both a latency measurement and a quality score yet.
 
-> Excluded from the frontier (no quality score supplied): `vllm/fp16`. Run the Phase-4 eval against these configurations and pass `--quality`.
+> Excluded from the frontier (no quality score supplied): `vllm/fp16`, `vllm/fp16-noprefixcache`. Run the Phase-4 eval against these configurations and pass `--quality`.
 
