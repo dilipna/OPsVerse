@@ -208,3 +208,4 @@ python registry/registry.py --out docs/model-registry.md                   # reg
 
 - [We built the eval harness before the model — and the numbers changed our retrieval design twice](docs/blog/01-eval-first-changed-my-retrieval-twice.md)
 - [The document is the attack surface — RAG security at ingest, measured like a classifier](docs/blog/02-the-document-is-the-attack-surface.md)
+- ["Which engine is faster?" is the wrong question — measuring continuous batching on a free T4](docs/blog/03-measuring-continuous-batching-on-a-free-t4.md)

@@ -1,6 +1,6 @@
 # ADR-0016: Split serving — ephemeral GPU for measurement, always-on CPU for the demo
 
-**Status:** accepted (2026-07-23) — suite + Colab runner committed and smoke-tested; GPU run pending
+**Status:** accepted (2026-07-23) — **measured 2026-07-25** on a Colab T4 (vLLM FP16 + Ollama Q4 + prefix-cache control); numbers in `docs/reports/inference-benchmark-v1.md`
 
 ## Context
 
