@@ -127,7 +127,7 @@ Ordered by evidence produced per unit of effort.
 | **1** | **Measurement suite + Colab runner** | vLLM vs Ollama, FP16/AWQ/Q8/Q4, concurrency sweep, TTFT/TPOT/throughput, prefix-cache and guided-decoding probes → committed JSON + report | user runs one Colab session |
 | **2** | Quantization frontier report | Module 3 table with a real quality axis, using existing eval sets | #1 |
 | **3** | Before/after eval (base Qwen3-4B vs OpsLM-v1) | the fine-tune's justification | #1 |
-| **4** | Model registry | versions, quant, eval score, deploy status; fed by #1–#3 | #1 |
+| **4** | Model registry ✅ | versions, quant, eval score, deploy status; fed by #1–#3. `registry/` + `docs/model-registry.md`, joins benchmark JSON automatically | #1 |
 | **5** | Frontend reframe | overview / registry / benchmarks / playground pages | #4 |
 | **6** | Prometheus + OTel serving metrics | GPU + request metrics alongside Langfuse | #1 |
 | **7** | CI/CD + K8s extensions | security scan, registry push, GPU workload manifest | — |

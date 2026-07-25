@@ -1,0 +1,82 @@
+{
+ "_comment": "Source of truth for the model registry. Static facts are authored here; measured fields (latency, throughput, eval score) are joined in at render time from benchmarks/results/ and docs/reports/ by registry.py — never hand-copied, so they cannot drift from the artifacts that produced them.",
+ "models": [
+  {
+   "name": "OpsLM-v1",
+   "version": "1.0",
+   "status": "production",
+   "base_model": "unsloth/Qwen3-4B-Base",
+   "license": "Apache-2.0",
+   "hub": "dhf1234/OpsLM-v1",
+   "adr": "ADR-0009",
+   "fine_tuning": {
+    "method": "QLoRA",
+    "lora_r": 16,
+    "lora_alpha": 16,
+    "targets": "q,k,v,o,gate,up,down",
+    "trainable_pct": 0.5,
+    "base_precision": "4-bit NF4",
+    "tooling": "Unsloth + TRL SFTTrainer"
+   },
+   "dataset": {
+    "train": 534,
+    "val": 59,
+    "format": "chat/messages",
+    "decontaminated": true
+   },
+   "deployment": "Published to HF Hub (merged 16-bit + LoRA adapter + GGUF Q4_K_M). The GGUF serves the public demo via Ollama on the Oracle ARM VM. Before/after eval vs. base is pending a serving session.",
+   "eval": {
+    "before_after_vs_base": "pending",
+    "report": null
+   },
+   "variants": [
+    {
+     "quant": "fp16",
+     "artifact": "merged 16-bit safetensors",
+     "serving_engine": "vLLM",
+     "status": "benchmarking",
+     "benchmark_key": {"engine": "vllm", "quant": "fp16"}
+    },
+    {
+     "quant": "q4_k_m",
+     "artifact": "GGUF Q4_K_M",
+     "serving_engine": "Ollama / llama.cpp",
+     "status": "serving (public demo)",
+     "benchmark_key": {"engine": "ollama", "quant": "q4_k_m"}
+    },
+    {
+     "quant": "awq",
+     "artifact": "AWQ 4-bit (attempted)",
+     "serving_engine": "vLLM",
+     "status": "dropped",
+     "note": "AutoAWQ is unmaintained past torch 2.6 and threw cascading conflicts on Colab's torch 2.11; dropped 2026-07-24. See ADR-0016 and benchmarks/README.md.",
+     "benchmark_key": null
+    }
+   ]
+  },
+  {
+   "name": "OpsLM-v2",
+   "version": "2.0",
+   "status": "planned",
+   "base_model": "OpsLM-v1",
+   "license": "Apache-2.0",
+   "hub": null,
+   "adr": "ADR-0015",
+   "fine_tuning": {
+    "method": "DPO",
+    "tooling": "TRL DPOTrainer",
+    "note": "Preference-alignment follow-on to v1. Pipeline committed (libs/training/preferences.py); not yet trained."
+   },
+   "dataset": {
+    "format": "preference pairs (chosen/rejected)",
+    "note": "generated from the committed SFT set"
+   },
+   "deployment": "Not deployed. Trains only after v1 has honest before/after numbers.",
+   "eval": {
+    "before_after_vs_base": "pending",
+    "report": null
+   },
+   "variants": []
+  }
+ ]
+}

@@ -62,4 +62,5 @@ testpaths = [
     "libs/security/tests",
     "libs/training/tests",
     "benchmarks/tests",
+    "registry/tests",
 ]
