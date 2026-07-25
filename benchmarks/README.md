@@ -15,9 +15,16 @@ SGLang remains a documented future engine, not a claim.
 | Session driver (`run_suite.py`) | ✅ sweep + prefix-cache/structured probes; **unit-tested + smoke-tested against a mock OpenAI server** |
 | Report generator (`report.py`) | ✅ renders comparison tables + Pareto frontier from committed JSON |
 | Colab runner (`notebooks/opslm_inference_bench_colab.ipynb`) | ✅ turnkey: vLLM FP16 → Ollama Q4 → control run, each with a fail-fast smoke test |
-| **vLLM FP16 on T4 + prefix-cache control** | ✅ **measured** (clean run) — `docs/reports/inference-benchmark-v1.md`. 13.4× continuous-batching scaling at 0.81× latency, prefix-cache **47.8% on vs 0.0% off** (control isolates the cache), guided decoding 0→1.0 |
-| Ollama Q4 cross-engine | ⏳ pending — the one remaining benchmark; needs a GPU-clean Ollama run (stop vLLM first) |
+| **vLLM FP16 + prefix-cache control** | ✅ **measured** — 13.4× continuous-batching scaling at 0.81× latency, prefix-cache **47.8% on vs 0.0% off** (control isolates the cache), guided decoding 0→1.0 |
+| **Ollama Q4 cross-engine** | ✅ **measured** (GPU-clean) — the headline contrast: **0.89× throughput scaling / 16× latency inflation**. Ollama has no continuous batching, so it serializes concurrent requests while vLLM shares decode passes. Same model, same T4, same harness — the delta is the engine. Guided decoding unsupported (0→0.0). |
 | Quality axis (Phase-4 eval) → frontier | ⏳ pending — needs a served-model eval pass |
+
+**The cross-engine finding** (`docs/reports/inference-benchmark-v1.md`): under a 1→16
+concurrency sweep, vLLM scales throughput 13.4× while *lowering* tail latency (0.81×);
+Ollama's throughput stays flat (0.89×) and latency inflates 16×. Ollama is faster
+single-stream (Q4 is lighter than FP16), but collapses under load because it lacks
+continuous batching. This is the clearest demonstration in the repo of *why* a
+dedicated serving engine matters — and it's measured, not asserted.
 
 ### What the first attempted run taught us (2026-07-24)
 

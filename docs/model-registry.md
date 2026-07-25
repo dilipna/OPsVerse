@@ -18,7 +18,7 @@ _Published to HF Hub (merged 16-bit + LoRA adapter + GGUF Q4_K_M). The GGUF serv
 | Quant | Artifact | Engine | Status | Latency p50 | Throughput |
 |---|---|---|---|---|---|
 | `fp16` | merged 16-bit safetensors | vLLM | benchmarking | 12.97s | 233 tok/s @ c16 |
-| `q4_k_m` | GGUF Q4_K_M | Ollama / llama.cpp | serving (public demo) | pending | pending |
+| `q4_k_m` | GGUF Q4_K_M | Ollama / llama.cpp | serving (public demo) | 3.64s | 33 tok/s @ c16 |
 | `awq` | AWQ 4-bit (attempted) | vLLM | dropped | pending | pending |
 
 > `awq`: AutoAWQ is unmaintained past torch 2.6 and threw cascading conflicts on Colab's torch 2.11; dropped 2026-07-24. See ADR-0016 and benchmarks/README.md.
