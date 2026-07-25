@@ -15,8 +15,9 @@ SGLang remains a documented future engine, not a claim.
 | Session driver (`run_suite.py`) | ✅ sweep + prefix-cache/structured probes; **unit-tested + smoke-tested against a mock OpenAI server** |
 | Report generator (`report.py`) | ✅ renders comparison tables + Pareto frontier from committed JSON |
 | Colab runner (`notebooks/opslm_inference_bench_colab.ipynb`) | ✅ turnkey: vLLM FP16 → Ollama Q4 → control run, each with a fail-fast smoke test |
-| **Actual benchmark run on GPU** | ⏳ pending — needs one Colab T4 session (~50 min) |
-| Report (`docs/reports/inference-benchmark-v1.md`) | ⏳ blocked on the run |
+| **vLLM FP16 on T4** | ✅ **measured** — `docs/reports/inference-benchmark-v1.md`. 12.5× continuous-batching scaling, 49% prefix-cache TTFT reduction, guided decoding 0→1.0 |
+| Ollama Q4 + prefix-cache control | ⏳ pending — first run was CPU-contaminated (GPU held by vLLM) then lost to a Colab runtime recycle; re-run downloads per-section now |
+| Quality axis (Phase-4 eval) → frontier | ⏳ pending — needs a served-model eval pass |
 
 ### What the first attempted run taught us (2026-07-24)
 
