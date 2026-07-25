@@ -2,8 +2,14 @@
 
 OpsVerse is a monorepo LLM platform: a FastAPI service over Postgres / Redis /
 Qdrant / MinIO, a Next.js UI, and an MCP server, with an offline training track
-(Colab) for the OpsLM model. This document is the map; the [ADRs](adr/) hold
-the *why* for each decision.
+(Colab) for the OpsLM model and a measured **inference/serving layer** in front of
+it. This document is the map; the [ADRs](adr/) hold the *why* for each decision.
+
+> **The serving layer has its own technical design doc:**
+> [inference-design.md](inference-design.md) — inference flow (prefill/decode,
+> KV cache, prefix caching, guided decoding), scaling (continuous batching,
+> measured 13.4×), failure handling, and tradeoffs. Numbers in
+> [inference-benchmark-v1](reports/inference-benchmark-v1.md).
 
 ## Request lifecycle (a chat query)
 
@@ -14,7 +20,9 @@ client ─POST /v1/chat─► API
    │       degradation ladder: hybrid+rerank → hybrid → no-retrieval → error
    │  3. prompt: numbered context blocks + grounded system prompt
    │  4. gateway: exact-match Redis cache? → hit: replay (free) │ miss: budget check
-   │  5. generate: LiteLLM client → Gemini (fallback chain on 429) → stream tokens (SSE)
+   │  5. generate: OpenAI-compatible client → serving layer (vLLM/Ollama serving
+   │       OpsLM, or Gemini free tier as fallback on 429) → stream tokens (SSE)
+   │       └─ serving internals (batching, KV cache, prefix cache): inference-design.md
    │  6. citations: extract [n] refs the answer used
    │  7. ledger: model, tokens, cost_usd, latency, degraded[], injection_flags
    └────► SSE events: sources → delta* → done
