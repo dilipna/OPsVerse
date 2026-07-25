@@ -1,42 +1,87 @@
 # OpsVerse AI
 
-A production-grade **LLM engineering platform** for the DevOps / MLOps / LLMOps
-domain, built end-to-end to demonstrate the full lifecycle of a modern AI system:
+An **LLM inference & operations platform** — the path a fine-tuned model takes from
+artifact to production: **served → optimized → measured → observed → deployed.**
 
-> data engineering → hybrid RAG → **evaluation-first** → fine-tuning (OpsLM) →
-> gateway → security → MCP → observability
+The model is **OpsLM** (Qwen3-4B fine-tuned for DevOps/MLOps); the workload it serves
+is citation-grounded RAG over an operations corpus. But the centre of gravity is the
+**inference layer** — vLLM serving, quantization, continuous batching, prefix caching,
+guided decoding — **measured on a real GPU, not asserted.**
 
-Everything here runs on **free tiers and local compute** (Docker Compose, Gemini
-free tier, Colab T4 for training) — the constraint is deliberate, and the
-routing/caching/quota-aware design is a direct consequence of it.
+> **Honesty bar (the project's defining constraint):** every number is measured, with
+> hardware and *n* stated; raw JSON is committed next to every report so charts are
+> reproducible; approximations are labelled at the point of use; and what a single free
+> T4 *cannot* show (tensor parallelism, multi-node) is stated as a limitation, never
+> faked. Every non-trivial decision has an [ADR](docs/adr/).
 
-> **Design ethos:** every non-trivial choice has an [ADR](docs/adr/); every quality
-> claim has a **measured number** and an honest caveat; the evaluation harness was
-> built **before** the fine-tune so "better than base" is provable, not asserted.
+Built entirely on **free tiers and local compute** (Docker Compose, Colab T4). That
+constraint drives the architecture: **ephemeral-GPU measurement + always-on CPU
+serving** ([ADR-0016](docs/adr/0016-split-serving-ephemeral-gpu-vs-always-on-cpu.md)),
+quota-aware routing, and a cache/budget kill-switch.
 
 ---
 
-## What works today (measured)
+## The inference layer (measured on a Tesla T4)
+
+One engine-agnostic harness drives an OpenAI-compatible endpoint, so the same
+measurement path benchmarks every engine and quantization — the difference is the
+engine, not the harness. Full report: **[inference-benchmark-v1](docs/reports/inference-benchmark-v1.md)** ·
+raw JSON in [`benchmarks/results/`](benchmarks/results/).
+
+| Under a 1→16 concurrency sweep | **vLLM · FP16** | **Ollama · GGUF Q4** |
+|---|---|---|
+| Throughput scaling | **13.4×** | 0.89× |
+| p95 latency inflation | **0.81×** (improved) | 16.0× |
+| Prefix cache (on vs off *control*) | **47.8%** vs 0.0% | 35.1% |
+| Guided decoding (JSON parse, off→on) | **0 → 1.00** | 0 → 0.00 (unsupported) |
+| Single-stream latency (c=1) | 13.0s | **3.6s** |
+
+**The finding:** same model, same T4, same harness — vLLM's continuous batching scales
+throughput 13× while *lowering* tail latency; Ollama, without it, serializes concurrent
+requests so throughput stays flat and latency inflates 16×. Ollama wins single-stream
+(Q4 is lighter than FP16) but collapses under load. This is the clearest measured
+demonstration of *why* a dedicated serving engine matters — and the prefix-cache
+**control** (47.8% on vs 0.0% off) isolates the cache from warm-up rather than assuming it.
+
+- **Model registry** — versions, quant, deploy status, joined to the benchmark numbers
+  automatically: [docs/model-registry.md](docs/model-registry.md)
+- **Optimization techniques** — speculative decoding (lossless-verified), guided decoding
+  (token-masking FSM), quantization Pareto frontier — implemented + unit-tested
+  ([ADR-0014](docs/adr/0014-inference-optimization-techniques.md))
+- **Honest gaps:** the quantization→quality frontier needs a served-model eval pass
+  (pending); a single T4 can't demonstrate tensor parallelism (explained, not faked).
+
+---
+
+## Evaluation-first (the discipline)
+
+The eval harness was built **before** the fine-tune, so "better than base" is provable,
+not asserted — and it has already changed the design:
 
 | Capability | Evidence |
 |---|---|
-| **Hybrid RAG** (BGE dense + BM25 sparse, RRF fusion, citations, SSE streaming) | 1,241 docs / 7,383 chunks; hybrid MRR@10 **0.705** ([ablation v2](docs/reports/retrieval-ablation-v2.md)) |
-| **Paraphrase-robust retrieval** — proved hybrid > sparse under reworded queries | sparse drops **−0.149** MRR on paraphrases, hybrid only −0.049 ([ablation v3](docs/reports/retrieval-ablation-v3.md)) |
+| **Paraphrase-robust retrieval** — the eval *falsified the project's own v2 result* | a sparse "win" on the raw set collapsed **−0.149** MRR under reworded queries; hybrid held (−0.049) → hybrid vindicated ([ablation v3](docs/reports/retrieval-ablation-v3.md)) |
+| **Hybrid RAG** (BGE dense + BM25 sparse, RRF, citations, SSE) | 1,241 docs / 7,383 chunks; hybrid MRR@10 **0.705** ([ablation v2](docs/reports/retrieval-ablation-v2.md)) |
 | **RAG answer quality** (LLM-judged, cached) | faithfulness **1.0**, answer-relevance **0.99**, citation-use **1.0** (n=20) |
-| **Evaluation platform** — Postgres eval store, pinned regression gate, CI eval gate | 15 thresholds, green on GitHub Actions ([ADR-0005](docs/adr/0005-ci-eval-gate-committed-fixture.md)) |
-| **Tool-use / structured-output eval** — deterministic JSON-fidelity gate | base model 1.0 parse/schema/field; the "did SFT break JSON?" check ([ADR-0012](docs/adr/0012-structured-output-tool-use-eval.md)) |
-| **Security** — injection quarantine, secret redaction, red-team classifier | TPR **1.0**, specificity **1.0** ([ADR-0007](docs/adr/0007-layered-security-heuristics-over-presidio.md)) |
-| **LLM gateway** — Redis response cache + daily budget kill-switch | cache hit **184× faster, $0** vs paid call ([ADR-0008](docs/adr/0008-gateway-as-library-not-proxy.md)) |
-| **Observability** — every request traced (retrieval scores → tokens → cost) | Langfuse self-host; live trace verified via API ([ADR-0010](docs/adr/0010-observability-langfuse-v2-facade.md)) |
-| **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |
-| **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 838 pairs; QLoRA training script pinned & resumable |
-| **OpsLM fine-tune** — Qwen3-4B → OpsLM, trained on Colab T4, published to HF | [dhf1234/OpsLM-v1](https://huggingface.co/dhf1234/OpsLM-v1): merged 16-bit + LoRA + GGUF Q4_K_M |
-| **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer script, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
-| **Demo site + live chat** — terminal-aesthetic Next.js, OpenAI-compatible chat | `opslm-demo/` (Vercel) + free-CPU HF Space serving the GGUF (`infra/hf-space-opslm/`) |
-| **Inference lab** — one OpenAI-compatible harness for Ollama/vLLM/SGLang | measurement math unit-tested ([ADR-0011](docs/adr/0011-inference-lab-openai-compatible-harness.md)); GPU run pending |
-| **Inference-optimization techniques** — speculative decoding, guided decoding, quant frontier | lossless-verified + token-masking + Pareto, all unit-tested ([ADR-0014](docs/adr/0014-inference-optimization-techniques.md)); served numbers pending |
+| **Regression gate in CI** — Postgres eval store, pinned thresholds | 15 thresholds, green on GitHub Actions ([ADR-0005](docs/adr/0005-ci-eval-gate-committed-fixture.md)) |
+| **Structured-output eval** — deterministic JSON-fidelity gate | 1.0 parse/schema/field — the "did SFT break tool-use?" check ([ADR-0012](docs/adr/0012-structured-output-tool-use-eval.md)) |
 
-**104 tests · ruff + pyright clean · CI + eval-gate green.**
+---
+
+## The rest of the platform (the workload it serves)
+
+| Capability | Evidence |
+|---|---|
+| **OpsLM fine-tune** — Qwen3-4B → OpsLM, QLoRA on Colab T4, published to HF | [dhf1234/OpsLM-v1](https://huggingface.co/dhf1234/OpsLM-v1): merged 16-bit + LoRA + GGUF Q4_K_M ([ADR-0009](docs/adr/0009-qwen3-4b-qlora-for-opslm.md)) |
+| **LLM gateway** — Redis response cache + daily budget kill-switch | cache hit **184× faster, $0** ([ADR-0008](docs/adr/0008-gateway-as-library-not-proxy.md)) |
+| **Security** — injection quarantine, secret redaction, red-team classifier | TPR **1.0**, specificity **1.0** ([ADR-0007](docs/adr/0007-layered-security-heuristics-over-presidio.md)) |
+| **Observability** — every request traced (retrieval scores → tokens → cost) | Langfuse self-host; live trace verified ([ADR-0010](docs/adr/0010-observability-langfuse-v2-facade.md)) |
+| **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |
+| **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 838 pairs; QLoRA script pinned & resumable |
+| **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
+| **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | `opslm-demo/` (Vercel); always-on serving path = Oracle ARM + Ollama |
+
+**176 tests · ruff + pyright clean · CI + eval-gate green · 16 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -57,20 +102,23 @@ A single `/chat` request as Langfuse sees it — retrieval and generation spans 
                  │ Ingestion  │  │ RAG engine  │  │ LLM gateway     │
                  │ parse·chunk│  │ hybrid+RRF  │  │ cache·budget·   │
                  │ quality·   │  │ rerank·cite │  │ fallback·ledger │
-                 │ security   │  │ (degrade    │  │ (LiteLLM client)│
-                 │ DVC        │  │  ladder)    │  └──────┬──────────┘
-                 └──┬─────────┘  └──┬──────────┘         │
-        ┌───────────┼───────────────┼───────┐      ┌─────▼─────┐
-     ┌──▼──┐ ┌──────▼─┐ ┌───▼────┐ ┌▼──────┐│      │ Gemini    │
-     │MinIO│ │Postgres│ │ Qdrant │ │ Redis ││      │ free tier │
-     │ raw │ │meta·   │ │ vectors│ │cache· ││      │ (+ OpsLM  │
-     │ docs│ │eval·   │ │ +BM25  │ │queue· ││      │  via HF   │
-     └─────┘ │ledger  │ └────────┘ │budget ││      │  Phase 5) │
-             └────────┘            └───────┘│      └───────────┘
-       Offline (Colab T4): instruction-gen → QLoRA (Qwen3-4B → OpsLM) → eval → HF Hub
+                 │ security   │  │ (degrade)   │  │ (OpenAI-shaped) │
+                 └──┬─────────┘  └──┬──────────┘  └──────┬──────────┘
+                    │               │                    │ OpenAI-compatible surface
+        ┌───────────┼───────────────┼───────┐   ┌────────┴─────────────────────┐
+     ┌──▼──┐ ┌──────▼─┐ ┌───▼────┐ ┌▼──────┐│   │ vLLM (Colab T4, ephemeral)   │
+     │MinIO│ │Postgres│ │ Qdrant │ │ Redis ││   │  paged-attn · cont. batching │
+     │ raw │ │meta·   │ │ vectors│ │cache· ││   │  prefix cache · guided decode│
+     │ docs│ │eval·   │ │ +BM25  │ │queue· ││   ├──────────────────────────────┤
+     └─────┘ │ledger  │ └────────┘ │budget ││   │ Ollama (Oracle ARM, always-on)│
+             └────────┘            └───────┘│   │  GGUF Q4 · the public demo    │
+                                            │   └──────────────┬───────────────┘
+                                            │        OpsLM-v1 (Qwen3-4B QLoRA)
+       Offline (Colab T4): instruction-gen → QLoRA → eval → HF Hub → serve → benchmark
 ```
 
-Full write-up: [docs/architecture.md](docs/architecture.md).
+Full write-up: [docs/architecture.md](docs/architecture.md) · repositioning rationale:
+[docs/migration-plan.md](docs/migration-plan.md).
 
 ---
 
@@ -90,51 +138,49 @@ uv run arq opsverse_api.worker.WorkerSettings
 
 # 4. Health, ingest, ask
 curl http://localhost:8100/health/ready
-curl -X POST http://localhost:8100/v1/ingest -H "Content-Type: application/json" \
-  -d '{"source_type":"github_repo","uri":"docker/awesome-compose","tool":"docker"}'
 curl -X POST http://localhost:8100/v1/chat -H "Content-Type: application/json" \
   -d '{"query":"How does a Kubernetes HPA scale on custom metrics?","stream":false}'
 ```
 
-Web UI: `cd apps/web && npm run dev` → http://localhost:3000
-(chat with citations · eval dashboard · cost/latency panel).
+Web UI: `cd apps/web && npm run dev` → http://localhost:3000 ·
+MCP server: `uv run opsverse-mcp` (config in [apps/mcp-server](apps/mcp-server/)) ·
+Config is `.env` (copy `.env.example`), every variable `OPSVERSE_`-prefixed.
 
-MCP server (Claude Desktop / Cursor): `uv run opsverse-mcp` — config in
-[apps/mcp-server](apps/mcp-server/). Requires the API running.
-
-Config is `.env` (copy `.env.example`); every variable is `OPSVERSE_`-prefixed.
+**Reproduce the inference benchmarks** (needs a CUDA GPU): open
+[`benchmarks/notebooks/opslm_inference_bench_colab.ipynb`](benchmarks/notebooks/opslm_inference_bench_colab.ipynb)
+on a Colab T4, run top to bottom, then `python benchmarks/report.py --out docs/reports/inference-benchmark-v1.md`.
 
 ---
 
 ## Repository layout
 
 ```
-apps/api          FastAPI: routers (health/ingest/search/chat/costs/evals), arq worker, stream consumer, db, alembic
+apps/api          FastAPI: routers (health/ingest/search/chat/costs/evals), arq worker, db, alembic
 apps/web          Next.js UI (chat · evals · costs)
 apps/mcp-server   MCP stdio server (search/chat/evals/costs as tools)
-libs/core         settings, thin LiteLLM client, LLM gateway (cache/budget), Redis-Streams ingestion, object store
+libs/core         settings, OpenAI-shaped LLM client, gateway (cache/budget), Redis-Streams ingest
 libs/ingestion    parsing, source-aware chunking, quality gates (dedup, language, security)
 libs/rag          hybrid retrieval, RRF, rerank, citation-grounded chat + degradation ladder
 libs/evals        IR metrics, ablation, LLM-judge (cached), regression gate, CI smoke, contamination guard
 libs/security     injection heuristic, secret redaction, red-team evaluator
-libs/training     synthetic instruction dataset pipeline (generate · quality · decontaminate)
-training/         QLoRA run (Qwen3-4B → OpsLM): scripts, Colab notebook, headless Kaggle kernel, SFT prep
+libs/training     synthetic instruction dataset + DPO preference pipeline
+benchmarks/       inference lab: harness · run_suite (sweep + probes) · report generator · results/ · techniques/
+registry/         model registry: models.json source of truth + generator that joins in measured numbers
+training/         QLoRA + DPO runs (Qwen3-4B → OpsLM): scripts, Colab notebooks, SFT prep
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
-docs/adr          15 architecture decision records
-opslm-demo        Next.js demo site (Vercel): terminal-aesthetic landing + live OpsLM chat
-infra/hf-space-opslm  free-CPU HF Space serving the OpsLM GGUF (OpenAI-compatible)
-docs/reports      6 live reports: retrieval ablations, RAG-quality, security, structured-output
-benchmarks/       inference lab: engine-agnostic harness + techniques/ (speculative, guided decoding, quant frontier)
-infra/compose     local dev stack (+ `full` profile: Langfuse)   ·   infra/k8s   documented manifests
+docs/adr          16 architecture decision records          docs/reports  ablations + inference benchmark
+docs/blog         2 posts        opslm-demo  Vercel demo site        infra/  compose · k8s · oracle-opslm
 ```
 
 ## Development
 
 ```bash
-uv run pytest -q            # 104 tests
-uv run ruff check .         # lint
-uv run pyright              # types
-uv run python -m opsverse_evals.regression   # eval regression gate
+uv run pytest -q            # 176 tests
+uv run ruff check . && uv run ruff format --check .
+uv run pyright
+uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
+python benchmarks/report.py --out docs/reports/inference-benchmark-v1.md   # regen from results/
+python registry/registry.py --out docs/model-registry.md                   # regen registry
 ```
 
 ## Key decisions (ADRs)
@@ -153,7 +199,8 @@ uv run python -m opsverse_evals.regression   # eval regression gate
 [0012](docs/adr/0012-structured-output-tool-use-eval.md) tool-use eval ·
 [0013](docs/adr/0013-streaming-ingestion-redis-streams.md) streaming ingestion ·
 [0014](docs/adr/0014-inference-optimization-techniques.md) inference optimization ·
-[0015](docs/adr/0015-dpo-preference-alignment.md) DPO alignment
+[0015](docs/adr/0015-dpo-preference-alignment.md) DPO alignment ·
+[0016](docs/adr/0016-split-serving-ephemeral-gpu-vs-always-on-cpu.md) split serving
 
 ## Writing
 
