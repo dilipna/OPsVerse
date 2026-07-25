@@ -1,0 +1,62 @@
+{
+ "meta": {
+  "engine": "vllm",
+  "quant": "fp16-noprefixcache",
+  "model": "dhf1234/OpsLM-v1",
+  "endpoint": "http://localhost:8000/v1",
+  "notes": "CONTROL: prefix caching disabled \u2014 isolates the cache effect",
+  "measured_at": "2026-07-25T02:40:01Z",
+  "python": "3.12.13",
+  "platform": "Linux-6.6.122+-x86_64-with-glibc2.35",
+  "gpu": "Tesla T4",
+  "gpu_memory": "15360 MiB"
+ },
+ "levels": [
+  {
+   "concurrency": 1,
+   "requests": 8,
+   "ok": 8,
+   "errors": 0,
+   "ttft_s": {
+    "p50": 0.0695,
+    "p95": 0.1018
+   },
+   "itl_s": {
+    "p50": 0.0452,
+    "p95": 0.0518
+   },
+   "latency_s": {
+    "p50": 11.3419,
+    "p95": 13.2836
+   },
+   "tokens_per_s_per_req": {
+    "p50": 22.05,
+    "p95": 22.93
+   },
+   "throughput_tokens_s": 21.32
+  }
+ ],
+ "batching": {
+  "measured": false,
+  "reason": "need >=2 concurrency levels with successful requests"
+ },
+ "prefix_cache": {
+  "measured": true,
+  "cold_ttft_s": 0.1371,
+  "warm_ttft_s_p50": 0.1547,
+  "ttft_reduction": 0.0,
+  "warm_requests": 4
+ },
+ "structured_output": {
+  "guided_off": {
+   "json_parse_rate": 0.0,
+   "n": 4,
+   "empty_responses": 0
+  },
+  "guided_on": {
+   "json_parse_rate": 1.0,
+   "n": 4,
+   "empty_responses": 0
+  }
+ }
+}
