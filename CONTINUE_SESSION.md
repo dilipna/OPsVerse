@@ -6,55 +6,37 @@
 
 ## 🎯 The one thing that matters
 
-**The user demos on 2026-07-27.** The project is in strong shape and is *already*
-demo-worthy — the remaining risk is **not** missing features, it is that
-**`docs/demo-runbook.md` tells the OLD story.** It was written before the project
-was repositioned and is now actively wrong:
+**The user demos on 2026-07-27.** The project is in strong shape and **already
+demo-worthy**. The docs are consistent, every claim is backed by committed data, and
+**`docs/demo-runbook.md` has been rewritten inference-first** (2026-07-25) — it now
+leads with the measured benchmark, has correct counts, marks every step that needs no
+infrastructure `[no stack]`, and carries a "tough questions → honest answers" section.
 
-- pitches "a production LLM platform for DevOps knowledge" (the old RAG-first framing)
-- says "**Nine ADRs, 90 tests**" → actually **16 ADRs, 176 tests**
-- says "13 pinned thresholds" → actually **15**
-- step 8 says the OpsLM training run "is a Colab session away" → **it trained days ago and is published**
-- **contains zero mention of the inference benchmark** — the project's centerpiece
-
-If the user demos from that script, they present a weaker project than they built.
-**Fixing it is P0.** Everything else is optional.
+**The remaining risk is purely operational: the runbook's live commands have never been
+run end-to-end against a live stack.** That is this session's P0.
 
 ## Priority plan for this session — do strictly in order
 
-### P0 — demo-critical (~90 min). Do NOT start anything else until these are done.
+### P0 — demo-critical (~60 min). Nothing else until these pass.
 
-1. **Rewrite `docs/demo-runbook.md` inference-first.** New spine (~8–10 min talk):
-   - *Pitch (30s):* "An LLM **inference & operations platform**. I took a model I
-     fine-tuned, served it on real GPU hardware, and **measured** what production
-     serving actually buys you. 16 ADRs, 176 tests, CI + eval gate green."
-   - *The measured inference result (2–3 min) — NEW, make this the money shot.*
-     Open `benchmarks/dashboard.html` (self-contained, no stack needed — **safest
-     demo asset in the repo, works with zero infrastructure**). Story: vLLM
-     **13.4× throughput scaling at 0.81× latency** vs Ollama **0.89× / 16×** —
-     same model, same T4, same harness, so the delta is continuous batching.
-     Then the **prefix-cache control**: 47.8% on vs **0.0% off** — "a measurement
-     without its control is an anecdote."
-   - *Eval-first (90s):* `uv run python -m opsverse_evals.regression` (15 green) +
-     `/evals` tab. The v3 paraphrase story — the eval that **falsified my own
-     result**. This is the strongest judgment signal in the project.
-   - *Live RAG answer + Langfuse trace (2 min):* keep old steps 2–3, they're good.
-   - *Gateway cache (45s):* keep old step 4 (184×, $0).
-   - *Security (45s):* keep old step 6 (TPR 1.0 / spec 1.0).
-   - *Model + registry (45s):* OpsLM **is trained and published** (`dhf1234/OpsLM-v1`)
-     — show `docs/model-registry.md`. Say the before/after eval is the next serving
-     session; **do not claim it exists.**
-   - *Close:* "Free tiers, measured everywhere, an ADR for every hard call."
-   - Update all counts; delete the stale "training run is a session away" line.
-2. **Verify the stack actually comes up** (see "How to bring the local stack up"
-   below) and `/health/ready` returns 4× ok; `regression` = 15/15 PASS.
-3. **Tell the user to rehearse once, end to end.** Mind the 20/day gemini-3.5 chat quota.
+1. **Bring the stack up and walk the runbook top to bottom yourself**, verifying every
+   command actually works (see "How to bring the local stack up" below):
+   - `curl http://localhost:8100/health/ready` → 4× ok
+   - `uv run python -m opsverse_evals.regression` → **15/15 PASS**
+   - runbook step 4 (live chat in the web UI) → streams, cites, no degraded badges
+   - runbook step 6 (`curl` cache hit) → prints `(cached)`, cost `0.0`, ~30ms
+   - runbook step 7 (`opsverse_security.evaluate`) → TPR 1.0 / spec 1.0
+   - runbook step 5 (Langfuse trace visible at :3002)
+   **Fix the runbook wherever reality differs — reality wins.**
+2. **Confirm `benchmarks/dashboard.html` opens correctly from disk** in the browser
+   they'll present with. It's the `[no stack]` centerpiece and the whole fallback plan.
+3. **Have the user rehearse once, end to end, out loud.** Mind the 20/day
+   `gemini-3.5-flash` chat quota — at most two live-chat rehearsals.
 
-### P1 — high value if P0 is done (~30 min)
-4. **Make the dashboard reachable on demo day** — it's the best visual asset and needs
-   no stack. Simplest: open `benchmarks/dashboard.html` from disk (already works).
-   Optional: GitHub Pages, or the live artifact link.
-5. **Skim the README top section aloud** — it's the fallback pitch if a live step fails.
+### P1 — polish if P0 passes (~30 min)
+4. Read the **"Tough questions"** section of the runbook with the user so the honest
+   answers (especially "is the fine-tune actually better?") are natural, not read aloud.
+5. Optional: deploy `benchmarks/dashboard.html` to GitHub Pages for a shareable link.
 
 ### P2 — STRETCH ONLY. Do not start unless P0+P1 are finished and there is real time left.
 6. **Before/after eval** (base Qwen3-4B vs OpsLM-v1) — the one genuine content gap.
@@ -150,7 +132,7 @@ Depth > breadth; honest numbers always; a claim without a measured number is a l
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
 | 5 OpsLM fine-tune | ✅ **TRAINED on Colab T4 → `dhf1234/OpsLM-v1`**: merged 16-bit + LoRA adapter + **GGUF Q4_K_M** (`qwen3-4b-base.Q4_K_M.gguf`), all verified on the Hub. **+ DPO pipeline for v2 (ADR-0015).** Before/after eval still pending a serving session. |
 | 6 LLM gateway | ✅ Redis cache (hit = 184× faster, $0) + daily budget kill-switch (ADR-0008) |
-| 7 Inference lab | 🟡 harness + **5 inference-opt techniques** written & unit-tested (ADR-0011, ADR-0014) — **GPU/served-model numbers NOT yet produced** |
+| 7 Inference lab | ✅ **MEASURED 2026-07-25** on a Colab T4 — vLLM vs Ollama, batching 13.4× vs 0.89×, prefix cache 47.8% vs 0.0% control, guided decoding 0→1.0 (ADR-0011, ADR-0014, ADR-0016) |
 | 8 Observability | ✅ Langfuse v2 self-host (:3002) + tracing facade; live trace verified + screenshot in README (ADR-0010) |
 | 9 Security | ✅ red-team classifier TPR 1.0 / spec 1.0; **injection quarantine verified live** (poisoned → 0 chunks) on both ingest paths; secret redaction (ADR-0007) |
 | 10 MCP server | ✅ 5 tools verified live over stdio; Claude Desktop/Cursor config in `apps/mcp-server/README.md` |
