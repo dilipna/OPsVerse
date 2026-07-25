@@ -1,6 +1,8 @@
 # ADR-0009: Qwen3-4B + QLoRA for OpsLM
 
-**Status:** accepted (2026-07-18) — training pipeline committed; first run pending
+**Status:** accepted (2026-07-18) — **trained 2026-07-22** on a Colab T4 and published to
+`dhf1234/OpsLM-v1` (merged 16-bit + LoRA adapter + GGUF Q4_K_M); served and benchmarked
+2026-07-25. The before/after-vs-base eval is still outstanding — see `docs/model-registry.md`.
 
 ## Context
 
