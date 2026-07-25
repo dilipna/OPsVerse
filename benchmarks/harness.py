@@ -122,7 +122,8 @@ def summarize(results: list[RequestResult], wall_clock_s: float) -> dict[str, An
 async def _one_request(client: Any, base_url: str, model: str, prompt: str) -> RequestResult:
     start = time.perf_counter()
     ttft: float | None = None
-    tokens = 0
+    chunk_tokens = 0  # count of streamed content chunks — the fallback estimate
+    usage_tokens = 0  # server-reported completion_tokens — exact, preferred
     try:
         async with client.stream(
             "POST",
@@ -132,20 +133,44 @@ async def _one_request(client: Any, base_url: str, model: str, prompt: str) -> R
                 "messages": [{"role": "user", "content": prompt}],
                 "stream": True,
                 "max_tokens": 256,
+                # Ask for a terminal usage chunk. Both vLLM and Ollama honour
+                # this and it yields an exact completion-token count, which the
+                # streamed-chunk approximation below cannot: Ollama's OpenAI
+                # surface shapes its deltas differently from vLLM's, so counting
+                # chunks silently undercounts (or zero-counts) on Ollama while
+                # looking fine on vLLM. Usage is the same number on both.
+                "stream_options": {"include_usage": True},
             },
             timeout=120.0,
         ) as resp:
             resp.raise_for_status()
             async for line in resp.aiter_lines():
-                if not line.startswith("data: ") or line.strip() == "data: [DONE]":
+                # Tolerate "data:" with or without the SSE-conventional space;
+                # not every OpenAI-compatible server emits the space.
+                if not line.startswith("data:"):
                     continue
-                if ttft is None:
-                    ttft = time.perf_counter() - start
-                delta = json.loads(line[6:])["choices"][0].get("delta", {}).get("content")
-                if delta:
-                    tokens += 1  # streamed-chunk count ~ output tokens (documented approximation)
+                payload = line[len("data:") :].strip()
+                if payload == "[DONE]":
+                    continue
+                try:
+                    chunk = json.loads(payload)
+                except json.JSONDecodeError:
+                    continue
+                # The terminal usage chunk carries an empty choices list, so
+                # guard the index before touching it.
+                choices = chunk.get("choices") or []
+                if choices:
+                    if ttft is None:
+                        ttft = time.perf_counter() - start
+                    if (choices[0].get("delta") or {}).get("content"):
+                        chunk_tokens += 1
+                usage = chunk.get("usage") or {}
+                if usage.get("completion_tokens"):
+                    usage_tokens = usage["completion_tokens"]
     except Exception:
+        tokens = usage_tokens or chunk_tokens
         return RequestResult(ttft, time.perf_counter() - start, tokens, ok=False)
+    tokens = usage_tokens or chunk_tokens
     return RequestResult(ttft, time.perf_counter() - start, tokens, ok=True)
 
 
