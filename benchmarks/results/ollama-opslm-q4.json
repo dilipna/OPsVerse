@@ -1,0 +1,111 @@
+{
+ "meta": {
+  "engine": "ollama",
+  "quant": "q4_k_m",
+  "model": "hf.co/dhf1234/OpsLM-v1:Q4_K_M",
+  "endpoint": "http://localhost:11434/v1",
+  "notes": "ollama, T4 GPU offload, GGUF Q4_K_M",
+  "measured_at": "2026-07-25T02:50:27Z",
+  "python": "3.12.13",
+  "platform": "Linux-6.6.122+-x86_64-with-glibc2.35",
+  "gpu": "Tesla T4",
+  "gpu_memory": "15360 MiB"
+ },
+ "levels": [
+  {
+   "concurrency": 1,
+   "requests": 32,
+   "ok": 32,
+   "errors": 0,
+   "ttft_s": {
+    "p50": 0.3819,
+    "p95": 0.6566
+   },
+   "itl_s": {
+    "p50": 0.0163,
+    "p95": 0.018
+   },
+   "latency_s": {
+    "p50": 3.6427,
+    "p95": 4.9768
+   },
+   "tokens_per_s_per_req": {
+    "p50": 25.53,
+    "p95": 58.47
+   },
+   "throughput_tokens_s": 37.22
+  },
+  {
+   "concurrency": 4,
+   "requests": 32,
+   "ok": 32,
+   "errors": 0,
+   "ttft_s": {
+    "p50": 12.8365,
+    "p95": 16.9202
+   },
+   "itl_s": {
+    "p50": 0.0211,
+    "p95": 0.0242
+   },
+   "latency_s": {
+    "p50": 16.8701,
+    "p95": 20.9567
+   },
+   "tokens_per_s_per_req": {
+    "p50": 11.6,
+    "p95": 23.56
+   },
+   "throughput_tokens_s": 34.61
+  },
+  {
+   "concurrency": 16,
+   "requests": 32,
+   "ok": 32,
+   "errors": 0,
+   "ttft_s": {
+    "p50": 64.6318,
+    "p95": 74.7265
+   },
+   "itl_s": {
+    "p50": 0.0216,
+    "p95": 0.0229
+   },
+   "latency_s": {
+    "p50": 69.7734,
+    "p95": 79.6455
+   },
+   "tokens_per_s_per_req": {
+    "p50": 3.25,
+    "p95": 11.38
+   },
+   "throughput_tokens_s": 33.21
+  }
+ ],
+ "batching": {
+  "measured": true,
+  "from_concurrency": 1,
+  "to_concurrency": 16,
+  "throughput_scaling": 0.892,
+  "p95_latency_inflation": 16.003
+ },
+ "prefix_cache": {
+  "measured": true,
+  "cold_ttft_s": 0.8107,
+  "warm_ttft_s_p50": 0.5257,
+  "ttft_reduction": 0.3515,
+  "warm_requests": 4
+ },
+ "structured_output": {
+  "guided_off": {
+   "json_parse_rate": 0.0,
+   "n": 4,
+   "empty_responses": 4
+  },
+  "guided_on": {
+   "json_parse_rate": 0.0,
+   "n": 4,
+   "empty_responses": 4
+  }
+ }
+}

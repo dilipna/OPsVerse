@@ -7,13 +7,14 @@
 
 - **Hardware:** Tesla T4
 - **Measured:** 2026-07-25
-- **Configurations:** 2
+- **Configurations:** 3
 - **Output tokens** are approximated by streamed-chunk count (see `harness.py`).
   The approximation is identical across engines, so comparisons hold even where
   the absolute token count does not.
 
 - `vllm/fp16` · model `dhf1234/OpsLM-v1` · `vllm-opslm-fp16.json` — vllm 0.25.1, T4, prefix-caching on
 - `vllm/fp16-noprefixcache` · model `dhf1234/OpsLM-v1` · `vllm-opslm-fp16-noprefix.json` — CONTROL: prefix caching disabled — isolates the cache effect
+- `ollama/q4_k_m` · model `hf.co/dhf1234/OpsLM-v1:Q4_K_M` · `ollama-opslm-q4.json` — ollama, T4 GPU offload, GGUF Q4_K_M
 
 ## Serving metrics at concurrency 1
 
@@ -21,18 +22,21 @@
 |---|---|---|---|---|---|
 | `vllm/fp16` | 0.059 | 0.121 | 0.0602 | 17.42 | 0 |
 | `vllm/fp16-noprefixcache` | 0.070 | 0.102 | 0.0452 | 21.32 | 0 |
+| `ollama/q4_k_m` | 0.382 | 0.657 | 0.0163 | 37.22 | 0 |
 
 ## Serving metrics at concurrency 4
 
 | Config | TTFT p50 (s) | TTFT p95 (s) | ITL p50 (s) | Throughput (tok/s) | Errors |
 |---|---|---|---|---|---|
 | `vllm/fp16` | 0.126 | 0.128 | 0.0420 | 89.66 | 0 |
+| `ollama/q4_k_m` | 12.836 | 16.920 | 0.0211 | 34.61 | 0 |
 
 ## Serving metrics at concurrency 16
 
 | Config | TTFT p50 (s) | TTFT p95 (s) | ITL p50 (s) | Throughput (tok/s) | Errors |
 |---|---|---|---|---|---|
 | `vllm/fp16` | 0.156 | 0.173 | 0.0514 | 233.18 | 0 |
+| `ollama/q4_k_m` | 64.632 | 74.727 | 0.0216 | 33.21 | 0 |
 
 ## Continuous batching
 
@@ -44,6 +48,7 @@ costs per-request tail latency.
 | Config | Sweep | Throughput scaling | p95 latency inflation |
 |---|---|---|---|
 | `vllm/fp16` | 1→16 | 13.39x | 0.81x |
+| `ollama/q4_k_m` | 1→16 | 0.89x | 16.00x |
 
 ## Feature probes
 
@@ -55,10 +60,11 @@ the informative number is the unguided baseline it is compared against.
 |---|---|---|
 | `vllm/fp16` | 47.8% | 0.00 → 1.00 |
 | `vllm/fp16-noprefixcache` | 0.0% | 0.00 → 1.00 |
+| `ollama/q4_k_m` | 35.1% | 0.00 → 0.00 |
 
 ## Quantization: quality vs. latency frontier
 
 No configuration has both a latency measurement and a quality score yet.
 
-> Excluded from the frontier (no quality score supplied): `vllm/fp16`, `vllm/fp16-noprefixcache`. Run the Phase-4 eval against these configurations and pass `--quality`.
+> Excluded from the frontier (no quality score supplied): `vllm/fp16`, `vllm/fp16-noprefixcache`, `ollama/q4_k_m`. Run the Phase-4 eval against these configurations and pass `--quality`.
 
