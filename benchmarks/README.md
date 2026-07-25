@@ -1,10 +1,10 @@
 # Inference Engineering Lab (Phase 7)
 
-Reproducible benchmarks of **Ollama vs vLLM vs SGLang** serving OpsLM
-(Qwen3-4B, and its quantized GGUF/AWQ variants) on a free Colab/Kaggle GPU.
-The comparison *is* the deliverable — this directory holds the harness,
-methodology, and (once run) raw CSVs/JSON; the servers run on the GPU box, not
-this machine.
+Reproducible benchmarks of **vLLM vs Ollama** serving OpsLM (Qwen3-4B FP16 and
+its GGUF Q4_K_M) on a free Colab T4. The comparison *is* the deliverable — this
+directory holds the harness, methodology, and (once run) raw JSON; the servers
+run on the GPU box, not this machine. AWQ was attempted and dropped (see below);
+SGLang remains a documented future engine, not a claim.
 
 ## Status (honest)
 
@@ -14,9 +14,31 @@ this machine.
 | Inference techniques (`techniques/`) | ✅ implemented + **unit-tested** (speculative, guided decoding, quant frontier) |
 | Session driver (`run_suite.py`) | ✅ sweep + prefix-cache/structured probes; **unit-tested + smoke-tested against a mock OpenAI server** |
 | Report generator (`report.py`) | ✅ renders comparison tables + Pareto frontier from committed JSON |
-| Colab runner (`notebooks/opslm_inference_bench_colab.ipynb`) | ✅ turnkey: vLLM FP16 → AWQ → Ollama Q4 → control run |
-| **Actual benchmark run on GPU** | ⏳ pending — needs one Colab T4 session (~90 min) |
+| Colab runner (`notebooks/opslm_inference_bench_colab.ipynb`) | ✅ turnkey: vLLM FP16 → Ollama Q4 → control run, each with a fail-fast smoke test |
+| **Actual benchmark run on GPU** | ⏳ pending — needs one Colab T4 session (~50 min) |
 | Report (`docs/reports/inference-benchmark-v1.md`) | ⏳ blocked on the run |
+
+### What the first attempted run taught us (2026-07-24)
+
+The first live T4 session produced **no trustworthy numbers** and is recorded here
+rather than hidden — three of the four issues are now fixed in code:
+
+- **AWQ dropped.** AutoAWQ is unmaintained past torch 2.6 and threw three
+  cascading dependency conflicts (torchvision, then `torchao<0.16`) against
+  Colab's torch 2.11 stack; loading it also leaked GPU memory into the kernel and
+  killed the next server. The FP16-vs-Q4 comparison stands without it.
+- **Ollama silently ran on CPU** — its installer failed to detect the T4 (missing
+  `lshw`/`pciutils`), so the "T4" latencies were CPU latencies. The notebook now
+  installs the GPU deps first and verifies `ollama ps` shows GPU offload before
+  trusting a number.
+- **Token count read 0 on Ollama** — the harness's streamed-chunk counter didn't
+  survive Ollama's delta shape. `harness.py` now requests `include_usage` and
+  prefers the server-reported `completion_tokens`, verified against a mock that
+  reproduces the zero-content-delta case.
+- **vLLM served `/v1/models` but 400'd every chat call** — the likely missing
+  chat template in the merged repo. The notebook now runs a 3-second smoke test
+  after each server and auto-retries vLLM once with Qwen3's chat template,
+  surfacing the real error instead of failing 32 requests silently.
 
 Nothing here reports numbers that weren't measured. The harness is engine-
 agnostic (any OpenAI-compatible `/v1/chat/completions`), so the three engines
