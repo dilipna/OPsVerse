@@ -5,6 +5,27 @@
 > Persistent memory: `C:\Users\Dilip\.claude\projects\c--Users-Dilip-OneDrive-Pictures-ftrag\memory\`.
 > Demo script: `docs/demo-runbook.md` (rehearsal-ready, ~8 min).
 
+## ⭐ LATEST (2026-07-25) — repositioned to an LLM inference platform; benchmarks MEASURED
+
+> This block supersedes the older status below where they differ. Full rationale: `docs/migration-plan.md`.
+
+**Repositioning:** OpsVerse is now framed as an **"LLM inference & operations platform"** — README + architecture lead with the inference layer; RAG is "the workload it serves". Split serving (ADR-0016): ephemeral Colab-T4 GPU for measurement, always-on Oracle-ARM CPU for the demo.
+
+**The flagship gap is closed — inference is measured on a real T4:**
+- vLLM fp16 vs Ollama Q4, same model / T4 / harness: **vLLM 13.4× throughput scaling at 0.81× latency; Ollama 0.89× / 16×** (no continuous batching). Prefix cache **47.8% on vs 0.0% off** (control run isolates it). Guided decoding vLLM **0→1.0**, Ollama 0→0.0.
+- Report `docs/reports/inference-benchmark-v1.md` · raw JSON `benchmarks/results/*.json` · visual `benchmarks/dashboard.html` (+ live artifact).
+
+**New this session:** `benchmarks/run_suite.py` + `report.py` (measurement suite, 29 tests) · `registry/` model registry → `docs/model-registry.md` (15 tests) · hardened Colab notebook `benchmarks/notebooks/opslm_inference_bench_colab.ipynb` · README rewritten inference-first. **176 tests, 16 ADRs, ruff+format+pyright clean, pushed (HEAD `cbb6e16`).**
+
+**Colab lessons (all baked into the notebook, don't rediscover):** vLLM install via `uv pip install --system vllm --torch-backend=auto` → restart → set `LD_LIBRARY_PATH` + ctypes-preload `libcudart.so.13`; **AWQ dropped** (AutoAWQ unmaintained past torch 2.6, cascading conflicts, GPU-mem leak); **stop vLLM before Ollama** (else Ollama runs 80% on CPU — verify `ollama ps` says 100% GPU); harness now uses `include_usage` for token counts; **Colab recycles the whole runtime** — each run cats its JSON to stdout so results survive.
+
+**LEFTOVER — highest leverage (needs local stack + a served OpsLM endpoint):**
+1. **Before/after eval** (base Qwen3-4B vs OpsLM-v1) — the fine-tune's justification, still unmeasured. `OPSVERSE_CHAT_MODEL=... OPSVERSE_LLM_API_BASE=... uv run python -m opsverse_evals.rag_suite --n 20` (burns the 20/day gemini-3.5 chat quota).
+2. **Quantization→quality frontier:** feed eval scores to `python benchmarks/report.py --quality fp16=X --quality q4_k_m=Y`.
+3. Optional: deploy the dashboard (GitHub Pages / embed in Vercel demo); wire the demo chat to a live endpoint.
+
+---
+
 ## What this is
 
 Portfolio project #3 (of 3): a production-grade **LLM engineering platform** for DevOps/MLOps.
