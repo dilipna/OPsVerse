@@ -26,7 +26,8 @@ quota-aware routing, and a cache/budget kill-switch.
 One engine-agnostic harness drives an OpenAI-compatible endpoint, so the same
 measurement path benchmarks every engine and quantization — the difference is the
 engine, not the harness. Full report: **[inference-benchmark-v1](docs/reports/inference-benchmark-v1.md)** ·
-raw JSON in [`benchmarks/results/`](benchmarks/results/).
+visual dashboard: **[benchmarks/dashboard.html](benchmarks/dashboard.html)** (self-contained,
+open in any browser) · raw JSON in [`benchmarks/results/`](benchmarks/results/).
 
 | Under a 1→16 concurrency sweep | **vLLM · FP16** | **Ollama · GGUF Q4** |
 |---|---|---|
