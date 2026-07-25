@@ -171,7 +171,7 @@ registry/         model registry: models.json source of truth + generator that j
 training/         QLoRA + DPO runs (Qwen3-4B → OpsLM): scripts, Colab notebooks, SFT prep
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
 docs/adr          16 architecture decision records          docs/reports  ablations + inference benchmark
-docs/blog         2 posts        opslm-demo  Vercel demo site        infra/  compose · k8s · oracle-opslm
+docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  compose · k8s · oracle-opslm
 ```
 
 ## Development

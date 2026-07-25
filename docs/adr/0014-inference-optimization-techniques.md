@@ -1,6 +1,9 @@
 # ADR-0014: Inference-optimization techniques, measured in the lab
 
-**Status:** accepted (2026-07-20) — algorithms + harness committed and tested; served numbers pending OpsLM
+**Status:** accepted (2026-07-20) — **partially measured 2026-07-25** on a Colab T4: prefix caching
+(47.8% TTFT reduction vs a 0.0% cache-off control), guided decoding (JSON parse 0→1.0), and continuous
+batching (13.4× throughput scaling) are measured; speculative decoding and multi-LoRA remain
+implemented-and-unit-tested only. Numbers: `docs/reports/inference-benchmark-v1.md`
 
 ## Context
 

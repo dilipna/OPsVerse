@@ -1,6 +1,7 @@
 # ADR-0011: One OpenAI-compatible harness for the inference lab
 
-**Status:** accepted (2026-07-18) — harness committed + tested; GPU run pending
+**Status:** accepted (2026-07-18) — **validated 2026-07-25**: the one-harness bet paid off, measuring
+vLLM and Ollama on a Colab T4 with zero per-engine code (`docs/reports/inference-benchmark-v1.md`)
 
 ## Context
 
