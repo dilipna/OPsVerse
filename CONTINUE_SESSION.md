@@ -1,28 +1,108 @@
-# OpsVerse AI — Session Handoff
+# OpsVerse AI — FINAL SESSION HANDOFF (demo 2026-07-27)
 
-> Give this file to Claude at the start of the next session. Everything needed to continue is here.
-> Full roadmap: `C:\Users\Dilip\.claude\plans\opsverse-ai-immutable-scroll.md` (approved 11-phase plan).
-> Persistent memory: `C:\Users\Dilip\.claude\projects\c--Users-Dilip-OneDrive-Pictures-ftrag\memory\`.
-> Demo script: `docs/demo-runbook.md` (rehearsal-ready, ~8 min).
+> **Read this whole top block before doing anything.** This is the **last working session**
+> before the user's demo. Persistent memory:
+> `C:\Users\Dilip\.claude\projects\c--Users-Dilip-OneDrive-Pictures-ftrag\memory\`.
 
-## ⭐ LATEST (2026-07-25) — repositioned to an LLM inference platform; benchmarks MEASURED
+## 🎯 The one thing that matters
 
-> This block supersedes the older status below where they differ. Full rationale: `docs/migration-plan.md`.
+**The user demos on 2026-07-27.** The project is in strong shape and is *already*
+demo-worthy — the remaining risk is **not** missing features, it is that
+**`docs/demo-runbook.md` tells the OLD story.** It was written before the project
+was repositioned and is now actively wrong:
 
-**Repositioning:** OpsVerse is now framed as an **"LLM inference & operations platform"** — README + architecture lead with the inference layer; RAG is "the workload it serves". Split serving (ADR-0016): ephemeral Colab-T4 GPU for measurement, always-on Oracle-ARM CPU for the demo.
+- pitches "a production LLM platform for DevOps knowledge" (the old RAG-first framing)
+- says "**Nine ADRs, 90 tests**" → actually **16 ADRs, 176 tests**
+- says "13 pinned thresholds" → actually **15**
+- step 8 says the OpsLM training run "is a Colab session away" → **it trained days ago and is published**
+- **contains zero mention of the inference benchmark** — the project's centerpiece
 
-**The flagship gap is closed — inference is measured on a real T4:**
-- vLLM fp16 vs Ollama Q4, same model / T4 / harness: **vLLM 13.4× throughput scaling at 0.81× latency; Ollama 0.89× / 16×** (no continuous batching). Prefix cache **47.8% on vs 0.0% off** (control run isolates it). Guided decoding vLLM **0→1.0**, Ollama 0→0.0.
-- Report `docs/reports/inference-benchmark-v1.md` · raw JSON `benchmarks/results/*.json` · visual `benchmarks/dashboard.html` (+ live artifact).
+If the user demos from that script, they present a weaker project than they built.
+**Fixing it is P0.** Everything else is optional.
 
-**New this session:** `benchmarks/run_suite.py` + `report.py` (measurement suite, 29 tests) · `registry/` model registry → `docs/model-registry.md` (15 tests) · hardened Colab notebook `benchmarks/notebooks/opslm_inference_bench_colab.ipynb` · README rewritten inference-first. **176 tests, 16 ADRs, ruff+format+pyright clean, pushed (HEAD `cbb6e16`).**
+## Priority plan for this session — do strictly in order
 
-**Colab lessons (all baked into the notebook, don't rediscover):** vLLM install via `uv pip install --system vllm --torch-backend=auto` → restart → set `LD_LIBRARY_PATH` + ctypes-preload `libcudart.so.13`; **AWQ dropped** (AutoAWQ unmaintained past torch 2.6, cascading conflicts, GPU-mem leak); **stop vLLM before Ollama** (else Ollama runs 80% on CPU — verify `ollama ps` says 100% GPU); harness now uses `include_usage` for token counts; **Colab recycles the whole runtime** — each run cats its JSON to stdout so results survive.
+### P0 — demo-critical (~90 min). Do NOT start anything else until these are done.
 
-**LEFTOVER — highest leverage (needs local stack + a served OpsLM endpoint):**
-1. **Before/after eval** (base Qwen3-4B vs OpsLM-v1) — the fine-tune's justification, still unmeasured. `OPSVERSE_CHAT_MODEL=... OPSVERSE_LLM_API_BASE=... uv run python -m opsverse_evals.rag_suite --n 20` (burns the 20/day gemini-3.5 chat quota).
-2. **Quantization→quality frontier:** feed eval scores to `python benchmarks/report.py --quality fp16=X --quality q4_k_m=Y`.
-3. Optional: deploy the dashboard (GitHub Pages / embed in Vercel demo); wire the demo chat to a live endpoint.
+1. **Rewrite `docs/demo-runbook.md` inference-first.** New spine (~8–10 min talk):
+   - *Pitch (30s):* "An LLM **inference & operations platform**. I took a model I
+     fine-tuned, served it on real GPU hardware, and **measured** what production
+     serving actually buys you. 16 ADRs, 176 tests, CI + eval gate green."
+   - *The measured inference result (2–3 min) — NEW, make this the money shot.*
+     Open `benchmarks/dashboard.html` (self-contained, no stack needed — **safest
+     demo asset in the repo, works with zero infrastructure**). Story: vLLM
+     **13.4× throughput scaling at 0.81× latency** vs Ollama **0.89× / 16×** —
+     same model, same T4, same harness, so the delta is continuous batching.
+     Then the **prefix-cache control**: 47.8% on vs **0.0% off** — "a measurement
+     without its control is an anecdote."
+   - *Eval-first (90s):* `uv run python -m opsverse_evals.regression` (15 green) +
+     `/evals` tab. The v3 paraphrase story — the eval that **falsified my own
+     result**. This is the strongest judgment signal in the project.
+   - *Live RAG answer + Langfuse trace (2 min):* keep old steps 2–3, they're good.
+   - *Gateway cache (45s):* keep old step 4 (184×, $0).
+   - *Security (45s):* keep old step 6 (TPR 1.0 / spec 1.0).
+   - *Model + registry (45s):* OpsLM **is trained and published** (`dhf1234/OpsLM-v1`)
+     — show `docs/model-registry.md`. Say the before/after eval is the next serving
+     session; **do not claim it exists.**
+   - *Close:* "Free tiers, measured everywhere, an ADR for every hard call."
+   - Update all counts; delete the stale "training run is a session away" line.
+2. **Verify the stack actually comes up** (see "How to bring the local stack up"
+   below) and `/health/ready` returns 4× ok; `regression` = 15/15 PASS.
+3. **Tell the user to rehearse once, end to end.** Mind the 20/day gemini-3.5 chat quota.
+
+### P1 — high value if P0 is done (~30 min)
+4. **Make the dashboard reachable on demo day** — it's the best visual asset and needs
+   no stack. Simplest: open `benchmarks/dashboard.html` from disk (already works).
+   Optional: GitHub Pages, or the live artifact link.
+5. **Skim the README top section aloud** — it's the fallback pitch if a live step fails.
+
+### P2 — STRETCH ONLY. Do not start unless P0+P1 are finished and there is real time left.
+6. **Before/after eval** (base Qwen3-4B vs OpsLM-v1) — the one genuine content gap.
+   Needs a **served OpsLM endpoint** (Colab vLLM + a tunnel) *and* the local stack:
+   ```bash
+   OPSVERSE_CHAT_MODEL=openai/OpsLM-v1 OPSVERSE_LLM_API_BASE=<tunnel-url>/v1 \
+     uv run python -m opsverse_evals.rag_suite --n 20
+   ```
+   Then the frontier: `python benchmarks/report.py --results benchmarks/results
+   --quality fp16=<score> --quality q4_k_m=<score> --out docs/reports/inference-benchmark-v1.md`.
+   **Risk: HIGH** (3 Colab sessions were burned on GPU work on 2026-07-24/25).
+   **Judgment: the demo does not need this.** "Trained and published; the measured
+   before/after is the next serving session" is already an honest, strong answer.
+   Burning demo-prep time here to chase it would be a bad trade — say so plainly.
+
+## Where the project actually stands (2026-07-25, HEAD `25d9606`, pushed clean)
+
+**Repositioned** to an "LLM inference & operations platform" (rationale:
+`docs/migration-plan.md`; split serving: ADR-0016 — ephemeral Colab-T4 GPU for
+measurement, always-on Oracle-ARM CPU for the demo). RAG is framed as the workload.
+
+**Inference is MEASURED on a real T4** (the flagship gap, closed):
+vLLM fp16 **13.4×** throughput scaling at **0.81×** latency; Ollama q4 **0.89× / 16×**;
+prefix cache **47.8% on vs 0.0% off** (control); guided decoding vLLM **0→1.0**,
+Ollama 0→0.0. → `docs/reports/inference-benchmark-v1.md`, raw JSON
+`benchmarks/results/*.json`, visual `benchmarks/dashboard.html`.
+
+**Shipped over 2026-07-23→25:** measurement suite (`benchmarks/run_suite.py`,
+`report.py`) · model registry (`registry/` → `docs/model-registry.md`) · hardened
+Colab notebook · inference TDD (`docs/inference-design.md`) · inference-first README ·
+inference dashboard · CI security-scan stage (pip-audit + Trivy, advisory) ·
+blog #3 (`docs/blog/03-measuring-continuous-batching-on-a-free-t4.md`).
+**176 tests · ruff + format + pyright clean · 16 ADRs · CI + eval gate green.**
+
+**Honest gaps — do not overclaim in the demo:**
+- **Before/after eval (base vs OpsLM) does not exist.** Say "trained and published;
+  the measured before/after is the next serving session."
+- Quantization→quality **frontier is empty** (needs that eval); the report says so itself.
+- No tensor-parallel / multi-GPU numbers — a single T4 can't; stated as a limitation.
+- Demo-site chat is in **demo mode** unless the Oracle endpoint is wired.
+- rag-quality n=20, structured-output n=12 — regression gates, not proof points.
+
+**Colab lessons (baked into the notebook — don't rediscover):** install vLLM via
+`uv pip install --system vllm --torch-backend=auto` → restart → set `LD_LIBRARY_PATH`
++ ctypes-preload `libcudart.so.13`; **AWQ dropped** (AutoAWQ unmaintained past torch
+2.6); **stop vLLM before starting Ollama** (else Ollama silently runs 80% on CPU —
+verify `ollama ps` shows 100% GPU); harness uses `include_usage` for token counts;
+**Colab recycles the whole runtime**, so each run cats its JSON to stdout.
 
 ---
 
@@ -58,10 +138,10 @@ Depth > breadth; honest numbers always; a claim without a measured number is a l
 - The permission classifier may block destructive-looking DB scripts even on regenerable data —
   use AskUserQuestion when that happens.
 
-## Current status (2026-07-22, all committed + pushed, HEAD = 3f4679a)
+## Phase status (historical, as of 2026-07-22 — superseded by the top block)
 
-**132 tests · ruff check + format clean · pyright clean · 15 ADRs · CI + Eval Gate green.**
-ALL 11 phases have committed artifacts; **OpsLM is trained and live on the Hub.**
+> Counts here are stale (132 tests / 15 ADRs). **Current: 176 tests, 16 ADRs, HEAD `25d9606`.**
+> Phase 7 is now DONE and measured. Kept for the per-phase detail only.
 
 | Phase | State |
 |---|---|
@@ -99,7 +179,10 @@ twice, off by default. Numbers in `docs/reports/`; narrative in
   Ollama + token-gated Caddy). `infra/hf-space-opslm/` kept but **HF now requires PRO** for
   Docker/Gradio Spaces — noted in its README.
 
-## LEFTOVER WORK — prioritized
+## LEFTOVER WORK (2026-07-22 list — ⚠️ SUPERSEDED by the priority plan at the top)
+
+> Item 2's "Phase-7 inference numbers" is **DONE** (measured 2026-07-25). The rest are
+> post-demo ideas, not final-session work. **Follow the top block's P0→P1→P2 instead.**
 
 ### 1. Take the demo chat LIVE (always-on, free) — `infra/oracle-opslm/`
 User chose always-on. Path: Oracle Cloud "Always Free" A1 ARM VM (4 cores/24 GB) → run
@@ -209,12 +292,17 @@ docs/adr          0001..0015        docs/reports   6 live reports        docs/bl
 data/             corpus.dvc + instructions.dvc (content in MinIO); data/sft/{train,val}.jsonl committed to git
 ```
 
-## Session-start checklist for next Claude
+## Session-start checklist for the FINAL session
 
-1. Read this file. 2. Working tree is clean at `3f4679a`; no rebuild needed unless changing code.
-3. Ask the user what they want this session. Most likely: (a) Oracle setup to take the chat live
-   (item 1), (b) a GPU serving session for the before/after eval + inference numbers (item 2), or
-   (c) DPO → v2 (item 3). Items 1 and 3 need the user's HF/Oracle accounts; walk them screen-by-screen.
-4. If touching local code: bring the stack up, verify `/health/ready` + `regression` 15/15.
-5. Commit per milestone, `ruff check` + `ruff format --check` before every commit, heads-up before
-   pushes, update this file at session end.
+1. **Read the top block.** The demo is 2026-07-27; **P0 is rewriting `docs/demo-runbook.md`
+   inference-first** — it currently tells the old story with wrong counts.
+2. Working tree is clean at `25d9606`; no rebuild needed unless changing code.
+3. Do P0 → P1 → (only if time) P2, in that order. **Resist starting the before/after eval
+   first** — it is the most seductive and the least demo-critical item, and GPU work has
+   burned three sessions already.
+4. If touching local code: bring the stack up, verify `/health/ready` (4× ok) + `regression`
+   15/15. `uv run ruff check .` **and** `uv run ruff format --check .` before every commit.
+5. Commit per milestone without asking; quick "pushing now" heads-up before each push.
+6. **End of session:** tell the user plainly what is demo-ready and what is not, and give
+   them the one-paragraph honest answer for each gap (see "Honest gaps" above) so nothing
+   gets overclaimed on stage.
