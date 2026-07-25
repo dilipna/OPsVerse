@@ -31,6 +31,37 @@ jobs:
       - name: Pytest
         run: uv run pytest -q
 
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Python dependency CVEs. Advisory (report-only) on purpose: the current
+      # findings are transitive dev-tooling (dvc's gitpython/diskcache), so this
+      # surfaces them in the log rather than blocking on a vuln we don't ship at
+      # runtime. Remove `|| true` to turn it into a hard gate.
+      - name: pip-audit (dependency CVEs)
+        run: uv run --with pip-audit pip-audit || true
+
+      # Filesystem scan: known-vuln packages, leaked secrets, and IaC misconfig
+      # across the repo (Dockerfile, k8s, compose). Advisory here too (exit-code 0);
+      # set exit-code '1' to gate. continue-on-error keeps a transient action/network
+      # issue from turning the build red on an advisory step.
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        continue-on-error: true
+        with:
+          scan-type: fs
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+          format: table
+
   docker-build:
     runs-on: ubuntu-latest
     steps:
