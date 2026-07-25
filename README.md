@@ -118,8 +118,9 @@ A single `/chat` request as Langfuse sees it — retrieval and generation spans 
        Offline (Colab T4): instruction-gen → QLoRA → eval → HF Hub → serve → benchmark
 ```
 
-Full write-up: [docs/architecture.md](docs/architecture.md) · repositioning rationale:
-[docs/migration-plan.md](docs/migration-plan.md).
+Full write-up: [docs/architecture.md](docs/architecture.md) · **inference technical design:**
+[docs/inference-design.md](docs/inference-design.md) (flow · scaling · failure handling ·
+tradeoffs) · repositioning rationale: [docs/migration-plan.md](docs/migration-plan.md).
 
 ---
 
