@@ -212,11 +212,27 @@ uv run python -m opsverse_security.evaluate        # TPR 1.0, specificity 1.0
 
 Open **`docs/model-registry.md`**.
 
-> "**OpsLM-v1**: a QLoRA fine-tune of Qwen3-4B on 838 synthetic DevOps instructions,
-> decontaminated against the eval sets by hash. It's trained and **published on the Hub** —
+> "**OpsLM-v1**: a QLoRA fine-tune of Qwen3-4B on **534 training examples** — a 593-pair
+> split, decontaminated against the eval sets by hash. It's trained and **published on the Hub** —
 > merged 16-bit, the LoRA adapter, and a GGUF Q4. The registry tracks each variant's quant,
 > serving engine, and deployment status, and it pulls latency and throughput straight from
 > the benchmark JSON, so a number here can't drift from the file that produced it."
+
+⚠️ **The registry says `benchmarked; no live endpoint` — say that out loud, don't skip past it.**
+It is the honest status: the GGUF is published and benchmarked, but nothing is serving it
+always-on (Oracle ARM is scaffolded, not provisioned), so the public site runs in labelled
+demo mode. Verified 2026-07-26: `ops-verse.vercel.app/api/chat` → `{"live":false}`.
+
+> **If asked "so is it deployed?"** — *"It's published and benchmarked, not served. The
+> always-on host is scaffolded but I haven't provisioned it, and the demo site says 'demo mode'
+> on its face rather than pretending. I'd rather show you the measured serving numbers from the
+> T4 than a box I can't prove is running."*
+
+**The generated-vs-written point — worth making here.** This registry is generated from
+`registry/models.json` plus the benchmark JSON. When I audited the docs the day before this
+demo, the hand-written README had drifted on the dataset size and the registry had not —
+because the registry can't drift, by construction. That's the argument for generating docs
+from data, and it's on screen right now.
 
 ### 9. Close (20s) **[no stack]**
 
@@ -235,6 +251,24 @@ Have these ready. **Answering a gap cleanly is a stronger signal than not being 
 > "I don't have that number yet, and I won't claim it. OpsLM is trained and published, and
 > the eval harness that would grade it existed first — deliberately. The measured
 > before/after is the next serving session. What I *have* measured is the serving layer."
+
+**"How much data did you fine-tune on?"** ← *know this cold; the number is checkable in the repo*
+> "534 training examples — a 593-pair split, 534 train / 59 val. The generator produced 838
+> examples, but I scaled it two days *after* I built the split and never re-ran the prep step,
+> so those extra examples never reached training. I caught that auditing my own claims the day
+> before this demo — the docs had been saying 838. I fixed the claim rather than the data,
+> because `data/sft/` is the provenance of the published checkpoint; regenerating it would make
+> the committed data stop matching the weights on the Hub. It's written up in ADR-0009."
+
+*Why this answer lands:* it is a small dataset and they know it. What you are demonstrating
+is that you audit your own numbers, that you understand data provenance, and that you would
+rather be correct than impressive. **Do not volunteer it unprompted** — but if dataset size
+comes up, this is a better story than "838" ever was.
+
+**"Isn't 534 examples too small to matter?"**
+> "For a general model, yes. This is a narrow domain adapter — QLoRA r=16, ~0.5% of parameters,
+> on one document domain. And I deliberately won't tell you it made the model better, because I
+> haven't measured that yet. That's exactly why the eval harness came first."
 
 **"Why only a T4? Can this scale?"**
 > "A single free T4 can't demonstrate tensor parallelism or multi-node, so I don't claim it —

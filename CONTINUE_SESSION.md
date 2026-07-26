@@ -147,7 +147,10 @@ twice, off by default. Numbers in `docs/reports/`; narrative in
 
 - **OpsLM TRAINED** on Colab T4 (after fixing 3 version-drift bugs — see gotchas). Live at
   `dhf1234/OpsLM-v1` (merged 16-bit + adapter + GGUF Q4_K_M).
-- **Instruction dataset scaled 593 → 838 pairs** (`generate_instructions --n 900`); DVC-pushed.
+- **Instruction *generator* output scaled 593 → 838 examples** (`generate_instructions --n 900`); DVC-pushed.
+  ⚠️ `prepare_sft.py` was never re-run, so the committed `data/sft/` split stayed at **593 pairs
+  (534 train / 59 val)** — and that split is what OpsLM-v1 was trained on. Docs claiming "838
+  instructions" were corrected 2026-07-26; provenance recorded in ADR-0009.
 - **Streaming ingestion** (ADR-0013): `libs/core/streaming.py` + `apps/api/stream_ingest.py`, 6 tests, verified live.
 - **Inference-optimization lab** (ADR-0014): `benchmarks/techniques/` — speculative decoding
   (lossless + acceptance meter), guided/structured decoding (schema FSM), quant Pareto frontier;
