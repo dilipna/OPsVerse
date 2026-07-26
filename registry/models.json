@@ -24,7 +24,7 @@
     "format": "chat/messages",
     "decontaminated": true
    },
-   "deployment": "Published to HF Hub (merged 16-bit + LoRA adapter + GGUF Q4_K_M). The GGUF serves the public demo via Ollama on the Oracle ARM VM. Before/after eval vs. base is pending a serving session.",
+   "deployment": "Published to HF Hub (merged 16-bit + LoRA adapter + GGUF Q4_K_M). No always-on endpoint is currently serving it: the intended path is Ollama on an Oracle Cloud Free ARM VM (scaffolded in infra/oracle-opslm/, not yet provisioned), so the public demo site at ops-verse.vercel.app runs in clearly-labelled demo mode with canned answers (verified /api/chat -> {\"live\":false} on 2026-07-26). Before/after eval vs. base is pending a serving session.",
    "eval": {
     "before_after_vs_base": "pending",
     "report": null
@@ -41,7 +41,7 @@
      "quant": "q4_k_m",
      "artifact": "GGUF Q4_K_M",
      "serving_engine": "Ollama / llama.cpp",
-     "status": "serving (public demo)",
+     "status": "benchmarked; no live endpoint",
      "benchmark_key": {"engine": "ollama", "quant": "q4_k_m"}
     },
     {

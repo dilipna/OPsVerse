@@ -36,6 +36,39 @@ Choices needed: base model, adaptation method, precision.
   every checkpoint to the Hub, giving free-session resumability
   (`--resume` picks up the latest).
 
+## Training data provenance (corrected 2026-07-26)
+
+**OpsLM-v1 was trained on 534 training examples** — the committed
+`data/sft/` split: **593 pairs total, 534 train / 59 val**
+(`data/sft/manifest.json`, `contaminated_dropped: 0`).
+
+The instruction *generator* output, `data/instructions/instructions-v1.jsonl`,
+holds **838** examples. These two numbers are not the same thing and had been
+conflated:
+
+| Artifact | Count | Date |
+|---|---|---|
+| `data/sft/` split — **what the QLoRA run consumed** | **593** (534 train / 59 val) | 2026-07-19 |
+| `data/instructions/instructions-v1.jsonl` — generator output | 838 | scaled 2026-07-21 |
+
+The instruction set was scaled 593 → 838 on 2026-07-21, **two days after** the
+SFT split was built and before the 2026-07-22 training run — but
+`prepare_sft.py` was never re-run, so the extra 245 examples never reached
+training. The Colab notebook clones the repo and reads `data/sft/train.jsonl`
+directly, so the committed split *is* the provenance of the published
+checkpoint.
+
+**The split is deliberately left as-is.** Regenerating `data/sft/` from the 838
+file would make the committed data stop matching the published weights — the
+repo would look tidier and be less true. The correct fix was to the claim, not
+the data. Docs that said "fine-tuned on 838 instructions" (README, demo
+runbook) now say 534 training examples.
+
+**Consequence for the pending before/after eval:** it grades a checkpoint
+trained on 534 examples. Regenerating the split to 838 and retraining is a
+legitimate v1.1, but it is a *different* experiment and must not be quietly
+folded into v1's numbers.
+
 ## Consequences
 
 - A killed Colab session resumes from the last Hub checkpoint instead of

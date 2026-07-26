@@ -11,7 +11,8 @@ expensive failure. The 2026 hiring signal is also explicit: **DPO has displaced
 RLHF for alignment in most production settings**, so a post-training story that
 stops at SFT is incomplete for an LLM-engineer portfolio.
 
-The instruction dataset was already scaled to 838 pairs partly to feed this.
+The instruction *generator* output was already scaled to 838 examples partly to
+feed this (note: the v1 SFT split is 593 pairs / 534 train — see ADR-0009).
 
 ## Decision
 

@@ -212,7 +212,7 @@ export default function Page() {
           <div className="cell">
             <h3>02 · generate</h3>
             <p>
-              OpsLM answers from the retrieved context. Fine-tuned on 838
+              OpsLM answers from the retrieved context. Fine-tuned on 534
               grounded, decontaminated instruction pairs.
             </p>
           </div>
@@ -242,7 +242,7 @@ export default function Page() {
           </div>
           <div className="cell">
             <h3>alignment</h3>
-            <p>SFT on 838 pairs → DPO preference round (v2) on the same corpus</p>
+            <p>SFT on a 593-pair split (534 train) → DPO preference round (v2) on the same corpus</p>
           </div>
           <div className="cell">
             <h3>serving</h3>

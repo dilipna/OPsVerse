@@ -78,9 +78,9 @@ not asserted — and it has already changed the design:
 | **Security** — injection quarantine, secret redaction, red-team classifier | TPR **1.0**, specificity **1.0** ([ADR-0007](docs/adr/0007-layered-security-heuristics-over-presidio.md)) |
 | **Observability** — every request traced (retrieval scores → tokens → cost) | Langfuse self-host; live trace verified ([ADR-0010](docs/adr/0010-observability-langfuse-v2-facade.md)) |
 | **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |
-| **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 838 pairs; QLoRA script pinned & resumable |
+| **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 838 generated examples; OpsLM-v1 trained on the committed **593-pair split** (534 train / 59 val) — [provenance](docs/adr/0009-qwen3-4b-qlora-for-opslm.md) |
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
-| **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | `opslm-demo/` (Vercel); always-on serving path = Oracle ARM + Ollama |
+| **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
 **176 tests · ruff + pyright clean · CI + eval-gate green · 16 ADRs.**
 
