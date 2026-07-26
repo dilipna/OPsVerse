@@ -47,6 +47,15 @@ run end-to-end against a live stack.** That is this session's P0.
    ```
    Then the frontier: `python benchmarks/report.py --results benchmarks/results
    --quality fp16=<score> --quality q4_k_m=<score> --out docs/reports/inference-benchmark-v1.md`.
+   ⚠️ **The command above is WRONG in two ways** — corrected procedure now lives in
+   **`docs/opslm-before-after-runbook.md`** (written 2026-07-26, prepared but NOT executed):
+   (a) the setting is `OPSVERSE_CHAT_API_BASE`, not `OPSVERSE_LLM_API_BASE`; (b) the env vars
+   must be set on the **uvicorn API process**, not prefixed onto `rag_suite` (which is only an
+   HTTP client for `:8100`). Also: `rag_suite` writes a **fixed** filename
+   `rag-quality-smoke-summary.json`, which the regression gate pins 3 thresholds against — a
+   default-`--out` run **overwrites the Gemini baseline and turns the gate red**. Use
+   `--out docs/reports/opslm-eval`. And the valid comparison is **base Qwen3-4B vs OpsLM-v1**
+   (two serves), not OpsLM vs the Gemini baseline.
    **Risk: HIGH** (3 Colab sessions were burned on GPU work on 2026-07-24/25).
    **Judgment: the demo does not need this.** "Trained and published; the measured
    before/after is the next serving session" is already an honest, strong answer.
