@@ -3,6 +3,12 @@
 A tight **~10-minute** live walkthrough of an LLM **inference & operations platform**.
 Rehearse once end-to-end before demo day.
 
+> ✅ **Every live command in this runbook was executed end-to-end on 2026-07-26** against a
+> real local stack on the presenting machine. Steps 3, 5, 6, 7 and the pre-flight are
+> verified; the commands and expected outputs below are what actually happened, not what
+> was intended. Shell-specific fixes from that run are folded in — **the original bash
+> one-liners failed in PowerShell.**
+
 > **Read this first — the resilience rule.** Steps marked **[no stack]** need nothing
 > running: no Docker, no API, no network. They are `benchmarks/dashboard.html`, the
 > committed reports, and the README. **If anything goes wrong live, retreat to those and
@@ -13,20 +19,38 @@ Rehearse once end-to-end before demo day.
 
 ## Pre-flight (10 min before you present)
 
-```bash
+> **Shell matters.** These were verified in **PowerShell** on the presenting machine
+> (2026-07-26). In PowerShell `curl` is an alias for `Invoke-WebRequest` and **`&&` is a
+> parse error** — the bash forms below will fail. Use the PowerShell column.
+
+**PowerShell (the presenting shell):**
+```powershell
 # 1. Stack up (core + observability). Langfuse migrates on first boot (~40s).
 docker compose -f infra/compose/docker-compose.yml --profile full up -d --wait
 
 # 2. API (tracing on) + worker + web UI — three terminals
-OPSVERSE_LANGFUSE_HOST=http://localhost:3002 \
-  uv run uvicorn opsverse_api.main:app --port 8100     # terminal 1
-uv run arq opsverse_api.worker.WorkerSettings          # terminal 2
-(cd apps/web && npm run dev)                            # terminal 3 -> :3000
+$env:OPSVERSE_LANGFUSE_HOST='http://localhost:3002'
+uv run uvicorn opsverse_api.main:app --port 8100        # terminal 1
+uv run arq opsverse_api.worker.WorkerSettings           # terminal 2
+cd apps/web; npm run dev                                # terminal 3 -> :3000  (cd back after!)
 
 # 3. Sanity — do not present until these two pass
-curl http://localhost:8100/health/ready                # expect 4x ok
-uv run python -m opsverse_evals.regression             # expect 15/15 PASS
+curl.exe -s http://localhost:8100/health/ready          # expect 4x ok  (curl.exe, NOT curl)
+uv run python -m opsverse_evals.regression              # expect 15/15 PASS
 ```
+
+<details><summary>bash / WSL equivalents</summary>
+
+```bash
+docker compose -f infra/compose/docker-compose.yml --profile full up -d --wait
+OPSVERSE_LANGFUSE_HOST=http://localhost:3002 \
+  uv run uvicorn opsverse_api.main:app --port 8100
+uv run arq opsverse_api.worker.WorkerSettings
+(cd apps/web && npm run dev)
+curl http://localhost:8100/health/ready
+uv run python -m opsverse_evals.regression
+```
+</details>
 
 **Tabs to open, left to right (in demo order):**
 1. `benchmarks/dashboard.html` (open the file directly — no server needed)
@@ -98,28 +122,74 @@ Then open **`/evals`** in the web UI.
 
 Ask: *"How does a Kubernetes HPA scale on custom metrics?"*
 
+> ⚠️ **Expect a silent pause before the first token — measured 4.0 s and 13.3 s on
+> 2026-07-26.** That is free-tier Gemini, not your stack. Don't stand there in silence and
+> don't apologise; **talk over it** — this is the moment to say what's happening under the
+> hood: *"while that's going — it's embedding the question, running hybrid retrieval over
+> 7,386 chunks, and reranking before a token comes back."* By the time you finish that
+> sentence it's usually streaming.
+
 > "Streaming tokens, **inline citations**, a sources panel with retrieval scores, and
 > degradation badges — none here, so this is full-quality retrieval. Every answer is
 > grounded in retrieved docs and cites them."
 
+Verified live 2026-07-26: `degraded: []`, `cited: [3, 2]`, 2,111 prompt / 141 completion
+tokens, $0.0044. A second question (*"What is a Kubernetes readiness probe?"*) also
+returned clean with 5 citations — a good spare if the first one misbehaves.
+
 ### 5. The trace (60s) — Langfuse tab
 
-Refresh → open the newest `chat` trace.
+Refresh → open the newest `chat` trace. Two spans: `retrieval`, then `generation`.
+
+> **Click the `generation` span, then its `Metadata` tab.** Verified 2026-07-26: the model,
+> cost, and token counts live in span **metadata**, *not* in the waterfall header — these
+> are `SPAN`-typed observations, so Langfuse's native cost column stays blank. Know this
+> before you click; hunting for the number on stage looks like the feature is missing.
+>
+> `retrieval` span → input is the query, output is the ranked chunk IDs **with scores and
+> source paths**, metadata has `n_chunks` and `degraded`.
+> `generation` span → metadata has `model`, `cached`, `cost_usd`, `prompt_tokens`,
+> `completion_tokens`, `first_token_ms`, `cited`, `grounded`.
 
 > "The span waterfall: retrieval with chunk IDs and scores, then generation with model,
 > token counts, **cost in dollars**, and first-token latency. This is how you debug
 > 'answers got worse yesterday' in production."
 
+⚠️ **Show the trace from your live step-4 question, not a repeat.** A cached call traces
+with `cost_usd: 0` and `first_token_ms: ~33` — true, but it undercuts step 6's reveal and
+looks like the cost tracking is broken.
+
 ### 6. The gateway cache (45s) — terminal
 
-Ask the **same** question again:
+Ask the **same** question again.
+
+**PowerShell** (verified 2026-07-26 — the bash `curl … | python` one-liner **fails** here):
+```powershell
+$body = '{"query":"How does a Kubernetes HPA scale on custom metrics?","stream":false}'
+$r = Invoke-RestMethod -Uri http://localhost:8100/v1/chat -Method Post `
+       -ContentType 'application/json' -Body $body
+"{0}  cost={1}  latency_ms={2}" -f $r.done.model, $r.done.cost_usd, [math]::Round($r.done.latency_ms,1)
+```
+Expected: `gemini/gemini-3.5-flash (cached)  cost=0.0  latency_ms=~30`
+
+<details><summary>bash equivalent</summary>
+
 ```bash
 curl -s -X POST http://localhost:8100/v1/chat -H "Content-Type: application/json" \
   -d '{"query":"How does a Kubernetes HPA scale on custom metrics?","stream":false}' \
   | python -c "import sys,json;d=json.load(sys.stdin)['done'];print(d['model'],d['cost_usd'],d['latency_ms'])"
 ```
-> "Tagged `(cached)`, **cost $0**, ~30ms instead of ~6 seconds — **184× faster**. A Redis
-> exact-match cache plus a daily budget kill-switch. Free-tier survival by design."
+</details>
+
+> "Tagged `(cached)`, **cost $0**, ~30ms instead of seconds. A Redis exact-match cache plus
+> a daily budget kill-switch. Free-tier survival by design."
+
+**Say the multiplier only if you quote the range.** Measured 2026-07-26 on this machine:
+cache hit **25–33 ms** (stable, n=5) versus a cold call of **5.3 s–21.1 s** (n=2) — so the
+speedup is **~180×–650×**, depending on how the upstream free-tier API is behaving that
+minute. The safe line is *"~30 milliseconds and zero dollars, versus seconds"*.
+Do **not** quote a bare "184×" — it's the best case, and a slow cold call on stage makes it
+look cherry-picked.
 
 ### 7. Security (45s) — terminal
 

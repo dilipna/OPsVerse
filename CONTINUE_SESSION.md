@@ -131,7 +131,7 @@ Depth > breadth; honest numbers always; a claim without a measured number is a l
 | 3 Hybrid RAG serving | ✅ SSE/WS chat, citations, degradation ladder, vision input |
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
 | 5 OpsLM fine-tune | ✅ **TRAINED on Colab T4 → `dhf1234/OpsLM-v1`**: merged 16-bit + LoRA adapter + **GGUF Q4_K_M** (`qwen3-4b-base.Q4_K_M.gguf`), all verified on the Hub. **+ DPO pipeline for v2 (ADR-0015).** Before/after eval still pending a serving session. |
-| 6 LLM gateway | ✅ Redis cache (hit = 184× faster, $0) + daily budget kill-switch (ADR-0008) |
+| 6 LLM gateway | ✅ Redis cache (hit = ~30ms/$0 vs 5–21s cold → 180–650×, measured 2026-07-26) + daily budget kill-switch (ADR-0008) |
 | 7 Inference lab | ✅ **MEASURED 2026-07-25** on a Colab T4 — vLLM vs Ollama, batching 13.4× vs 0.89×, prefix cache 47.8% vs 0.0% control, guided decoding 0→1.0 (ADR-0011, ADR-0014, ADR-0016) |
 | 8 Observability | ✅ Langfuse v2 self-host (:3002) + tracing facade; live trace verified + screenshot in README (ADR-0010) |
 | 9 Security | ✅ red-team classifier TPR 1.0 / spec 1.0; **injection quarantine verified live** (poisoned → 0 chunks) on both ingest paths; secret redaction (ADR-0007) |
