@@ -69,6 +69,11 @@ Ollama 0→0.0. → `docs/reports/inference-benchmark-v1.md`, raw JSON
 Colab notebook · inference TDD (`docs/inference-design.md`) · inference-first README ·
 inference dashboard · CI security-scan stage (pip-audit + Trivy, advisory) ·
 blog #3 (`docs/blog/03-measuring-continuous-batching-on-a-free-t4.md`).
+⚠️ The CI security-scan stage was **broken from the moment it landed** (`00b8e20`) until
+2026-07-26: `aquasecurity/trivy-action@0.28.0` has no such tag (they are `v`-prefixed), so the
+job died at "Set up job" — before `continue-on-error` could apply — on all 7 pushes. Fixed to
+`@v0.36.0` (`8b786fe`); verified the scan now genuinely executes (41s, all steps). Both scan
+steps remain **advisory**, so a green CI means "the scan ran", not "nothing was found".
 **176 tests · ruff + format + pyright clean · 16 ADRs · CI + eval gate green.**
 
 **Honest gaps — do not overclaim in the demo:**
