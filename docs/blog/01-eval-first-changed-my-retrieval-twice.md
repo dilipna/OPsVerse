@@ -30,7 +30,7 @@ ADR reviewers can read, not a vibe.
 
 ## Wrong decision #2: "sparse wins, switch the default"
 
-Later I expanded the corpus 15× (1,241 docs / 7,383 chunks) and regenerated a
+Later I expanded the corpus 17× by chunks — 421 → 7,383 chunks, 144 → 1,241 docs — and regenerated a
 fresh eval set. New numbers: **sparse BM25 now won** — MRR@10 0.759 vs hybrid's
 0.705. Lexical retrieval beating hybrid is a real, publishable-looking result.
 The tempting move: switch the chat default to sparse and write a smug blog post

@@ -51,16 +51,28 @@ Redis round-trip) but can never take it down.
 Local stack, `POST /v1/chat`, query *"How does a Kubernetes HPA scale on custom
 metrics?"*, `latency_ms` as reported in the `done` event:
 
+Measured in two rounds on the same day (a first round, then an independent
+re-verification later the same afternoon):
+
 | | n | latency | cost |
 |---|---|---|---|
-| Cache **hit** | 5 | **25.0 / 29.4 / 32.4 / 33.0 ms** (range 25–33) | **$0** |
+| Cache **hit**, round 1 | 5 | 25.0 / 29.4 / 32.4 / 33.0 ms | **$0** |
+| Cache **hit**, round 2 | 7 | 38.8 / 40.0 / 41.1 / 53.7 / 83.9 / 114.6 / 137.3 ms | **$0** |
+| Cache **hit**, all | 13 | **mean 53.8 ms** (gateway's own counter), **range 25–137 ms** | **$0** |
 | Cache **miss** (cold, upstream Gemini) | 2 | **5,290 ms** and **21,085 ms** | $0.0044–0.0055 |
 
-→ **~180×–650×**, dominated by how the free-tier upstream is behaving. The
-earlier "184×" figure quoted in the README was the fast-end case and had no
-recorded source; it is replaced by this range. Cold latency is the unstable
-term — the cache-hit side is tight (25–33 ms) because it is a single Redis
-round-trip and never leaves the machine.
+→ **roughly two orders of magnitude, occasionally three** (~40×–840× across the
+observed extremes). Both terms are less stable than the first round suggested.
+Cold latency swings with the free-tier upstream; the hit side is *not* as tight
+as the round-1 "25–33 ms" implied — a second round on the same machine ran
+slower and wider (up to 137 ms), so that first sample was optimistic, not
+representative. The honest headline is **"tens of milliseconds and $0 versus
+seconds and real money."** The earlier "184×" figure in the README was a
+fast-end case with no recorded source and is retired.
+
+**Why quote a range at all:** a single multiplier here would be measurement
+theatre. The number depends on an upstream we don't control, so the range *is*
+the finding.
 
 ## Consequences
 

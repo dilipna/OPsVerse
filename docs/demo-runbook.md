@@ -111,7 +111,8 @@ uv run python -m opsverse_evals.regression         # 15 pinned thresholds, all g
 Then open **`/evals`** in the web UI.
 
 > "The eval harness existed **before** the model, so 'better than base' is provable rather
-> than asserted. It has contradicted me twice. The best one: after growing the corpus 15×,
+> than asserted. It has contradicted me twice. The best one: after growing the corpus 17×
+> (421 → 7,383 chunks),
 > sparse BM25 beat hybrid — 0.759 vs 0.705 MRR. Tempting result. But my eval questions were
 > LLM-written from the gold chunk, which reuses its vocabulary and flatters exact-term
 > matching. So I built a **third eval set that paraphrases every question**. Sparse dropped
@@ -170,7 +171,9 @@ $r = Invoke-RestMethod -Uri http://localhost:8100/v1/chat -Method Post `
        -ContentType 'application/json' -Body $body
 "{0}  cost={1}  latency_ms={2}" -f $r.done.model, $r.done.cost_usd, [math]::Round($r.done.latency_ms,1)
 ```
-Expected: `gemini/gemini-3.5-flash (cached)  cost=0.0  latency_ms=~30`
+Expected: `gemini/gemini-3.5-flash (cached)  cost=0.0  latency_ms=` **anywhere from ~25 to ~140**
+(mean 53.8 ms over n=13). The *number* moves run to run; `(cached)` and `cost=0.0` do not —
+**those two are the point**, so lead with them and treat the latency as "tens of milliseconds".
 
 <details><summary>bash equivalent</summary>
 
@@ -181,15 +184,20 @@ curl -s -X POST http://localhost:8100/v1/chat -H "Content-Type: application/json
 ```
 </details>
 
-> "Tagged `(cached)`, **cost $0**, ~30ms instead of seconds. A Redis exact-match cache plus
-> a daily budget kill-switch. Free-tier survival by design."
+> "Tagged `(cached)`, **cost $0**, tens of milliseconds instead of seconds. A Redis
+> exact-match cache plus a daily budget kill-switch. Free-tier survival by design."
 
-**Say the multiplier only if you quote the range.** Measured 2026-07-26 on this machine:
-cache hit **25–33 ms** (stable, n=5) versus a cold call of **5.3 s–21.1 s** (n=2) — so the
-speedup is **~180×–650×**, depending on how the upstream free-tier API is behaving that
-minute. The safe line is *"~30 milliseconds and zero dollars, versus seconds"*.
-Do **not** quote a bare "184×" — it's the best case, and a slow cold call on stage makes it
-look cherry-picked.
+**Say the multiplier only if you quote the range.** Measured over two independent rounds on
+2026-07-26: cache hit **25–137 ms** (mean **53.8 ms**, n=13) versus a cold call of
+**5.3 s–21.1 s** (n=2) — so the speedup spans **~40×–840×** depending on how the free-tier
+upstream is behaving that minute. The safe line is *"tens of milliseconds and zero dollars,
+versus seconds"*.
+
+Do **not** quote a bare "184×" — it was the best case and had no recorded source.
+Note the first round measured 25–33 ms and looked tight; a second round the same afternoon
+ran up to 137 ms. **If asked why you don't give one number:** *"because it depends on an
+upstream I don't control — the range is the honest answer, and the part that never moves is
+`cost=0`."* That answer is stronger than a clean multiplier would have been.
 
 ### 7. Security (45s) — terminal
 

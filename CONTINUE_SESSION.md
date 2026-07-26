@@ -24,7 +24,7 @@ run end-to-end against a live stack.** That is this session's P0.
    - `curl http://localhost:8100/health/ready` → 4× ok
    - `uv run python -m opsverse_evals.regression` → **15/15 PASS**
    - runbook step 4 (live chat in the web UI) → streams, cites, no degraded badges
-   - runbook step 6 (`curl` cache hit) → prints `(cached)`, cost `0.0`, ~30ms
+   - runbook step 6 (`curl` cache hit) → prints `(cached)`, cost `0.0`, tens of ms (25–137)
    - runbook step 7 (`opsverse_security.evaluate`) → TPR 1.0 / spec 1.0
    - runbook step 5 (Langfuse trace visible at :3002)
    **Fix the runbook wherever reality differs — reality wins.**
@@ -131,14 +131,14 @@ Depth > breadth; honest numbers always; a claim without a measured number is a l
 | 3 Hybrid RAG serving | ✅ SSE/WS chat, citations, degradation ladder, vision input |
 | 4 Evaluation platform | ✅ ablations v1/v2/v3, RAG-quality (1.0/0.99/1.0), structured-output eval, regression gate **15 thresholds**, CI eval-gate, contamination policy |
 | 5 OpsLM fine-tune | ✅ **TRAINED on Colab T4 → `dhf1234/OpsLM-v1`**: merged 16-bit + LoRA adapter + **GGUF Q4_K_M** (`qwen3-4b-base.Q4_K_M.gguf`), all verified on the Hub. **+ DPO pipeline for v2 (ADR-0015).** Before/after eval still pending a serving session. |
-| 6 LLM gateway | ✅ Redis cache (hit = ~30ms/$0 vs 5–21s cold → 180–650×, measured 2026-07-26) + daily budget kill-switch (ADR-0008) |
+| 6 LLM gateway | ✅ Redis cache (hit = 25–137ms, mean 53.8ms n=13 / $0 vs 5–21s cold, measured 2026-07-26 over two rounds) + daily budget kill-switch (ADR-0008) |
 | 7 Inference lab | ✅ **MEASURED 2026-07-25** on a Colab T4 — vLLM vs Ollama, batching 13.4× vs 0.89×, prefix cache 47.8% vs 0.0% control, guided decoding 0→1.0 (ADR-0011, ADR-0014, ADR-0016) |
 | 8 Observability | ✅ Langfuse v2 self-host (:3002) + tracing facade; live trace verified + screenshot in README (ADR-0010) |
 | 9 Security | ✅ red-team classifier TPR 1.0 / spec 1.0; **injection quarantine verified live** (poisoned → 0 chunks) on both ingest paths; secret redaction (ADR-0007) |
 | 10 MCP server | ✅ 5 tools verified live over stdio; Claude Desktop/Cursor config in `apps/mcp-server/README.md` |
 | 11 Packaging | ✅ flagship README, architecture doc, K8s manifests, demo runbook, **2 blog posts**, **live Vercel demo site** |
 
-Key eval story (the demo's backbone): v1 hybrid wins → v2 sparse "wins" (corpus 15×) → v3
+Key eval story (the demo's backbone): v1 hybrid wins → v2 sparse "wins" (corpus 17× by chunks) → v3
 paraphrase set proves the sparse win was vocabulary leakage; hybrid vindicated. Rerank measured
 twice, off by default. Numbers in `docs/reports/`; narrative in
 `docs/blog/01-eval-first-changed-my-retrieval-twice.md`.
