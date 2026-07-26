@@ -74,7 +74,11 @@ blog #3 (`docs/blog/03-measuring-continuous-batching-on-a-free-t4.md`).
 job died at "Set up job" — before `continue-on-error` could apply — on all 7 pushes. Fixed to
 `@v0.36.0` (`8b786fe`); verified the scan now genuinely executes (41s, all steps). Both scan
 steps remain **advisory**, so a green CI means "the scan ran", not "nothing was found".
-**176 tests · ruff + format + pyright clean · 16 ADRs · CI + eval gate green.**
+**191 tests · ruff + format + pyright clean · 17 ADRs · CI + eval gate green.**
+**+ capacity/SLO analysis (2026-07-26):** `benchmarks/capacity.py` →
+`docs/reports/capacity-and-slo-v1.md` (ADR-0017). Converts the benchmark into goodput under a
+latency SLO: vLLM **6.3x** Ollama's goodput ($0.42 vs $2.61 / 1M tok, assumed $0.35/hr T4),
+vLLM **not saturated** at c=16, noise floor **+/-22%**, every number printed with its `n`.
 
 **Honest gaps — do not overclaim in the demo:**
 - **Before/after eval (base vs OpsLM) does not exist.** Say "trained and published;

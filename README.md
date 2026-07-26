@@ -44,6 +44,25 @@ requests so throughput stays flat and latency inflates 16×. Ollama wins single-
 demonstration of *why* a dedicated serving engine matters — and the prefix-cache
 **control** (47.8% on vs 0.0% off) isolates the cache from warm-up rather than assuming it.
 
+### What it costs, and where it runs out — [capacity & SLO analysis](docs/reports/capacity-and-slo-v1.md)
+
+Throughput is not capacity. Holding both engines to the same latency contract
+(**p95 TTFT ≤ 1s, p95 end-to-end ≤ 30s**) converts the benchmark into a deployment answer:
+
+| Under the SLO | **vLLM · FP16** | **Ollama · GGUF Q4** |
+|---|---|---|
+| Max serviceable concurrency | **c=16** (all levels pass) | **c=1** (c=4 and c=16 both violate) |
+| Goodput — throughput that meets the SLO | **233 tok/s** | 37 tok/s |
+| Cost per 1M tokens *(assumes $0.35/hr T4)* | **$0.42** | $2.61 |
+
+**6.3× the goodput at 1/6th the cost per token** — a smaller, more defensible number than
+the 13.4× headline, because it is the advantage that survives a user-facing latency budget.
+
+Two things the same analysis reports against itself: vLLM was **not saturated** at c=16
+(65% marginal efficiency — peak throughput is *un-measured*, the sweep ended before the
+device did), and two independent vLLM runs at c=1 differed by **±22%**, which is the noise
+floor any single-run delta has to clear. Every headline number is printed with its `n`.
+
 - **Model registry** — versions, quant, deploy status, joined to the benchmark numbers
   automatically: [docs/model-registry.md](docs/model-registry.md)
 - **Optimization techniques** — speculative decoding (lossless-verified), guided decoding
@@ -82,7 +101,7 @@ not asserted — and it has already changed the design:
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
 | **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
-**176 tests · ruff + pyright clean · CI + eval-gate green · 16 ADRs.**
+**191 tests · ruff + pyright clean · CI + eval-gate green · 17 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -170,18 +189,19 @@ benchmarks/       inference lab: harness · run_suite (sweep + probes) · report
 registry/         model registry: models.json source of truth + generator that joins in measured numbers
 training/         QLoRA + DPO runs (Qwen3-4B → OpsLM): scripts, Colab notebooks, SFT prep
 evalsets/         frozen eval sets (retrieval v1/v2/v3, CI fixture, security red-team) + thresholds
-docs/adr          16 architecture decision records          docs/reports  ablations + inference benchmark
+docs/adr          17 architecture decision records          docs/reports  ablations · inference benchmark · capacity/SLO
 docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  compose · k8s · oracle-opslm
 ```
 
 ## Development
 
 ```bash
-uv run pytest -q            # 176 tests
+uv run pytest -q            # 191 tests
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
 python benchmarks/report.py --out docs/reports/inference-benchmark-v1.md   # regen from results/
+python benchmarks/capacity.py --out docs/reports/capacity-and-slo-v1.md    # goodput/cost/saturation
 python registry/registry.py --out docs/model-registry.md                   # regen registry
 ```
 
@@ -202,7 +222,8 @@ python registry/registry.py --out docs/model-registry.md                   # reg
 [0013](docs/adr/0013-streaming-ingestion-redis-streams.md) streaming ingestion ·
 [0014](docs/adr/0014-inference-optimization-techniques.md) inference optimization ·
 [0015](docs/adr/0015-dpo-preference-alignment.md) DPO alignment ·
-[0016](docs/adr/0016-split-serving-ephemeral-gpu-vs-always-on-cpu.md) split serving
+[0016](docs/adr/0016-split-serving-ephemeral-gpu-vs-always-on-cpu.md) split serving ·
+[0017](docs/adr/0017-slo-constrained-goodput-as-the-capacity-metric.md) goodput as capacity
 
 ## Writing
 
