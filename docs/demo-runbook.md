@@ -37,7 +37,18 @@ cd apps/web; npm run dev                                # terminal 3 -> :3000  (
 # 3. Sanity — do not present until these two pass
 curl.exe -s http://localhost:8100/health/ready          # expect 4x ok  (curl.exe, NOT curl)
 uv run python -m opsverse_evals.regression              # expect 15/15 PASS
+
+# 4. Clear the gateway cache — REQUIRED, see the warning below
+docker exec opsverse-redis-1 redis-cli --scan --pattern 'gw:cache:*' | ForEach-Object { docker exec opsverse-redis-1 redis-cli DEL $_ }
 ```
+
+> 🚨 **Flush the cache or step 4 dies.** Cache entries live **24 h**. If you rehearsed —
+> or if anyone ran that question in the last day — step 4's question is already cached, so
+> it returns **instantly at `cost=0` with no streaming and no fresh trace**. You lose the
+> live-answer moment, step 5 has no new trace to open, and step 6's reveal is spoiled
+> because the cache was already warm. The command above deletes only `gw:cache:*` keys —
+> it leaves the arq queue and budget counters alone, so it is safe to run right before you
+> present. Verify it worked: the scan should return nothing.
 
 <details><summary>bash / WSL equivalents</summary>
 
