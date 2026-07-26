@@ -52,8 +52,13 @@ jobs:
       # across the repo (Dockerfile, k8s, compose). Advisory here too (exit-code 0);
       # set exit-code '1' to gate. continue-on-error keeps a transient action/network
       # issue from turning the build red on an advisory step.
+      #
+      # NOTE: this ref MUST carry the `v` prefix — trivy-action tags are `v0.36.0`,
+      # not `0.36.0`. An unresolvable action ref fails the job at "Set up job",
+      # BEFORE any step runs, so `continue-on-error` below cannot rescue it. That
+      # was a silent red X on every push (fixed 2026-07-26).
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: true
         with:
           scan-type: fs
