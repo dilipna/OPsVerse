@@ -128,6 +128,25 @@
     font-variant-numeric:tabular-nums;}
   .note{font-size:12px; color:var(--muted); margin:14px 0 0; line-height:1.5;}
 
+  /* slo / capacity */
+  .slo{background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:20px; margin-bottom:22px;}
+  .slo-note{font-size:12.5px; color:var(--secondary); margin:6px 0 4px; max-width:74ch;}
+  .slo-row{display:grid; grid-template-columns:132px 1fr auto; align-items:center;
+    gap:14px; padding:13px 0; border-top:1px solid var(--border);}
+  @media(max-width:640px){.slo-row{grid-template-columns:1fr; gap:9px;}}
+  .slo-eng{font-family:var(--mono); font-size:13px; display:flex; align-items:center; gap:8px;}
+  .slo-eng .sw{width:10px; height:10px; border-radius:3px; flex:none;}
+  .chips{display:flex; gap:7px; flex-wrap:wrap;}
+  .lvl{font-family:var(--mono); font-size:11.5px; padding:3px 10px; border-radius:6px;
+    border:1px solid var(--border); display:inline-flex; gap:6px; align-items:center;}
+  .lvl.pass{color:var(--good); border-color:color-mix(in srgb,var(--good) 40%,transparent);}
+  .lvl.fail{color:var(--crit); border-color:color-mix(in srgb,var(--crit) 40%,transparent);}
+  .slo-num{font-family:var(--mono); text-align:right; font-variant-numeric:tabular-nums;}
+  .slo-num b{font-size:18px; display:block; line-height:1.2;}
+  .slo-num span{font-size:11.5px; color:var(--muted);}
+  @media(max-width:640px){.slo-num{text-align:left;}}
+
   /* registry */
   .reg{background:var(--surface); border:1px solid var(--border); border-radius:16px;
     padding:20px; margin-bottom:22px; overflow-x:auto;}
@@ -238,6 +257,19 @@
     </div>
   </div>
 
+  <div class="slo">
+    <h2 class="panel-h">Capacity under an SLO — goodput, not throughput</h2>
+    <p class="slo-note">A concurrency level counts only if it meets <b>p95 TTFT &le; 1s</b>
+      and <b>p95 end-to-end &le; 30s</b>. Tokens generated past that point are served to
+      users who have already left, and raw throughput counts them anyway.</p>
+    <div id="sloRows"></div>
+    <p class="note">vLLM holds all three levels. Ollama is serviceable only at
+      <b>c=1</b> — it violates the contract at 4 and at 16, where its p95 TTFT reaches
+      64.6&nbsp;s. That turns a 13.4&times; throughput headline into a <b>6.3&times;
+      goodput</b> advantage: smaller, and the one that survives a latency contract.
+      Cost assumes $0.35/hr T4 — an assumption, not a measurement.</p>
+  </div>
+
   <div class="reg">
     <h2 class="panel-h" style="margin-bottom:12px">Model registry — OpsLM-v1</h2>
     <table>
@@ -279,6 +311,14 @@
   const guided = [
     {label:"vLLM · fp16",  off:0, on:100, cls:"v"},
     {label:"Ollama · q4",  off:0, on:0,   cls:"o"},
+  ];
+  // SLO: p95 TTFT <= 1s AND p95 end-to-end <= 30s, applied to the same levels above.
+  // Goodput = best throughput among levels that pass. See docs/reports/capacity-and-slo-v1.md
+  const slo = [
+    {eng:"vLLM · FP16", cls:"v", best:"c=16", goodput:"233 tok/s", cost:"$0.42 / 1M tok",
+     levels:[{c:1,ok:true},{c:4,ok:true},{c:16,ok:true}]},
+    {eng:"Ollama · Q4", cls:"o", best:"c=1", goodput:"37 tok/s", cost:"$2.61 / 1M tok",
+     levels:[{c:1,ok:true},{c:4,ok:false},{c:16,ok:false}]},
   ];
   const registry = [
     {q:"fp16",   art:"merged 16-bit safetensors", eng:"vLLM", st:"benchmarking", stc:"serve", lat:"12.97s", thr:"233 tok/s"},
@@ -369,6 +409,21 @@
     });
   }
 
+  function drawSlo(){
+    const mount=document.getElementById('sloRows'); mount.innerHTML='';
+    slo.forEach(s=>{
+      const col=colorFor(s.cls);
+      const row=document.createElement('div'); row.className='slo-row';
+      const chips=s.levels.map(l=>
+        `<span class="lvl ${l.ok?'pass':'fail'}">c=${l.c} ${l.ok?'✓':'✗'}</span>`).join('');
+      row.innerHTML=`<div class="slo-eng"><span class="sw" style="background:${col}"></span>${s.eng}</div>
+        <div class="chips">${chips}</div>
+        <div class="slo-num"><b style="color:${col}">${s.goodput}</b>
+          <span>goodput @ ${s.best} · ${s.cost}</span></div>`;
+      mount.appendChild(row);
+    });
+  }
+
   function drawRegistry(){
     const b=document.getElementById('regBody'); b.innerHTML='';
     registry.forEach(r=>{
@@ -380,7 +435,7 @@
     });
   }
 
-  function renderAll(){ drawCharts(); drawPrefix(); drawGuided(); drawRegistry(); }
+  function renderAll(){ drawCharts(); drawPrefix(); drawGuided(); drawSlo(); drawRegistry(); }
   renderAll();
 
   // theme toggle (stamps data-theme so it wins over OS pref; recolors SVG via re-render)
