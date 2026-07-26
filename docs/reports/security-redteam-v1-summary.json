@@ -1,7 +1,7 @@
 {
  "report": "security-redteam-v1",
  "kind": "security-detection",
- "date": "2026-07-19",
+ "date": "2026-07-26",
  "dataset": "security-redteam-v1",
  "cases": 33,
  "results": {

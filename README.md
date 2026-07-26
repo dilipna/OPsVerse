@@ -74,7 +74,7 @@ not asserted — and it has already changed the design:
 | Capability | Evidence |
 |---|---|
 | **OpsLM fine-tune** — Qwen3-4B → OpsLM, QLoRA on Colab T4, published to HF | [dhf1234/OpsLM-v1](https://huggingface.co/dhf1234/OpsLM-v1): merged 16-bit + LoRA + GGUF Q4_K_M ([ADR-0009](docs/adr/0009-qwen3-4b-qlora-for-opslm.md)) |
-| **LLM gateway** — Redis response cache + daily budget kill-switch | cache hit **184× faster, $0** ([ADR-0008](docs/adr/0008-gateway-as-library-not-proxy.md)) |
+| **LLM gateway** — Redis response cache + daily budget kill-switch | cache hit **~30 ms at $0** vs a 5–21 s cold call — **180×–650×**, measured 2026-07-26 ([ADR-0008](docs/adr/0008-gateway-as-library-not-proxy.md)) |
 | **Security** — injection quarantine, secret redaction, red-team classifier | TPR **1.0**, specificity **1.0** ([ADR-0007](docs/adr/0007-layered-security-heuristics-over-presidio.md)) |
 | **Observability** — every request traced (retrieval scores → tokens → cost) | Langfuse self-host; live trace verified ([ADR-0010](docs/adr/0010-observability-langfuse-v2-facade.md)) |
 | **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |

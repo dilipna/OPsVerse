@@ -46,6 +46,22 @@ wrapped so that a cache miss, a broken counter, or Redis being down entirely
 falls back to a direct provider call. The gateway can slow the platform (one
 Redis round-trip) but can never take it down.
 
+## Measured (2026-07-26, demo-prep verification)
+
+Local stack, `POST /v1/chat`, query *"How does a Kubernetes HPA scale on custom
+metrics?"*, `latency_ms` as reported in the `done` event:
+
+| | n | latency | cost |
+|---|---|---|---|
+| Cache **hit** | 5 | **25.0 / 29.4 / 32.4 / 33.0 ms** (range 25–33) | **$0** |
+| Cache **miss** (cold, upstream Gemini) | 2 | **5,290 ms** and **21,085 ms** | $0.0044–0.0055 |
+
+→ **~180×–650×**, dominated by how the free-tier upstream is behaving. The
+earlier "184×" figure quoted in the README was the fast-end case and had no
+recorded source; it is replaced by this range. Cold latency is the unstable
+term — the cache-hit side is tight (25–33 ms) because it is a single Redis
+round-trip and never leaves the machine.
+
 ## Consequences
 
 - Repeated identical questions are instant and free; the cost panel shows a
