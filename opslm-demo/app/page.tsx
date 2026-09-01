@@ -82,6 +82,16 @@ export default function Page() {
           <a href="#chat">chat</a>
           <a href="#how">how it works</a>
           <a href="#specs">specs</a>
+          <a href="/dashboard.html" target="_blank" rel="noreferrer">
+            benchmarks ↗
+          </a>
+          <a
+            href="https://github.com/dilipna/OPsVerse"
+            target="_blank"
+            rel="noreferrer"
+          >
+            code ↗
+          </a>
           <a
             href="https://huggingface.co/dhf1234/OpsLM-v1"
             target="_blank"
@@ -105,6 +115,14 @@ export default function Page() {
           corpus, wrapped in a hybrid-retrieval stack and gated by an
           eval-first platform. Every claim behind it traces to a measured
           number — no vibes.
+        </p>
+        <p className="lede">
+          <a href="/dashboard.html" target="_blank" rel="noreferrer">
+            <b>→ See the measured inference benchmark</b>
+          </a>{" "}
+          — vLLM vs Ollama on a real Tesla T4 under a 1→16 concurrency sweep:
+          13.4× throughput scaling, a prefix-cache control run, and the raw
+          JSON committed next to every chart.
         </p>
         <div className="metarow">
           <span>
