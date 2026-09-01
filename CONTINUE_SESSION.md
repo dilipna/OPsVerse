@@ -1,21 +1,43 @@
-# OpsVerse AI — FINAL SESSION HANDOFF (demo 2026-07-27)
+# OpsVerse AI — STATUS (last updated 2026-08-31)
 
-> **Read this whole top block before doing anything.** This is the **last working session**
-> before the user's demo. Persistent memory:
-> `C:\Users\Dilip\.claude\projects\c--Users-Dilip-OneDrive-Pictures-ftrag\memory\`.
+> **This file is a status record, not a task list.** Persistent memory: `~/.claude/projects/c--Users-Dilip-OneDrive-Pictures-ftrag/memory/`
 
-## 🎯 The one thing that matters
+## Current state
 
-**The user demos on 2026-07-27.** The project is in strong shape and **already
-demo-worthy**. The docs are consistent, every claim is backed by committed data, and
-**`docs/demo-runbook.md` has been rewritten inference-first** (2026-07-25) — it now
-leads with the measured benchmark, has correct counts, marks every step that needs no
-infrastructure `[no stack]`, and carries a "tough questions → honest answers" section.
+**The 2026-07-27 conference demo happened.** The demo-prep plan that used to sit at the
+top of this file is complete; it is preserved further down for context only.
 
-**The remaining risk is purely operational: the runbook's live commands have never been
-run end-to-end against a live stack.** That is this session's P0.
+**Verified healthy on 2026-08-31** after five weeks untouched, with no repair needed:
+Docker stack 6/6 containers, **195/195 tests**, `/health/ready` 4× ok, regression gate
+**15/15**, Qdrant corpus **7,386 points intact**, ruff + format + pyright clean, CI and
+Eval Gate green, [ops-verse.vercel.app](https://ops-verse.vercel.app) HTTP 200, and
+`dhf1234/OpsLM-v1` still published on the Hub.
 
-## Priority plan for this session — do strictly in order
+**Latest work (2026-08-31):** RAG retrieval metrics — `precision@k`, `recall@k`,
+`contextual_precision@k` implemented and tested, plus `opsverse_evals.metrics_audit`
+proving that on single-gold-label eval sets three of them are algebraic restatements of
+metrics already reported (`recall@k` = `hit@k`, `precision@k` = `hit@k/k`,
+`ctx_precision` = `mrr`), verified to 1e-12 across 300 cases × 4 modes. They are therefore
+**implemented but deliberately not reported** — ADR-0018 and
+`docs/reports/retrieval-metrics-audit-v1.md`.
+
+## What is genuinely left (all optional, none blocking)
+
+1. **Before/after eval (base Qwen3-4B vs OpsLM-v1)** — the one real content gap. Needs a
+   served OpsLM endpoint. Abortable procedure in `docs/opslm-before-after-runbook.md`
+   (prepared 2026-07-26, **never executed**). Risk: HIGH — GPU work burned 3 Colab sessions.
+2. **Multi-label / judge-graded retrieval relevance** — the costed next step that would make
+   precision/recall independent (ADR-0018).
+3. **Contextual recall** — blocked on authoring ground-truth answers; the faithfulness judge
+   is reference-free by design.
+4. **Quantization-to-quality frontier** — deliberately empty, blocked on (1).
+5. **Live demo chat** — `infra/oracle-opslm/` scaffolded (setup.sh + token-gated Caddy),
+   Oracle ARM VM **not provisioned**. Oracle free A1 often returns "Out of host capacity".
+   Note: `setup.sh` ships the bearer token over **plain HTTP**; a Cloudflare Tunnel would
+   fix that for free.
+6. **DPO to OpsLM-v2** — pipeline ready (ADR-0015), run pending.
+
+## Historical: the 2026-07-27 demo-prep plan (COMPLETE — kept for context)
 
 ### P0 — demo-critical (~60 min). Nothing else until these pass.
 
