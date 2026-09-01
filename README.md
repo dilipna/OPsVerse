@@ -80,8 +80,10 @@ not asserted — and it has already changed the design:
 
 | Capability | Evidence |
 |---|---|
+| **Golden set** — pooled (TREC-style), **graded 0-3**, position-randomised, **1,914 judgements** | 100 queries, mean **19.1 candidates/query** pooled across all 4 modes, **70/100 multi-label**; judge sanity-checked at **100% seed recovery** ([report](docs/reports/retrieval-golden-v1.md), [ADR-0019](docs/adr/0019-golden-set-pooled-graded-relevance.md)) |
+| **Significance testing** — bootstrap CIs + **paired permutation tests**, not bare means | every gap vs `hybrid` tested at 10k permutations; **`hit@10` is saturated** (0.97-0.99, no significant difference anywhere) and **sparse vs hybrid is a statistical tie** (nDCG +0.008, p=0.57) — two prior "wins" downgraded |
 | **Metric-independence audit** — implemented `precision@k` / `recall@k` / contextual-precision, then **declined to report three of them** | on a single-gold-label set `recall@k ≡ hit@k`, `precision@k ≡ hit@k/k`, ctx-precision ≡ `MRR` — verified to **1e-12 across 300 cases × 4 modes** ([audit](docs/reports/retrieval-metrics-audit-v1.md), [ADR-0018](docs/adr/0018-retrieval-metrics-independence-audit.md)) |
-| **Paraphrase-robust retrieval** — the eval *falsified the project's own v2 result* | a sparse "win" on the raw set collapsed **−0.149** MRR under reworded queries; hybrid held (−0.049) → hybrid vindicated ([ablation v3](docs/reports/retrieval-ablation-v3.md)) |
+| **Paraphrase-robust retrieval** — the eval *falsified the project's own v2 result* | a sparse "win" on the raw set collapsed **−0.149** MRR under reworded queries; hybrid held (−0.049) ([ablation v3](docs/reports/retrieval-ablation-v3.md)). **Chapter three:** under pooled graded labels the two are a *statistical tie* ([ADR-0019](docs/adr/0019-golden-set-pooled-graded-relevance.md)) |
 | **Hybrid RAG** (BGE dense + BM25 sparse, RRF, citations, SSE) | 1,241 docs / 7,383 chunks; hybrid MRR@10 **0.705** ([ablation v2](docs/reports/retrieval-ablation-v2.md)) |
 | **RAG answer quality** (LLM-judged, cached) | faithfulness **1.0**, answer-relevance **0.99**, citation-use **1.0** (n=20) |
 | **Regression gate in CI** — Postgres eval store, pinned thresholds | 15 thresholds, green on GitHub Actions ([ADR-0005](docs/adr/0005-ci-eval-gate-committed-fixture.md)) |
@@ -100,9 +102,9 @@ not asserted — and it has already changed the design:
 | **MCP server** — search/chat/evals/costs as tools for Claude Desktop / Cursor | 5 tools, verified live over stdio |
 | **Synthetic instruction dataset** — 3 grounded formats, decontaminated, DVC-versioned | 838 generated examples; OpsLM-v1 trained on the committed **593-pair split** (534 train / 59 val) — [provenance](docs/adr/0009-qwen3-4b-qlora-for-opslm.md) |
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
-| **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
+| **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — serves the live [benchmark dashboard](https://ops-verse.vercel.app/dashboard.html); chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
-**195 tests · ruff + pyright clean · CI + eval-gate green · 18 ADRs.**
+**210 tests · ruff + pyright clean · CI + eval-gate green · 19 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -197,7 +199,7 @@ docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  com
 ## Development
 
 ```bash
-uv run pytest -q            # 195 tests
+uv run pytest -q            # 210 tests
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
