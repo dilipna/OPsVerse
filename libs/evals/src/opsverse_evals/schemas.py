@@ -95,3 +95,46 @@ class GradedRetrievalDataset(BaseModel):
         dataset = cls.model_validate_json(header)
         dataset.cases = [GradedRetrievalCase.model_validate_json(line) for line in rest if line]
         return dataset
+
+
+class GoldenAnswer(BaseModel):
+    """A reference answer for one golden query, plus its atomic claims.
+
+    Written *from the judged-relevant chunks* (grade >= 2), not from any
+    system's retrieved output -- so it is independent of what any retrieval
+    mode happened to return, and can be used to score all of them fairly.
+
+    `claims` is the answer decomposed into atomic, independently-checkable
+    factual statements. Contextual recall is the share of these claims that a
+    given retrieval mode's context actually supports: it measures whether
+    retrieval brought back *enough to answer*, which neither faithfulness
+    (reference-free) nor hit@k (did we find the seed chunk) can express.
+    """
+
+    id: str
+    question: str
+    reference_answer: str
+    claims: list[str] = Field(default_factory=list)
+    source_chunk_ids: list[str] = Field(default_factory=list)
+
+
+class GoldenAnswerSet(BaseModel):
+    name: str
+    version: str
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    generator_model: str
+    notes: str = ""
+    answers: list[GoldenAnswer] = []
+
+    def save_jsonl(self, path: Path) -> None:
+        lines = [self.model_dump_json(exclude={"answers"})]
+        lines += [a.model_dump_json() for a in self.answers]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    @classmethod
+    def load_jsonl(cls, path: Path) -> "GoldenAnswerSet":
+        header, *rest = path.read_text(encoding="utf-8").splitlines()
+        ds = cls.model_validate_json(header)
+        ds.answers = [GoldenAnswer.model_validate_json(line) for line in rest if line]
+        return ds
