@@ -80,6 +80,7 @@ not asserted — and it has already changed the design:
 
 | Capability | Evidence |
 |---|---|
+| **Metric-independence audit** — implemented `precision@k` / `recall@k` / contextual-precision, then **declined to report three of them** | on a single-gold-label set `recall@k ≡ hit@k`, `precision@k ≡ hit@k/k`, ctx-precision ≡ `MRR` — verified to **1e-12 across 300 cases × 4 modes** ([audit](docs/reports/retrieval-metrics-audit-v1.md), [ADR-0018](docs/adr/0018-retrieval-metrics-independence-audit.md)) |
 | **Paraphrase-robust retrieval** — the eval *falsified the project's own v2 result* | a sparse "win" on the raw set collapsed **−0.149** MRR under reworded queries; hybrid held (−0.049) → hybrid vindicated ([ablation v3](docs/reports/retrieval-ablation-v3.md)) |
 | **Hybrid RAG** (BGE dense + BM25 sparse, RRF, citations, SSE) | 1,241 docs / 7,383 chunks; hybrid MRR@10 **0.705** ([ablation v2](docs/reports/retrieval-ablation-v2.md)) |
 | **RAG answer quality** (LLM-judged, cached) | faithfulness **1.0**, answer-relevance **0.99**, citation-use **1.0** (n=20) |
@@ -101,7 +102,7 @@ not asserted — and it has already changed the design:
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
 | **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
-**191 tests · ruff + pyright clean · CI + eval-gate green · 17 ADRs.**
+**195 tests · ruff + pyright clean · CI + eval-gate green · 18 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -196,7 +197,7 @@ docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  com
 ## Development
 
 ```bash
-uv run pytest -q            # 191 tests
+uv run pytest -q            # 195 tests
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
