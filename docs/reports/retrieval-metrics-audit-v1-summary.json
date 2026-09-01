@@ -1,0 +1,361 @@
+{
+ "report": "retrieval-metrics-audit-v1",
+ "kind": "metrics-audit",
+ "date": "2026-09-01",
+ "audits": [
+  {
+   "dataset": "retrieval-v1",
+   "version": "1",
+   "cases": 100,
+   "k": 10,
+   "gold_labels_per_query": [
+    1
+   ],
+   "single_label": true,
+   "modes": {
+    "dense": {
+     "means": {
+      "hit@1": 0.51,
+      "recall@1": 0.51,
+      "precision@1": 0.51,
+      "mrr@1": 0.51,
+      "ctx_precision@1": 0.51,
+      "hit@3": 0.75,
+      "recall@3": 0.75,
+      "precision@3": 0.25,
+      "mrr@3": 0.615,
+      "ctx_precision@3": 0.615,
+      "hit@5": 0.81,
+      "recall@5": 0.81,
+      "precision@5": 0.162,
+      "mrr@5": 0.629,
+      "ctx_precision@5": 0.629,
+      "hit@10": 0.86,
+      "recall@10": 0.86,
+      "precision@10": 0.086,
+      "mrr@10": 0.635567,
+      "ctx_precision@10": 0.635567
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "sparse": {
+     "means": {
+      "hit@1": 0.46,
+      "recall@1": 0.46,
+      "precision@1": 0.46,
+      "mrr@1": 0.46,
+      "ctx_precision@1": 0.46,
+      "hit@3": 0.74,
+      "recall@3": 0.74,
+      "precision@3": 0.246667,
+      "mrr@3": 0.586667,
+      "ctx_precision@3": 0.586667,
+      "hit@5": 0.78,
+      "recall@5": 0.78,
+      "precision@5": 0.156,
+      "mrr@5": 0.595667,
+      "ctx_precision@5": 0.595667,
+      "hit@10": 0.84,
+      "recall@10": 0.84,
+      "precision@10": 0.084,
+      "mrr@10": 0.605012,
+      "ctx_precision@10": 0.605012
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "hybrid": {
+     "means": {
+      "hit@1": 0.51,
+      "recall@1": 0.51,
+      "precision@1": 0.51,
+      "mrr@1": 0.51,
+      "ctx_precision@1": 0.51,
+      "hit@3": 0.76,
+      "recall@3": 0.76,
+      "precision@3": 0.253333,
+      "mrr@3": 0.621667,
+      "ctx_precision@3": 0.621667,
+      "hit@5": 0.83,
+      "recall@5": 0.83,
+      "precision@5": 0.166,
+      "mrr@5": 0.638167,
+      "ctx_precision@5": 0.638167,
+      "hit@10": 0.86,
+      "recall@10": 0.86,
+      "precision@10": 0.086,
+      "mrr@10": 0.643167,
+      "ctx_precision@10": 0.643167
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "hybrid+rerank": {
+     "means": {
+      "hit@1": 0.48,
+      "recall@1": 0.48,
+      "precision@1": 0.48,
+      "mrr@1": 0.48,
+      "ctx_precision@1": 0.48,
+      "hit@3": 0.69,
+      "recall@3": 0.69,
+      "precision@3": 0.23,
+      "mrr@3": 0.575,
+      "ctx_precision@3": 0.575,
+      "hit@5": 0.79,
+      "recall@5": 0.79,
+      "precision@5": 0.158,
+      "mrr@5": 0.598,
+      "ctx_precision@5": 0.598,
+      "hit@10": 0.9,
+      "recall@10": 0.9,
+      "precision@10": 0.09,
+      "mrr@10": 0.611484,
+      "ctx_precision@10": 0.611484
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    }
+   },
+   "identities_hold": true,
+   "violations": []
+  },
+  {
+   "dataset": "retrieval-v2",
+   "version": "2",
+   "cases": 100,
+   "k": 10,
+   "gold_labels_per_query": [
+    1
+   ],
+   "single_label": true,
+   "modes": {
+    "dense": {
+     "means": {
+      "hit@1": 0.44,
+      "recall@1": 0.44,
+      "precision@1": 0.44,
+      "mrr@1": 0.44,
+      "ctx_precision@1": 0.44,
+      "hit@3": 0.58,
+      "recall@3": 0.58,
+      "precision@3": 0.193333,
+      "mrr@3": 0.506667,
+      "ctx_precision@3": 0.506667,
+      "hit@5": 0.72,
+      "recall@5": 0.72,
+      "precision@5": 0.144,
+      "mrr@5": 0.538167,
+      "ctx_precision@5": 0.538167,
+      "hit@10": 0.83,
+      "recall@10": 0.83,
+      "precision@10": 0.083,
+      "mrr@10": 0.55354,
+      "ctx_precision@10": 0.55354
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "sparse": {
+     "means": {
+      "hit@1": 0.64,
+      "recall@1": 0.64,
+      "precision@1": 0.64,
+      "mrr@1": 0.64,
+      "ctx_precision@1": 0.64,
+      "hit@3": 0.86,
+      "recall@3": 0.86,
+      "precision@3": 0.286667,
+      "mrr@3": 0.74,
+      "ctx_precision@3": 0.74,
+      "hit@5": 0.9,
+      "recall@5": 0.9,
+      "precision@5": 0.18,
+      "mrr@5": 0.749,
+      "ctx_precision@5": 0.749,
+      "hit@10": 0.97,
+      "recall@10": 0.97,
+      "precision@10": 0.097,
+      "mrr@10": 0.759397,
+      "ctx_precision@10": 0.759397
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "hybrid": {
+     "means": {
+      "hit@1": 0.58,
+      "recall@1": 0.58,
+      "precision@1": 0.58,
+      "mrr@1": 0.58,
+      "ctx_precision@1": 0.58,
+      "hit@3": 0.79,
+      "recall@3": 0.79,
+      "precision@3": 0.263333,
+      "mrr@3": 0.673333,
+      "ctx_precision@3": 0.673333,
+      "hit@5": 0.87,
+      "recall@5": 0.87,
+      "precision@5": 0.174,
+      "mrr@5": 0.690833,
+      "ctx_precision@5": 0.690833,
+      "hit@10": 0.97,
+      "recall@10": 0.97,
+      "precision@10": 0.097,
+      "mrr@10": 0.704897,
+      "ctx_precision@10": 0.704897
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "hybrid+rerank": {
+     "means": {
+      "hit@1": 0.64,
+      "recall@1": 0.64,
+      "precision@1": 0.64,
+      "mrr@1": 0.64,
+      "ctx_precision@1": 0.64,
+      "hit@3": 0.83,
+      "recall@3": 0.83,
+      "precision@3": 0.276667,
+      "mrr@3": 0.723333,
+      "ctx_precision@3": 0.723333,
+      "hit@5": 0.86,
+      "recall@5": 0.86,
+      "precision@5": 0.172,
+      "mrr@5": 0.730833,
+      "ctx_precision@5": 0.730833,
+      "hit@10": 0.96,
+      "recall@10": 0.96,
+      "precision@10": 0.096,
+      "mrr@10": 0.745048,
+      "ctx_precision@10": 0.745048
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    }
+   },
+   "identities_hold": true,
+   "violations": []
+  },
+  {
+   "dataset": "retrieval-v3",
+   "version": "3",
+   "cases": 100,
+   "k": 10,
+   "gold_labels_per_query": [
+    1
+   ],
+   "single_label": true,
+   "modes": {
+    "dense": {
+     "means": {
+      "hit@1": 0.47,
+      "recall@1": 0.47,
+      "precision@1": 0.47,
+      "mrr@1": 0.47,
+      "ctx_precision@1": 0.47,
+      "hit@3": 0.65,
+      "recall@3": 0.65,
+      "precision@3": 0.216667,
+      "mrr@3": 0.55,
+      "ctx_precision@3": 0.55,
+      "hit@5": 0.71,
+      "recall@5": 0.71,
+      "precision@5": 0.142,
+      "mrr@5": 0.563,
+      "ctx_precision@5": 0.563,
+      "hit@10": 0.77,
+      "recall@10": 0.77,
+      "precision@10": 0.077,
+      "mrr@10": 0.570278,
+      "ctx_precision@10": 0.570278
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "sparse": {
+     "means": {
+      "hit@1": 0.47,
+      "recall@1": 0.47,
+      "precision@1": 0.47,
+      "mrr@1": 0.47,
+      "ctx_precision@1": 0.47,
+      "hit@3": 0.71,
+      "recall@3": 0.71,
+      "precision@3": 0.236667,
+      "mrr@3": 0.578333,
+      "ctx_precision@3": 0.578333,
+      "hit@5": 0.8,
+      "recall@5": 0.8,
+      "precision@5": 0.16,
+      "mrr@5": 0.598833,
+      "ctx_precision@5": 0.598833,
+      "hit@10": 0.88,
+      "recall@10": 0.88,
+      "precision@10": 0.088,
+      "mrr@10": 0.61048,
+      "ctx_precision@10": 0.61048
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "hybrid": {
+     "means": {
+      "hit@1": 0.53,
+      "recall@1": 0.53,
+      "precision@1": 0.53,
+      "mrr@1": 0.53,
+      "ctx_precision@1": 0.53,
+      "hit@3": 0.74,
+      "recall@3": 0.74,
+      "precision@3": 0.246667,
+      "mrr@3": 0.623333,
+      "ctx_precision@3": 0.623333,
+      "hit@5": 0.84,
+      "recall@5": 0.84,
+      "precision@5": 0.168,
+      "mrr@5": 0.646833,
+      "ctx_precision@5": 0.646833,
+      "hit@10": 0.9,
+      "recall@10": 0.9,
+      "precision@10": 0.09,
+      "mrr@10": 0.655512,
+      "ctx_precision@10": 0.655512
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    },
+    "hybrid+rerank": {
+     "means": {
+      "hit@1": 0.52,
+      "recall@1": 0.52,
+      "precision@1": 0.52,
+      "mrr@1": 0.52,
+      "ctx_precision@1": 0.52,
+      "hit@3": 0.74,
+      "recall@3": 0.74,
+      "precision@3": 0.246667,
+      "mrr@3": 0.615,
+      "ctx_precision@3": 0.615,
+      "hit@5": 0.82,
+      "recall@5": 0.82,
+      "precision@5": 0.164,
+      "mrr@5": 0.6335,
+      "ctx_precision@5": 0.6335,
+      "hit@10": 0.9,
+      "recall@10": 0.9,
+      "precision@10": 0.09,
+      "mrr@10": 0.644528,
+      "ctx_precision@10": 0.644528
+     },
+     "max_identity_deviation": 0.0,
+     "cases": 100
+    }
+   },
+   "identities_hold": true,
+   "violations": []
+  }
+ ]
+}
