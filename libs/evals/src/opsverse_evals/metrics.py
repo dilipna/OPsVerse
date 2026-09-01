@@ -77,3 +77,29 @@ def contextual_precision_at_k(ranked: Sequence[str], relevant: set[str], k: int)
             running += hits / pos
     denom = min(len(relevant), k)
     return running / denom if denom else 0.0
+
+
+def dcg_graded(ranked: Sequence[str], grades: dict[str, int], k: int) -> float:
+    """Exponential-gain DCG: gain = 2**grade - 1, discount = 1/log2(rank+1)."""
+    return sum(
+        (2 ** grades.get(rid, 0) - 1) / math.log2(pos + 1) for pos, rid in enumerate(ranked[:k], 1)
+    )
+
+
+def ndcg_at_k_graded(ranked: Sequence[str], grades: dict[str, int], k: int) -> float:
+    """nDCG over *graded* relevance (0..3), not binary.
+
+    Binary `ndcg_at_k` cannot distinguish "retrieved the perfect chunk" from
+    "retrieved a marginally on-topic one". With graded labels the exponential
+    gain makes a grade-3 hit worth 7 and a grade-1 hit worth 1, so ranking a
+    partial answer above a full one is penalised.
+
+    The ideal ranking is taken over the *judged pool*, so a system is measured
+    against the best achievable ordering of what was actually labelled.
+    """
+    if k <= 0 or not grades:
+        return 0.0
+    dcg = dcg_graded(ranked, grades, k)
+    ideal = sorted(grades.values(), reverse=True)[:k]
+    idcg = sum((2**g - 1) / math.log2(pos + 1) for pos, g in enumerate(ideal, 1))
+    return dcg / idcg if idcg > 0 else 0.0
