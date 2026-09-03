@@ -199,11 +199,21 @@ async def run(
 
     wanted = [c for c in CANDIDATES if not models or c[0] in models]
     client = AsyncQdrantClient(url=settings.qdrant_url)
+    cache_dir = out.parent / ".embedding-ablation-cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
     for model, dim, size_gb in wanted:
+        slug = model.split("/")[-1].replace(".", "_").replace("-", "_")
+        cache_path = cache_dir / f"{slug}.json"
+        if cache_path.exists():
+            res = json.loads(cache_path.read_text(encoding="utf-8"))
+            print(f"\n=== {model} (cached) ===", flush=True)
+            results.append(res)
+            continue
         print(f"\n=== {model} (dim={dim}, {size_gb} GB) ===", flush=True)
         res = await score_model(model, dim, chunks, golden, client)
         res["size_gb"] = size_gb
+        cache_path.write_text(json.dumps(res), encoding="utf-8")
         results.append(res)
         m = res["per_query"]
         print(

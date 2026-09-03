@@ -138,3 +138,44 @@ class GoldenAnswerSet(BaseModel):
         ds = cls.model_validate_json(header)
         ds.answers = [GoldenAnswer.model_validate_json(line) for line in rest if line]
         return ds
+
+
+class MultiTurnCase(BaseModel):
+    """A 2-turn conversation testing whether retrieval survives a follow-up.
+
+    `stream_chat` in `libs/rag/chat.py` sends only the CURRENT turn's raw text
+    to the retriever (`retrieval_query = query`) -- history reaches the
+    generator via the prompt but never reaches retrieval. `turn2_question` is
+    written to be under-specified without `turn1_question` (a pronoun or
+    ellipsis standing in for the entity turn 1 established), so it exercises
+    exactly that gap.
+    """
+
+    id: str  # the chunk turn2 is grounded in
+    turn1_question: str
+    turn2_question: str  # coreferential/elliptical w.r.t. turn1
+    relevant_chunk_ids: list[str] = Field(min_length=1)
+    relevant_document_ids: list[str] = Field(min_length=1)
+    source: str
+    tool: str | None = None
+
+
+class MultiTurnDataset(BaseModel):
+    name: str
+    version: str
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    generator_model: str
+    cases: list[MultiTurnCase] = []
+
+    def save_jsonl(self, path: Path) -> None:
+        lines = [self.model_dump_json(exclude={"cases"})]
+        lines += [case.model_dump_json() for case in self.cases]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    @classmethod
+    def load_jsonl(cls, path: Path) -> "MultiTurnDataset":
+        header, *rest = path.read_text(encoding="utf-8").splitlines()
+        dataset = cls.model_validate_json(header)
+        dataset.cases = [MultiTurnCase.model_validate_json(line) for line in rest if line]
+        return dataset
