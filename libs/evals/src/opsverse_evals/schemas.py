@@ -140,6 +140,49 @@ class GoldenAnswerSet(BaseModel):
         return ds
 
 
+class JudgeValidationTask(BaseModel):
+    """One blinded (question, candidate chunk) pair shown to a human annotator.
+
+    Deliberately carries *no* identifiers that could be joined back to the
+    golden set: no `case_id`, no `chunk_id`, no judge grade. An annotator who can
+    look up what the judge said is not an independent second rater, and the
+    agreement statistic would be measuring compliance instead. The join key
+    lives only in the companion `JudgeValidationKey` file.
+    """
+
+    task_id: str
+    question: str
+    chunk_text: str
+
+
+class JudgeValidationKey(BaseModel):
+    """The judge's grade for one task, plus the sampling design it came from.
+
+    `weight` is the inverse sampling probability for the item's stratum
+    (stratum population / stratum sample size). Sampling is stratified on the
+    *judge's* binary call because relevant items are only 15.8% of the pool, so
+    an unstratified sample would estimate TPR from a handful of positives; the
+    weights are what convert the balanced sample back to population rates.
+    """
+
+    task_id: str
+    case_id: str
+    chunk_id: str
+    judge_grade: int
+    stratum: str  # judge_relevant | judge_not_relevant
+    weight: float
+    split: str  # dev | test
+    retrieved_by: list[str] = Field(default_factory=list)  # modes that surfaced this chunk
+    is_seed_chunk: bool = False  # the chunk the question was generated from
+
+
+class HumanLabel(BaseModel):
+    """One human grade, produced by the offline labeling page."""
+
+    task_id: str
+    human_grade: int
+
+
 class MultiTurnCase(BaseModel):
     """A 2-turn conversation testing whether retrieval survives a follow-up.
 
