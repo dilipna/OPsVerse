@@ -20,7 +20,7 @@ reproducible rather than "whatever the run happened to draw".
 """
 
 import random
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 
@@ -88,6 +88,63 @@ def bootstrap_ci(
     lo_idx = int((alpha / 2) * n_boot)
     hi_idx = min(n_boot - 1, int((1 - alpha / 2) * n_boot))
     return Interval(_mean(values), means[lo_idx], means[hi_idx], n)
+
+
+def bootstrap_statistic_ci[T](
+    items: Sequence[T],
+    statistic: Callable[[Sequence[T]], float],
+    strata: Sequence[str] | None = None,
+    n_boot: int = 2000,
+    alpha: float = 0.05,
+    seed: int = 20260831,
+) -> Interval:
+    """Percentile bootstrap CI for an arbitrary statistic of a sample.
+
+    `bootstrap_ci` covers the common case where the statistic is the mean of
+    per-query scores. Agreement statistics are not means of anything: Cohen's
+    kappa, TPR and TNR are all ratios computed from a contingency table over the
+    *whole* sample, so the interval has to come from recomputing the statistic on
+    each resample rather than from resampling scalars.
+
+    `strata` (one label per item) makes this a **stratified** bootstrap:
+    resampling happens within each stratum, preserving that stratum's sample
+    size. That is the bootstrap that matches a stratified sampling design -- an
+    unstratified resample would let the realised stratum sizes drift, which
+    changes the estimand when items carry design weights.
+
+    `mean` on the returned Interval is the statistic on the observed sample (the
+    point estimate), not the mean of the bootstrap replicates.
+    """
+    n = len(items)
+    if n == 0:
+        return Interval(0.0, 0.0, 0.0, 0)
+    point = float(statistic(items))
+    if n == 1:
+        return Interval(point, point, point, 1)
+    if strata is not None and len(strata) != n:
+        raise ValueError(f"strata must be one label per item, got {len(strata)} for {n}")
+
+    # index pools to resample from: one pool overall, or one per stratum
+    if strata is None:
+        pools = [list(range(n))]
+    else:
+        by_label: dict[str, list[int]] = {}
+        for idx, label in enumerate(strata):
+            by_label.setdefault(label, []).append(idx)
+        pools = list(by_label.values())
+
+    rng = random.Random(seed)
+    replicates: list[float] = []
+    for _ in range(n_boot):
+        drawn: list[T] = []
+        for pool in pools:
+            size = len(pool)
+            drawn.extend(items[pool[rng.randrange(size)]] for _ in range(size))
+        replicates.append(float(statistic(drawn)))
+    replicates.sort()
+    lo_idx = int((alpha / 2) * n_boot)
+    hi_idx = min(n_boot - 1, int((1 - alpha / 2) * n_boot))
+    return Interval(point, replicates[lo_idx], replicates[hi_idx], n)
 
 
 def paired_permutation_test(
