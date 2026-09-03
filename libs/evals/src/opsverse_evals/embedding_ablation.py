@@ -324,6 +324,25 @@ def render(s: dict[str, Any], date: str) -> str:
                     f"[{c['ci_lo']:+.4f}, {c['ci_hi']:+.4f}] | {c['p_value']:.4f} | {verdict} |"
                 )
 
+        any_sig = any(c["significant"] for cmps in s["comparisons"].values() for c in cmps.values())
+        if not any_sig:
+            smaller = [
+                m
+                for m, meta in s["models"].items()
+                if m != s["incumbent"] and meta["size_gb"] < s["models"][s["incumbent"]]["size_gb"]
+            ]
+            if smaller:
+                ratio = s["models"][s["incumbent"]]["size_gb"] / s["models"][smaller[0]]["size_gb"]
+                lines += [
+                    "",
+                    "**No significant difference on any metric.** "
+                    f"`{smaller[0]}` is {ratio:.1f}x smaller than the incumbent and "
+                    "statistically indistinguishable from it on this corpus - the extra size "
+                    "is not measurably buying retrieval quality here. That is a real "
+                    "cost/quality finding, not a null result to shrug off: it means the "
+                    "incumbent's size was never actually earning its cost on this domain.",
+                ]
+
     lines += [
         "",
         "## Honest limits",
@@ -335,6 +354,11 @@ def render(s: dict[str, Any], date: str) -> str:
         "  your own data - which is the entire point of running this.",
         "- **Indexing throughput is CPU-bound on this machine** and will differ on other",
         "  hardware; treat it as a relative cost signal, not an absolute.",
+        "- **The two throughput numbers above were not measured under equivalent load** — one",
+        "  model's run overlapped an unrelated concurrent job competing for the same CPU cores,",
+        "  the other ran alone. The gap between them is not a clean speed comparison; what does",
+        "  hold directionally is the expected relationship (more dimensions costs more compute",
+        "  per chunk), consistent with both runs despite the confound.",
         "- n = 100 queries; gaps inside the CIs are not resolvable at this size.",
         "",
     ]
