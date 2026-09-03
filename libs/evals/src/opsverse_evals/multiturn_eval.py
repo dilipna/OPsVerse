@@ -143,6 +143,30 @@ def render(s: dict[str, Any], date: str) -> str:
                 f"{c['p_value']:.4f} | {verdict} |"
             )
 
+        any_sig = any(c["significant"] for c in s["comparisons"].values())
+        mean_delta = sum(c["delta"] for c in s["comparisons"].values()) / len(s["comparisons"])
+        if any_sig and mean_delta > 0:
+            verdict_line = (
+                "**Concatenating history measurably helps.** Worth adopting as an interim fix"
+                " while a proper query-rewriting step is built."
+            )
+        elif any_sig and mean_delta < 0:
+            verdict_line = (
+                "**Concatenating history measurably hurts.** Turn 1 is deliberately about a"
+                " *different* topic than turn 2, so naive concatenation adds off-topic terms to"
+                " the query — plausible mechanism, not proven here. Turn2-only stays the better"
+                " default; the honest fix is query rewriting, not string concatenation."
+            )
+        else:
+            direction = "trends lower" if mean_delta < 0 else "trends higher"
+            verdict_line = (
+                f"**No significant effect either way at n={s['queries']}.** The naive"
+                f" concatenation {direction} on average but the gap does not clear the noise"
+                " floor — this sample size cannot distinguish 'no effect' from 'a small effect'."
+                " It does **not** support adopting concatenation as a fix."
+            )
+        lines += ["", verdict_line]
+
     lines += [
         "",
         "## Honest limits",
@@ -150,10 +174,10 @@ def render(s: dict[str, Any], date: str) -> str:
         "- **Constructed, not observed.** These are LLM-written conversations designed to be",
         "  elliptical, not conversations sampled from real usage (none are logged). They test",
         "  whether the failure mode exists and is measurable, not its frequency in the wild.",
-        "- **`concat_history` is a naive baseline**, not a proposed design. If it helps, the",
-        "  honest next step is query rewriting (an LLM call that resolves the reference before",
-        "  retrieval) or a dedicated dense encoder for conversational queries - concatenation",
-        "  is the cheapest thing to measure first, not the final answer.",
+        "- **`concat_history` is a naive baseline**, not a proposed design — this eval tests",
+        "  whether the cheapest possible fix works, not what the actual fix should be. If it",
+        "  doesn't help, the honest next step is query rewriting (an LLM call that resolves the",
+        "  reference before retrieval) or a dedicated conversational encoder.",
         "- Single golden chunk per case (matches `retrieval-v1/v2/v3`'s convention); the",
         "  degeneracy documented in ADR-0018 applies here too — hit@k and mrr@k are what this",
         "  set can say, not recall/precision.",
