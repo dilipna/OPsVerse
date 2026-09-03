@@ -28,3 +28,7 @@ node_modules/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# ablation checkpoint caches (temporary, not for commit)
+docs/reports/.embedding-ablation-cache/
+docs/reports/.chunking-ablation-cache/
