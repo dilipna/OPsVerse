@@ -1,0 +1,61 @@
+{
+ "report": "generator-golden-v1",
+ "kind": "generator-golden",
+ "date": "2026-09-03",
+ "judge_model": "gemini/gemini-3.1-flash-lite",
+ "queries": 100,
+ "total_claims": 412,
+ "mean_claims_per_query": 4.12,
+ "modes": {
+  "dense": {
+   "mean": 0.838952380952381,
+   "ci_lo": 0.7773928571428571,
+   "ci_hi": 0.9004166666666668,
+   "n": 100
+  },
+  "sparse": {
+   "mean": 0.8988809523809523,
+   "ci_lo": 0.8521428571428571,
+   "ci_hi": 0.939797619047619,
+   "n": 100
+  },
+  "hybrid": {
+   "mean": 0.9015476190476189,
+   "ci_lo": 0.8533333333333333,
+   "ci_hi": 0.9443452380952381,
+   "n": 100
+  },
+  "hybrid+rerank": {
+   "mean": 0.9210238095238096,
+   "ci_lo": 0.8789404761904762,
+   "ci_hi": 0.9603571428571429,
+   "n": 100
+  }
+ },
+ "comparisons": {
+  "dense_vs_hybrid": {
+   "delta": -0.06259523809523809,
+   "ci_lo": -0.12114285714285714,
+   "ci_hi": -0.0006190476190476202,
+   "p_value": 0.04839516048395161,
+   "n": 100,
+   "significant": true
+  },
+  "sparse_vs_hybrid": {
+   "delta": -0.0026666666666666666,
+   "ci_lo": -0.040999999999999995,
+   "ci_hi": 0.03958333333333333,
+   "p_value": 0.9022097790220978,
+   "n": 100,
+   "significant": false
+  },
+  "hybrid+rerank_vs_hybrid": {
+   "delta": 0.019476190476190477,
+   "ci_lo": -0.03208333333333333,
+   "ci_hi": 0.075,
+   "p_value": 0.46505349465053497,
+   "n": 100,
+   "significant": false
+  }
+ }
+}
