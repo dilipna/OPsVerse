@@ -40,12 +40,25 @@ snapshots from its ingestion history, and hashing is what disambiguates them cor
 Same embedder throughout (`BAAI/bge-base-en-v1.5`, the incumbent) — the isolation
 principle already used in `embedding_ablation.py`: one variable changes at a time.
 
-**Result:** see [chunking-ablation-v1.md](../reports/chunking-ablation-v1.md).
+**Result:** see [chunking-ablation-v1.md](../reports/chunking-ablation-v1.md). Time-boxed to
+100/594 candidate documents for same-day turnaround (stated as a limit in the report; the
+comparison between configs stays valid since all three index the identical 100 documents).
 
-<!-- TODO: fill in once the run completes -->
-- Winning config: **TBD**
-- Was the difference from baseline significant (paired permutation test)? **TBD**
-- Indexing cost tradeoff (chunks/doc, index time) across configs: **TBD**
+- **`small` (150 tokens) beats the shipped `baseline` (350 tokens) on `nDCG_graded@10`:**
+  +0.044, paired permutation p=0.0002 — significant.
+- **`large` (700 tokens) is significantly worse than `baseline`:** -0.017, p=0.017.
+- **`hit@10` is identical (0.350) across all three configs** — not evidence chunking is
+  irrelevant, but the ceiling imposed by indexing only 100/594 documents: many queries'
+  true answer document isn't in this smaller index regardless of chunk size.
+  `nDCG_graded@10` is the metric with room to move, and it moves monotonically with chunk
+  size (small > baseline > large).
+- Indexing cost: `small` produced 15.11 chunks/doc, `baseline` 9.22, `large` 7.92 — smaller
+  chunks cost proportionally more to embed and store. `small`'s wall-clock index time
+  (2271.8s) was measured under CPU contention with a concurrent job and is not a clean
+  throughput comparison; chunk count is the reliable relative-cost signal.
+- **The shipped default is not the best-measured option** on this corpus, on this metric,
+  at this scope. That is the entire point of running the ablation instead of trusting the
+  original choice.
 
 ## Decision — multi-turn eval
 
@@ -93,9 +106,19 @@ encoder), not string concatenation.
 - **Multi-turn cases are constructed, not observed.** No real conversations are logged,
   so this measures whether the failure mode exists and is measurable, not its frequency
   in production traffic.
-- If `concat_history` helps: the honest next step is query rewriting or a dedicated
-  conversational encoder, not shipping string concatenation — this eval identifies the
-  problem and floor-tests the cheapest fix, it does not select a final design.
-- Both scripts gained on-disk checkpointing (`embedding_ablation.py` too) after three
+- `concat_history` did not help (trended worse, not significant) — the honest next step
+  is query rewriting or a dedicated conversational encoder, not shipping string
+  concatenation. This eval's job was to floor-test the cheapest fix and report honestly
+  that it doesn't clear the bar, not to select a final design.
+- **The shipped chunking default (350/512/50) is not the best-measured option** on the
+  one metric with room to move (`nDCG_graded@10`) at the scope tested. This does not
+  trigger a production change on its own — the result is document-level and scoped to
+  100/594 documents — but it is a concrete, measured reason to re-run this ablation at
+  full scope before treating 350/512/50 as settled.
+- Both scripts gained on-disk checkpointing (`embedding_ablation.py` too) after multiple
   session-restart crashes killed long single-shot sweeps mid-run with no partial-result
   recovery — each model/config result is now cached to disk as soon as it is computed.
+  One crash was self-inflicted (deleting a collection while its writer was still active,
+  mistaking a slow-but-alive process for a dead one from buffered-empty log output) —
+  the fix going forward is checking process activity before touching shared state, not
+  just absence of recent log lines.
