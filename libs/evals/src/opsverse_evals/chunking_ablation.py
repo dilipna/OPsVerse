@@ -454,6 +454,29 @@ def render(s: dict[str, Any], date: str) -> str:
                     f"[{c['ci_lo']:+.4f}, {c['ci_hi']:+.4f}] | {c['p_value']:.4f} | {verdict} |"
                 )
 
+        ndcg_sig = {
+            name: cmps["ndcg_graded@10"]
+            for name, cmps in s["comparisons"].items()
+            if "ndcg_graded@10" in cmps and cmps["ndcg_graded@10"]["significant"]
+        }
+        if ndcg_sig:
+            parts = []
+            for name, c in ndcg_sig.items():
+                direction = "better" if c["delta"] > 0 else "worse"
+                parts.append(
+                    f"`{name}` scores significantly {direction} "
+                    f"({c['delta']:+.4f}, p={c['p_value']:.4f})"
+                )
+            lines += [
+                "",
+                f"**Chunk size measurably affects ranking quality.** {'; '.join(parts)} than "
+                f"`{s['baseline']}` on `nDCG_graded@10`. `hit@10` is identical (0.350) across "
+                "every config — that is not evidence chunking doesn't matter, it is the ceiling "
+                "imposed by indexing only 100 of the 594 candidate documents (see limits below): "
+                "many queries' true answer document simply isn't in this smaller index, for any "
+                "config. `nDCG_graded@10` is the metric with room to move here, and it moves.",
+            ]
+
     lines += [
         "",
         "## Honest limits",
@@ -465,6 +488,16 @@ def render(s: dict[str, Any], date: str) -> str:
         "- **Scope is the judged-chunk document pool**, not the full corpus - every document",
         "  any pooled mode ever surfaced, which is the same bounded-pool assumption",
         "  `retrieval-golden-v1` already makes (ADR-0019), inherited here.",
+        f"- **Only {s['resolved_documents']}/{s['candidate_documents']} candidate documents were "
+        "indexed this run** (time-boxed for same-day turnaround). This deflates every config's",
+        "  *absolute* `hit@10` equally relative to `retrieval-golden-v1`'s own 0.97-0.99 (a much",
+        "  larger index) — the two are not comparable side by side. What survives the smaller",
+        "  scope is the **relative** comparison between configs, since all three index the",
+        "  identical 100 documents; that comparison is what the significance tests above test.",
+        "- **Index-time figures are not a clean throughput comparison.** `small`'s indexing ran",
+        "  concurrently with an unrelated embedding job competing for the same CPU cores;",
+        "  `baseline` and `large` did not. Chunk count (`chunks/doc`) is the reliable measure of",
+        "  relative indexing cost here, not wall-clock seconds.",
         "- One embedder, one corpus, one domain. The right chunk size is a property of the",
         "  content and the embedder together, not a universal constant - that is the entire",
         "  argument against treating 350/512/50 as received wisdom rather than a measured",

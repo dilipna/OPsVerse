@@ -82,6 +82,9 @@ not asserted — and it has already changed the design:
 |---|---|
 | **Golden set** — pooled (TREC-style), **graded 0-3**, position-randomised, **1,914 judgements** | 100 queries, mean **19.1 candidates/query** pooled across all 4 modes, **70/100 multi-label**; judge sanity-checked at **100% seed recovery** ([report](docs/reports/retrieval-golden-v1.md), [ADR-0019](docs/adr/0019-golden-set-pooled-graded-relevance.md)) |
 | **Significance testing** — bootstrap CIs + **paired permutation tests**, not bare means | every gap vs `hybrid` tested at 10k permutations; **`hit@10` is saturated** (0.97-0.99, no significant difference anywhere) and **sparse vs hybrid is a statistical tie** (nDCG +0.008, p=0.57) — two prior "wins" downgraded |
+| **Contextual recall** — independent reference answers (412 atomic claims), scored against retrieved context | dense **significantly worse** than hybrid (p=0.048) — reproduces the retrieval-side finding with a completely different, generator-side measurement ([report](docs/reports/generator-golden-v1.md)) |
+| **Chunking ablation** — re-parsed the original source docs under 3 chunk-size configs | shipped default (350 tok) is **not** the best-measured option: smaller chunks (150 tok) score significantly better on `nDCG_graded@10` (+0.044, p=0.0002) ([report](docs/reports/chunking-ablation-v1.md), [ADR-0020](docs/adr/0020-chunking-and-multiturn-ablations.md)) |
+| **Multi-turn eval** — the first conversational eval set; tests the cheapest fix for a real gap | retrieval ignores conversation history in production; the naive fix (concatenation) **doesn't help** — trends worse, not significant (p=0.25-0.45) ([report](docs/reports/multiturn-v1.md)) |
 | **Metric-independence audit** — implemented `precision@k` / `recall@k` / contextual-precision, then **declined to report three of them** | on a single-gold-label set `recall@k ≡ hit@k`, `precision@k ≡ hit@k/k`, ctx-precision ≡ `MRR` — verified to **1e-12 across 300 cases × 4 modes** ([audit](docs/reports/retrieval-metrics-audit-v1.md), [ADR-0018](docs/adr/0018-retrieval-metrics-independence-audit.md)) |
 | **Paraphrase-robust retrieval** — the eval *falsified the project's own v2 result* | a sparse "win" on the raw set collapsed **−0.149** MRR under reworded queries; hybrid held (−0.049) ([ablation v3](docs/reports/retrieval-ablation-v3.md)). **Chapter three:** under pooled graded labels the two are a *statistical tie* ([ADR-0019](docs/adr/0019-golden-set-pooled-graded-relevance.md)) |
 | **Hybrid RAG** (BGE dense + BM25 sparse, RRF, citations, SSE) | 1,241 docs / 7,383 chunks; hybrid MRR@10 **0.705** ([ablation v2](docs/reports/retrieval-ablation-v2.md)) |
@@ -104,7 +107,7 @@ not asserted — and it has already changed the design:
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
 | **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — serves the live [benchmark dashboard](https://ops-verse.vercel.app/dashboard.html); chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
-**210 tests · ruff + pyright clean · CI + eval-gate green · 19 ADRs.**
+**215 tests · ruff + pyright clean · CI + eval-gate green · 20 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -199,7 +202,7 @@ docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  com
 ## Development
 
 ```bash
-uv run pytest -q            # 210 tests
+uv run pytest -q            # 215 tests
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
