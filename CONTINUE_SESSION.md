@@ -1,4 +1,4 @@
-# OpsVerse AI — STATUS (last updated 2026-09-03, HEAD `f2945a9`)
+# OpsVerse AI — STATUS (last updated 2026-09-04, HEAD `6db0800`+)
 
 > **This file is a status record, not a task list.** Persistent memory:
 > `~/.claude/projects/c--Users-Dilip-OneDrive-Pictures-ftrag/memory/`
@@ -6,7 +6,7 @@
 ## Current state
 
 **Everything is pushed, CI is green, working tree is clean.** `origin/main` == local
-`HEAD` at `f2945a9`. **215 tests · 21 ADRs · 11 reports · ruff + format + pyright clean.**
+`HEAD` at `f2945a9`. **245 tests · 22 ADRs · 12 reports · ruff + format + pyright clean.**
 
 **The user has (or just had) a major conference demo they consider career-critical** —
 treat any mention of "the demo" as high-stakes. If a new session starts and the demo
@@ -58,6 +58,35 @@ overturn with a significance test rather than an eyeballed number.**
 an explicit "what NOT to claim yet" section. Read this before writing any resume/LinkedIn
 copy — don't re-derive from scratch.
 
+## What shipped 2026-09-04 (judge validation — the eval-rigor gap)
+
+Driven by a research pass on what top-tier AI labs screen for (plan:
+`~/.claude/plans/read-continue-session-md-at-the-glowing-gosling.md`; see the
+`opsverse-job-application-goal` memory). Of four recurring hiring signals, three were
+already covered with real evidence; the gaps were **judge validation**, **error
+analysis / failure taxonomy**, and **an agent tool-use harness**. Item 1 is now done.
+
+7. **Judge validation** (ADR-0022) — the golden set's labels audited against a blinded
+   second rater on a stratified sample (192 drawn, 190 scored). **Found the judge is
+   systematically strict**: signed error **+0.327 [+0.226, +0.430]**, precision 0.968
+   against **TPR 0.571**, quadratic κ 0.717. So absolute `recall@k`/`nDCG_graded@k` on
+   the golden set read *low* — but the bias is equal across all four modes
+   (+0.317–+0.412, overlapping CIs), so **the ADR-0019/0020/0021 comparisons stand**.
+   The levels move; the deltas don't. → `docs/reports/judge-validation-v1.md`
+
+   **⚠️ The reference rater was `claude-opus-5`, NOT a human.** The user asked for this
+   explicitly (no time before a demo) and the report says so in its title, a warning
+   block, and its limits; `--rater-kind model` switches that language on. Model-model
+   agreement is biased *upward*. **Never describe this as human validation** in a
+   resume, README, or interview — say "second-model cross-check; human labels are the
+   open item." A ~40-item human subset is the agreed follow-up (option C).
+
+   New: `libs/evals/.../judge_validation.py` (`sample` / `score` subcommands, offline —
+   no Qdrant, no API), `stats.bootstrap_statistic_ci` (stratified bootstrap for table
+   ratios like κ/TPR, which are not means of per-item scores). The generated labeling
+   page is gitignored; tasks + key + labels are committed. 2 tasks (`t0001`, `t0002`)
+   excluded for broken blinding and named in the report.
+
 ## What is genuinely left (all optional, none blocking a demo)
 
 1. **Before/after eval (base Qwen3-4B vs OpsLM-v1)** — the one real content gap.
@@ -80,9 +109,17 @@ copy — don't re-derive from scratch.
    over plain HTTP; a Cloudflare Tunnel would fix that for free. **Low priority** — the
    dashboard link is the stronger demo artifact and needs no serving infrastructure.
 6. **DPO → OpsLM-v2** — pipeline ready (ADR-0015), run pending.
-7. **Human-annotator agreement** for the golden set — currently a single LLM judge with
-   a seed-recovery sanity check (100%), not inter-annotator agreement. Stated as a limit
-   in every relevant report; a real next step if this project keeps growing.
+7. **HUMAN judge labels** — partially addressed by ADR-0022, but that used a *second
+   model* as the reference rater, not a person. Agreed next step (user picked "option
+   C"): the user labels a ~40-item subset themselves after the demo, giving a real
+   (if underpowered) human column alongside the model one. Redraw with
+   `uv run python -m opsverse_evals.judge_validation sample --n 40 --tasks ... --key ...`
+   then `score --rater-kind human`. Until then the human-validation slot is OPEN.
+8. **Error analysis / failure taxonomy** — item 2 of the approved plan, not started.
+   ~100 traces already on disk (`generator-golden-v1.partial.jsonl`, multiturn runs);
+   open-code → axial-code → counts per category. Offline, no quota.
+9. **Agent / tool-use harness + trajectory eval** — item 3 of the plan, multi-day,
+   quota-constrained. Reuses the 5 existing MCP tools; NOT a framework adoption.
 
 ## Lessons from 2026-09-02/03 (read before running long background jobs)
 

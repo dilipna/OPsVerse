@@ -1,0 +1,164 @@
+{
+  "dataset": "judge-validation-v1",
+  "n_labelled": 190,
+  "n_tasks": 190,
+  "excluded_task_ids": [
+    "t0001",
+    "t0002"
+  ],
+  "strata": {
+    "judge_relevant": 95,
+    "judge_not_relevant": 95
+  },
+  "weights": {
+    "judge_not_relevant": 16.781,
+    "judge_relevant": 3.156
+  },
+  "weighted": {
+    "tpr": {
+      "mean": 0.5710071898236342,
+      "ci_lo": 0.4638578274760383,
+      "ci_hi": 0.7404334165793925,
+      "n": 190
+    },
+    "tnr": {
+      "mean": 0.9931659787536369,
+      "ci_lo": 0.984197939250352,
+      "ci_hi": 1.0,
+      "n": 190
+    },
+    "precision": {
+      "mean": 0.968421052631579,
+      "ci_lo": 0.9263157894736842,
+      "ci_hi": 1.0,
+      "n": 190
+    },
+    "npv": {
+      "mean": 0.8631578947368421,
+      "ci_lo": 0.7894736842105263,
+      "ci_hi": 0.9368421052631579,
+      "n": 190
+    },
+    "cohen_kappa_binary": {
+      "mean": 0.6483831969976025,
+      "ci_lo": 0.524053506437361,
+      "ci_hi": 0.7994232195488723,
+      "n": 190
+    },
+    "quadratic_weighted_kappa": {
+      "mean": 0.7165604167214371,
+      "ci_lo": 0.6409469846885718,
+      "ci_hi": 0.7871729183233668,
+      "n": 190
+    },
+    "exact_agreement": {
+      "mean": 0.6255238409503382,
+      "ci_lo": 0.5369245999010064,
+      "ci_hi": 0.7069295495792773,
+      "n": 190
+    },
+    "adjacent_agreement": {
+      "mean": 0.97175383600066,
+      "ci_lo": 0.9379805312654678,
+      "ci_hi": 0.9983336083154595,
+      "n": 190
+    },
+    "mean_signed_error": {
+      "mean": 0.327289226200297,
+      "ci_lo": 0.22596931199472034,
+      "ci_hi": 0.42974756640818346,
+      "n": 190
+    }
+  },
+  "unweighted": {
+    "tpr": 0.8762,
+    "tnr": 0.9647,
+    "precision": 0.9684,
+    "npv": 0.8632,
+    "cohen_kappa_binary": 0.8316,
+    "quadratic_weighted_kappa": 0.8287,
+    "exact_agreement": 0.6579
+  },
+  "confusion_unweighted": [
+    [
+      14.0,
+      2.0,
+      0.0,
+      0.0
+    ],
+    [
+      22.0,
+      44.0,
+      2.0,
+      1.0
+    ],
+    [
+      2.0,
+      10.0,
+      15.0,
+      8.0
+    ],
+    [
+      0.0,
+      1.0,
+      17.0,
+      52.0
+    ]
+  ],
+  "binary_counts_unweighted": {
+    "tp": 92.0,
+    "fp": 3.0,
+    "fn": 13.0,
+    "tn": 82.0
+  },
+  "per_mode_signed_error": {
+    "dense": {
+      "mean": 0.3622090811633295,
+      "ci_lo": 0.21015319708130165,
+      "ci_hi": 0.4991873292526887,
+      "n": 105,
+      "judged_relevant_share": 0.22
+    },
+    "hybrid": {
+      "mean": 0.35555620936185234,
+      "ci_lo": 0.2330754067492424,
+      "ci_hi": 0.4819500426608609,
+      "n": 125,
+      "judged_relevant_share": 0.2258
+    },
+    "hybrid+rerank": {
+      "mean": 0.41168051189941623,
+      "ci_lo": 0.28544566681634487,
+      "ci_hi": 0.546418949259093,
+      "n": 124,
+      "judged_relevant_share": 0.2013
+    },
+    "sparse": {
+      "mean": 0.31662698532292577,
+      "ci_lo": 0.18619089237816822,
+      "ci_hi": 0.44914258159790243,
+      "n": 117,
+      "judged_relevant_share": 0.207
+    }
+  },
+  "human_seed_recovery": 1.0,
+  "n_seed_chunks": 29,
+  "by_split": {
+    "dev": {
+      "n": 95,
+      "cohen_kappa_binary": 0.6758,
+      "quadratic_weighted_kappa": 0.7406,
+      "tpr": 0.5957,
+      "tnr": 0.9954
+    },
+    "test": {
+      "n": 95,
+      "cohen_kappa_binary": 0.6216,
+      "quadratic_weighted_kappa": 0.6925,
+      "tpr": 0.5473,
+      "tnr": 0.9909
+    }
+  },
+  "rater_id": "claude-opus-5",
+  "rater_kind": "model"
+}

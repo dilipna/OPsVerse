@@ -545,8 +545,18 @@ def score(
     keys: Sequence[JudgeValidationKey],
     labels: Sequence[HumanLabel],
     seed: int = 20260903,
+    exclude: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
-    """Every agreement statistic, with stratified-bootstrap intervals."""
+    """Every agreement statistic, with stratified-bootstrap intervals.
+
+    `exclude` drops task ids whose blinding is known to be broken -- a rater who
+    has seen the judge's grade for an item is not independent on that item, and
+    silently leaving it in would inflate agreement. Excluded ids are recorded in
+    the report rather than quietly dropped.
+    """
+    if exclude:
+        keys = [k for k in keys if k.task_id not in exclude]
+        labels = [label for label in labels if label.task_id not in exclude]
     pairs = build_pairs(keys, labels)
     if not pairs:
         raise ValueError("no labelled tasks: label the tasks and export labels first")
@@ -619,6 +629,7 @@ def score(
         "dataset": "judge-validation-v1",
         "n_labelled": len(pairs),
         "n_tasks": len(keys),
+        "excluded_task_ids": sorted(exclude),
         "strata": {
             stratum: sum(1 for p in pairs if p.stratum == stratum)
             for stratum in (STRATUM_POS, STRATUM_NEG)
@@ -643,21 +654,98 @@ def _fmt_pos(entry: dict[str, Any]) -> str:
     return f"{entry['mean']:.3f} [{entry['ci_lo']:.3f}, {entry['ci_hi']:.3f}]"
 
 
-def render(report: dict[str, Any], judge_model: str, date: str) -> str:
+def render(
+    report: dict[str, Any],
+    judge_model: str,
+    date: str,
+    rater_id: str = "the project author",
+    rater_kind: str = "human",
+) -> str:
+    """Render the report.
+
+    `rater_kind` is load-bearing, not cosmetic. A second *model* rater measures
+    something strictly weaker than a human one -- two LLMs share training data,
+    tokenizer-level biases and failure modes, so their agreement is biased
+    upward and cannot stand in for human validation. When the reference rater is
+    a model the report says so in its title, its opening, and its limits, so the
+    number can never be quoted as human validation by someone skimming.
+    """
     w = report["weighted"]
     u = report["unweighted"]
+    is_model = rater_kind == "model"
+    subject = "a second model" if is_model else "a human"
     lines = [
-        "# Judge validation v1 - does the LLM relevance judge agree with a human?",
+        f"# Judge validation v1 - does the LLM relevance judge agree with {subject}?",
         "",
         f"Generated {date} by `opsverse_evals.judge_validation` from the committed",
-        "golden set, corpus dump and human label file. No Qdrant, no API, no network.",
+        "golden set, corpus dump and label file. No Qdrant, no API, no network.",
         "",
         f"Judge under test: **`{judge_model}`** (the judge that labelled",
-        "`retrieval-golden-v1`, ADR-0019). Human rater: the project author, one rater,",
+        f"`retrieval-golden-v1`, ADR-0019). Reference rater: **{rater_id}**"
+        f" ({rater_kind}), one rater,",
         f"**{report['n_labelled']}** blinded (question, candidate) pairs.",
+        "",
+    ]
+    if is_model:
+        lines += [
+            "> [!WARNING]",
+            "> **This is a second-model cross-check, not human validation.** The reference",
+            f"> rater here is `{rater_id}`, not a person. Two LLMs share training data and",
+            "> failure modes, so model-model agreement is biased **upward** and sets an",
+            "> optimistic ceiling rather than a ground truth. It can detect a judge that is",
+            "> badly miscalibrated; it cannot certify one that is well calibrated. The",
+            "> project's stated limitation - *the golden set is one rater's opinion* - is",
+            "> **narrowed by this report, not closed**. Human labels remain the open item.",
+            "",
+        ]
+    sgn = w["mean_signed_error"]
+    strict = sgn["ci_lo"] > 0
+    lenient = sgn["ci_hi"] < 0
+    lines += [
+        "## What this found",
+        "",
+    ]
+    if strict or lenient:
+        direction = "stricter" if strict else "more permissive"
+        lines += [
+            f"**The judge is systematically {direction} than the reference rater.** Mean",
+            f"signed error {_fmt(sgn)} on a 0-3 scale - the interval excludes zero, so this",
+            "is a calibration offset, not noise. It shows up as an asymmetry, not as random",
+            f"disagreement: precision {_fmt_pos(w['precision'])} against TPR {_fmt_pos(w['tpr'])}.",
+            "When this judge calls a chunk relevant it almost always is; it misses a large",
+            "share of what the other rater counts as relevant.",
+            "",
+            "**What that costs.** The graded labels are a conservative floor, so the count of",
+            "relevant chunks per query in `retrieval-golden-v1` is likely an *under*count, and",
+            "absolute `recall@k` / `nDCG_graded@k` on that set read low. Any absolute number",
+            "quoted from the golden set should be read with that direction of bias attached.",
+            "",
+            "**What it does not cost.** The bias is close to equal across all four retrieval",
+            "modes (see the per-mode table), and a bias shared equally cancels in a paired",
+            "comparison. The mode-vs-mode conclusions in ADR-0019 - dense significantly worse",
+            "than hybrid, sparse-vs-hybrid a tie, rerank no measurable help - are not",
+            "overturned by this. The *levels* move; the *deltas* stand.",
+            "",
+        ]
+    else:
+        lines += [
+            f"**No detectable calibration offset.** Mean signed error {_fmt(sgn)} on a 0-3",
+            "scale; the interval spans zero, so no systematic strictness in either direction",
+            "is demonstrated at this sample size.",
+            "",
+        ]
+    lines += [
+        f"Chance-corrected agreement is {_fmt_pos(w['quadratic_weighted_kappa'])} "
+        "(quadratic-weighted,",
+        f"graded) and {_fmt_pos(w['cohen_kappa_binary'])} (binary, at the relevance cut) -",
+        "'substantial' on the conventional reading, and agreement within one grade is",
+        f"{_fmt_pos(w['adjacent_agreement'])}. The disagreements are near misses on an",
+        "ordinal scale, not two raters reading different documents.",
         "",
         "## Why this exists",
         "",
+    ]
+    lines += [
         "Every retrieval conclusion in this project rests on one LLM judge's labels. The",
         "only check on it so far was **seed recovery** - the chunk each question was written",
         "from graded >= 2, 100/100. That detects a badly broken judge and nothing else: a",
@@ -683,13 +771,13 @@ def render(report: dict[str, Any], judge_model: str, date: str) -> str:
         "",
         "| statistic | weighted (population) | unweighted (in-sample) |",
         "|---|---|---|",
-        f"| TPR - judge finds what the human calls relevant | {_fmt_pos(w['tpr'])} |"
+        f"| TPR - judge finds what the rater calls relevant | {_fmt_pos(w['tpr'])} |"
         f" {u['tpr']:.3f} |",
-        f"| TNR - judge rejects what the human calls irrelevant | {_fmt_pos(w['tnr'])} |"
+        f"| TNR - judge rejects what the rater calls irrelevant | {_fmt_pos(w['tnr'])} |"
         f" {u['tnr']:.3f} |",
-        f"| Precision - judge's 'relevant' the human confirms | {_fmt_pos(w['precision'])} |"
+        f"| Precision - judge's 'relevant' the rater confirms | {_fmt_pos(w['precision'])} |"
         f" {u['precision']:.3f} |",
-        f"| NPV - judge's 'not relevant' the human confirms | {_fmt_pos(w['npv'])} |"
+        f"| NPV - judge's 'not relevant' the rater confirms | {_fmt_pos(w['npv'])} |"
         f" {u['npv']:.3f} |",
         f"| Cohen's kappa (binary, relevance cut) | {_fmt_pos(w['cohen_kappa_binary'])} |"
         f" {u['cohen_kappa_binary']:.3f} |",
@@ -698,16 +786,16 @@ def render(report: dict[str, Any], judge_model: str, date: str) -> str:
         f"| Exact grade agreement | {_fmt_pos(w['exact_agreement'])} |"
         f" {u['exact_agreement']:.3f} |",
         f"| Agreement within one grade | {_fmt_pos(w['adjacent_agreement'])} | - |",
-        f"| Mean signed error (human - judge) | {_fmt(w['mean_signed_error'])} | - |",
+        f"| Mean signed error (rater - judge) | {_fmt(w['mean_signed_error'])} | - |",
         "",
         "Kappa reference points (Landis & Koch, the conventional reading): 0.21-0.40 fair,",
         "0.41-0.60 moderate, 0.61-0.80 substantial, 0.81+ almost perfect. Raw agreement is",
         "not reported as a headline because a pool that is ~84% non-relevant makes it easy:",
         "a judge that rejected everything would score ~0.84 raw and 0.00 kappa.",
         "",
-        "### Confusion matrix (unweighted counts, rows = human, cols = judge)",
+        "### Confusion matrix (unweighted counts, rows = rater, cols = judge)",
         "",
-        "| human \\ judge | 0 | 1 | 2 | 3 |",
+        "| rater \\ judge | 0 | 1 | 2 | 3 |",
         "|---|---|---|---|---|",
     ]
     for i, row in enumerate(report["confusion_unweighted"]):
@@ -725,7 +813,7 @@ def render(report: dict[str, Any], judge_model: str, date: str) -> str:
         "This is the question that decides whether the published *comparisons* survive.",
         "Absolute judge accuracy could be mediocre without invalidating a mode-vs-mode",
         "delta, provided the judge's errors do not systematically favour one mode. Each row",
-        "is the weighted mean of (human - judge) over the sampled candidates that mode",
+        "is the weighted mean of (rater - judge) over the sampled candidates that mode",
         "retrieved; positive means the judge under-graded what that mode found.",
         "",
         "| retrieval mode | n | mean signed error [95% CI] | judged relevant |",
@@ -747,7 +835,14 @@ def render(report: dict[str, Any], judge_model: str, date: str) -> str:
         "accurate, and it is the right one, because a bias shared equally by all four modes",
         "cancels in a paired comparison between them.",
         "",
-        "## Human seed recovery",
+        "Two honest caveats on this table. The rows are **not independent samples** - the",
+        "pool is shared, so most sampled chunks were retrieved by several modes at once and",
+        "the same item appears in several rows. And 'no significant difference' at this n is",
+        "not proof of no difference; it bounds the effect rather than excluding it. The",
+        "claim this table supports is the narrow one: **no mode-dependent judge bias is",
+        "detectable at n~120 per mode**, which is what the paired comparisons need.",
+        "",
+        "## Seed recovery, re-checked",
         "",
     ]
     if seed_rate is None:
@@ -756,7 +851,7 @@ def render(report: dict[str, Any], judge_model: str, date: str) -> str:
         n_seed = report["n_seed_chunks"]
         lines += [
             "The judge recovered **100%** of originating chunks at grade >= 2 (ADR-0019).",
-            f"On the {n_seed} seed chunks that fell in this sample, the human rater graded",
+            f"On the {n_seed} seed chunks that fell in this sample, the reference rater graded",
             f"**{seed_rate:.0%}** of them >= 2. A gap here would mean the seed-recovery check",
             "was easier than the judging task it was standing in for.",
         ]
@@ -780,21 +875,44 @@ def render(report: dict[str, Any], judge_model: str, date: str) -> str:
                 f" {s['quadratic_weighted_kappa']:.3f} | {s['tpr']:.3f} | {s['tnr']:.3f} |"
             )
 
+    kind_limit = (
+        [
+            "- **The reference rater is a language model, not a person.** Model-model",
+            "  agreement shares training data and failure modes with the judge, so it is",
+            "  biased upward: it is an optimistic ceiling on what human agreement would be,",
+            "  never a substitute for it. Read every number here as 'the judge is at most",
+            "  this consistent', not 'the judge is this correct'.",
+        ]
+        if is_model
+        else [
+            "- **The rater is the system's author**, which is a real bias risk in the",
+            "  optimistic direction. Blinding removes the ability to look up the judge's",
+            "  answer; it does not remove knowing how the retriever works.",
+        ]
+    )
     lines += [
         "",
         "## Limits",
         "",
-        "- **One human rater.** This measures judge-vs-human agreement, not inter-annotator",
+        "- **One rater.** This measures judge-vs-rater agreement, not inter-annotator",
         "  agreement, so it cannot separate 'the judge is wrong' from 'this rater is",
-        "  unusual'. A second independent rater is the next step, and until there is one the",
-        "  human column is a reference, not ground truth.",
-        "- **The rater is the system's author**, which is a real bias risk in the",
-        "  optimistic direction. Blinding removes the ability to look up the judge's answer;",
-        "  it does not remove knowing how the retriever works.",
+        "  unusual'. A second independent rater is the next step, and until there is one",
+        "  the reference column is a reference, not ground truth.",
+        *kind_limit,
         f"- **n = {report['n_labelled']}** pairs across {report['n_tasks']} sampled tasks. The",
         "  intervals above are what that buys; they are printed on every number for that",
         "  reason.",
         "- Agreement is measured on this corpus and this rubric only.",
+        *(
+            [
+                f"- **{len(report['excluded_task_ids'])} task(s) excluded for broken "
+                "blinding**: " + ", ".join(f"`{t}`" for t in report["excluded_task_ids"]) + ".",
+                "  The rater had seen the judge's grade for these before labelling, so they",
+                "  are not independent observations and are dropped rather than counted.",
+            ]
+            if report.get("excluded_task_ids")
+            else []
+        ),
         "",
     ]
     return "\n".join(lines)
@@ -838,12 +956,18 @@ def cmd_score(args: argparse.Namespace) -> None:
         for line in args.labels.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    report = score(keys, labels, seed=args.seed)
+    exclude = frozenset(t.strip() for t in args.exclude.split(",") if t.strip())
+    report = score(keys, labels, seed=args.seed, exclude=exclude)
+    report["rater_id"] = args.rater_id
+    report["rater_kind"] = args.rater_kind
 
     golden = GradedRetrievalDataset.load_jsonl(args.golden)
     date = datetime.now(UTC).strftime("%Y-%m-%d")
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(render(report, golden.judge_model, date), encoding="utf-8")
+    args.out.write_text(
+        render(report, golden.judge_model, date, args.rater_id, args.rater_kind),
+        encoding="utf-8",
+    )
     summary = args.out.with_name(args.out.stem + "-summary.json")
     summary.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
@@ -881,6 +1005,25 @@ def main() -> None:
     c.add_argument("--labels", type=Path, default=Path("evalsets/judge-validation-v1-labels.jsonl"))
     c.add_argument("--out", type=Path, default=Path("docs/reports/judge-validation-v1.md"))
     c.add_argument("--seed", type=int, default=20260903)
+    c.add_argument(
+        "--rater-id",
+        default="the project author",
+        help="who produced the labels; printed in the report",
+    )
+    c.add_argument(
+        "--rater-kind",
+        default="human",
+        choices=("human", "model"),
+        help=(
+            "'model' marks the run as a second-model cross-check and prints the "
+            "upward-bias warning; it is NOT human validation"
+        ),
+    )
+    c.add_argument(
+        "--exclude",
+        default="",
+        help="comma-separated task ids to drop (e.g. blinding known to be broken)",
+    )
     c.set_defaults(func=cmd_score)
 
     args = parser.parse_args()
