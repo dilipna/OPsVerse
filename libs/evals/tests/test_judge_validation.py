@@ -286,7 +286,49 @@ def test_render_produces_a_report_with_the_headline_numbers():
     assert "Judge validation v1" in text
     assert "Cohen's kappa" in text
     assert "Quadratic-weighted kappa" in text
-    assert "One human rater" in text  # the limits section must survive rendering
+    assert "One rater." in text  # the limits section must survive rendering
+
+
+def test_render_marks_a_model_rater_as_not_human_validation():
+    """A second-model cross-check must never read as human validation."""
+    keys = _keys(40, [3, 2, 1, 0] * 10)
+    labels = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys]
+    report = jv.score(keys, labels)
+
+    as_model = jv.render(report, "gemini/test", "2026-09-03", "claude-opus-5", "model")
+    assert "second model" in as_model
+    assert "not human validation" in as_model
+    assert "biased **upward**" in as_model
+    assert "language model, not a person" in as_model
+
+    as_human = jv.render(report, "gemini/test", "2026-09-03", "a person", "human")
+    assert "not human validation" not in as_human
+    assert "the system's author" in as_human
+
+
+def test_render_reports_a_calibration_offset_only_when_the_ci_excludes_zero():
+    keys = _keys(40, [3, 2, 1, 0] * 10)
+    # judge grades one full point below the rater on every item
+    strict = [
+        HumanLabel(task_id=k.task_id, human_grade=min(jv.MAX_GRADE, k.judge_grade + 1))
+        for k in keys
+    ]
+    text = jv.render(jv.score(keys, strict), "gemini/test", "2026-09-03")
+    assert "systematically stricter" in text
+
+    agreeing = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys]
+    text = jv.render(jv.score(keys, agreeing), "gemini/test", "2026-09-03")
+    assert "No detectable calibration offset" in text
+
+
+def test_score_excludes_unblinded_tasks_and_records_them():
+    """An item whose grade the rater already saw is not an independent observation."""
+    keys = _keys(40, [3, 2, 1, 0] * 10)
+    labels = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys]
+    report = jv.score(keys, labels, exclude=frozenset({"t0000", "t0001"}))
+    assert report["n_labelled"] == 38
+    assert report["excluded_task_ids"] == ["t0000", "t0001"]
+    assert "`t0000`" in jv.render(report, "gemini/test", "2026-09-03")
 
 
 def test_labeler_page_is_self_contained_and_escapes_script_tags():

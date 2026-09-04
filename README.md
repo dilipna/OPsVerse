@@ -81,6 +81,7 @@ not asserted — and it has already changed the design:
 | Capability | Evidence |
 |---|---|
 | **Golden set** — pooled (TREC-style), **graded 0-3**, position-randomised, **1,914 judgements** | 100 queries, mean **19.1 candidates/query** pooled across all 4 modes, **70/100 multi-label**; judge sanity-checked at **100% seed recovery** ([report](docs/reports/retrieval-golden-v1.md), [ADR-0019](docs/adr/0019-golden-set-pooled-graded-relevance.md)) |
+| **Judge validation** — the golden set's own labels audited against a blinded second rater | the judge is **systematically strict**: signed error **+0.327** [+0.226, +0.430], precision 0.968 vs **TPR 0.571** — so absolute `recall@k` reads *low*, while the bias is equal across modes (+0.317–+0.412) so the **comparisons stand**. Quadratic κ **0.717** ([report](docs/reports/judge-validation-v1.md), [ADR-0022](docs/adr/0022-judge-validation-against-a-second-rater.md)). Reference rater is a **second model, not a human** — an optimistic ceiling, labelled as such |
 | **Significance testing** — bootstrap CIs + **paired permutation tests**, not bare means | every gap vs `hybrid` tested at 10k permutations; **`hit@10` is saturated** (0.97-0.99, no significant difference anywhere) and **sparse vs hybrid is a statistical tie** (nDCG +0.008, p=0.57) — two prior "wins" downgraded |
 | **Contextual recall** — independent reference answers (412 atomic claims), scored against retrieved context | dense **significantly worse** than hybrid (p=0.048) — reproduces the retrieval-side finding with a completely different, generator-side measurement ([report](docs/reports/generator-golden-v1.md)) |
 | **Chunking ablation** — re-parsed the original source docs under 3 chunk-size configs | shipped default (350 tok) is **not** the best-measured option: smaller chunks (150 tok) score significantly better on `nDCG_graded@10` (+0.044, p=0.0002) ([report](docs/reports/chunking-ablation-v1.md), [ADR-0020](docs/adr/0020-chunking-and-multiturn-ablations.md)) |
@@ -108,7 +109,7 @@ not asserted — and it has already changed the design:
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
 | **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — serves the live [benchmark dashboard](https://ops-verse.vercel.app/dashboard.html); chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
-**215 tests · ruff + pyright clean · CI + eval-gate green · 21 ADRs.**
+**245 tests · ruff + pyright clean · CI + eval-gate green · 22 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -203,7 +204,7 @@ docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  com
 ## Development
 
 ```bash
-uv run pytest -q            # 215 tests
+uv run pytest -q            # 245 tests
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
@@ -230,7 +231,8 @@ python registry/registry.py --out docs/model-registry.md                   # reg
 [0014](docs/adr/0014-inference-optimization-techniques.md) inference optimization ·
 [0015](docs/adr/0015-dpo-preference-alignment.md) DPO alignment ·
 [0016](docs/adr/0016-split-serving-ephemeral-gpu-vs-always-on-cpu.md) split serving ·
-[0017](docs/adr/0017-slo-constrained-goodput-as-the-capacity-metric.md) goodput as capacity
+[0017](docs/adr/0017-slo-constrained-goodput-as-the-capacity-metric.md) goodput as capacity ·
+[0022](docs/adr/0022-judge-validation-against-a-second-rater.md) judge validation
 
 ## Writing
 
