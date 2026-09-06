@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpsVerse AI · What the measurements overturned</title>
+<meta name="description" content="Seven claims this project believed, tested, and
+ had to withdraw — each published with the statistic that overturned it.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --plane:#f6f7f9; --surface:#ffffff; --surface-2:#fbfcfd;
+  --ink:#0b0d10; --secondary:#4a4f57; --muted:#878d96;
+  --border:rgba(11,13,16,.10); --accent:#2a78d6;
+  --was:#d03b3b; --now:#0ca30c; --was-soft:rgba(208,59,59,.28);
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --plane:#0a0c0f; --surface:#15181d; --surface-2:#1a1e24;
+    --ink:#f2f4f7; --secondary:#a8afb9; --muted:#7c828c;
+    --border:rgba(255,255,255,.10); --accent:#3987e5;
+    --was:#e66767; --now:#3fbf6b; --was-soft:rgba(230,103,103,.32);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --plane:#0a0c0f; --surface:#15181d; --surface-2:#1a1e24;
+  --ink:#f2f4f7; --secondary:#a8afb9; --muted:#7c828c;
+  --border:rgba(255,255,255,.10); --accent:#3987e5;
+  --was:#e66767; --now:#3fbf6b; --was-soft:rgba(230,103,103,.32);
+  color-scheme:dark;
+}
+html,body{background:var(--plane)}
+body{color:var(--ink);font-family:var(--sans);line-height:1.55;
+  -webkit-font-smoothing:antialiased;padding:clamp(16px,4vw,44px)}
+.wrap{max-width:1000px;margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
+  margin:0;text-wrap:balance}
+.sub{color:var(--secondary);font-size:16px;margin:14px 0 0;max-width:68ch}
+.sub strong{color:var(--ink)}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);
+  margin:22px 0 0;padding-top:16px;border-top:1px solid var(--border)}
+.grid{display:grid;gap:16px;margin:30px 0 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:clamp(16px,2.6vw,24px)}
+.n{font-family:var(--mono);font-size:12px;color:var(--muted);
+  letter-spacing:.1em;margin:0 0 10px}
+.belief{font-size:17px;font-weight:600;margin:0;color:var(--secondary);
+  text-wrap:balance}
+.belief::before{content:"Believed: ";color:var(--muted);font-weight:500}
+.verdict{font-size:19px;font-weight:660;margin:12px 0 0;color:var(--was);
+  letter-spacing:-.01em;text-wrap:balance}
+.detail{margin:12px 0 0;font-size:15px;color:var(--ink);
+  background:var(--surface-2);border-left:3px solid var(--was-soft);
+  border-radius:0 8px 8px 0;padding:12px 14px}
+.detail code,.changed code,.belief code,.foot code{font-family:var(--mono);font-size:13px}
+.changed{margin:12px 0 0;font-size:14.5px;color:var(--secondary)}
+.changed b{color:var(--now);font-weight:640}
+.links{margin:14px 0 0;font-family:var(--mono);font-size:12.5px}
+.links a{color:var(--accent);text-decoration:none;margin-right:14px;
+  border-bottom:1px solid transparent}
+.links a:hover{border-bottom-color:var(--accent)}
+.foot{margin:34px 0 0;padding-top:18px;border-top:1px solid var(--border);
+  font-size:14px;color:var(--secondary)}
+.foot h2{font-size:15px;font-weight:640;color:var(--ink);margin:0 0 10px}
+.foot li{margin:0 0 8px 18px}
+@media print{body{padding:0}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="eyebrow">OpsVerse AI · claim ledger</p>
+  <h1>Seven things this project was wrong about</h1>
+  <p class="sub">The stack here — hybrid RAG, a QLoRA fine-tune, a served model, an
+  evaluation harness — is not unusual. This is: <strong>every claim below was believed,
+  measured, and withdrawn.</strong> Four were the project's own published conclusions,
+  two were shipped defaults, and one was the grader that produced the labels for
+  everything else.</p>
+  <p class="meta">Generated 2026-09-06 from the committed *-summary.json files · every
+  number plucked from source, never typed · no network, no running stack</p>
+
+  <div class="grid">
+    <article class="card">
+      <p class="n">01 / 07</p>
+      <p class="belief">Sparse retrieval beats hybrid — the v2 ablation measured it.</p>
+      <p class="verdict">Wrong twice, in two different ways.</p>
+      <p class="detail">v2 raw set: sparse MRR@10 0.759 vs hybrid 0.705. v3 reworded queries: sparse falls to 0.611 (-0.149) while hybrid holds at 0.655 (-0.049) -- the 'win' was vocabulary leakage. Pooled graded labels: nDCG +0.008, p=0.573 -- a statistical tie.</p>
+      <p class="changed"><b>What changed:</b> Three chapters on one claim: a measured win, shown to be an artifact of the eval set, then shown to be no difference at all. Hybrid stayed the default for the robustness reason, not the original one.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-ablation-v2.md">retrieval-ablation-v2</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-ablation-v3.md">retrieval-ablation-v3</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-golden-v1.md">retrieval-golden-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0019-golden-set-pooled-graded-relevance.md">ADR-0019</a></p>
+    </article>
+    <article class="card">
+      <p class="n">02 / 07</p>
+      <p class="belief">Adding <code>precision@k</code>, <code>recall@k</code> and contextual precision makes the eval suite more rigorous.</p>
+      <p class="verdict">Three of them were the same column twice.</p>
+      <p class="detail">On single-gold-label sets <code>recall@k</code> == <code>hit@k</code>, <code>precision@k</code> == <code>hit@k/k</code>, and contextual precision == <code>mrr@k</code>. Verified per case across 3 datasets / 300 cases: the identities hold exactly, to the last bit of floating point (max deviation 0, against a 1e-12 tolerance). Three of the five new metrics carried no independent information, so they were not reported.</p>
+      <p class="changed"><b>What changed:</b> Implemented, tested, proven degenerate — and then *not reported*. The fix was better labels, not more metrics, which is what motivated the golden set.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-metrics-audit-v1.md">retrieval-metrics-audit-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0018-retrieval-metrics-independence-audit.md">ADR-0018</a></p>
+    </article>
+    <article class="card">
+      <p class="n">03 / 07</p>
+      <p class="belief"><code>hit@10</code> is a meaningful headline metric for this corpus.</p>
+      <p class="verdict">Saturated. It cannot separate anything.</p>
+      <p class="detail">All four retrieval modes score 0.97-0.99 on <code>hit@10</code>, and no pairwise difference is significant (worst p=1.000). The metric most prominent in the project's own earlier reports had no remaining power to separate anything.</p>
+      <p class="changed"><b>What changed:</b> Demoted from the headline. <code>nDCG_graded@10</code> and <code>recall@10</code> do the discriminating; <code>hit@10</code> is reported only to show it is exhausted.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-golden-v1.md">retrieval-golden-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0019-golden-set-pooled-graded-relevance.md">ADR-0019</a></p>
+    </article>
+    <article class="card">
+      <p class="n">04 / 07</p>
+      <p class="belief">The shipped 350-token chunk size is the right default.</p>
+      <p class="verdict">It is not the best-measured option.</p>
+      <p class="detail">Re-parsing the real source documents under three chunk sizes: 150-token chunks beat the shipped 350-token default by nDCG +0.044 [+0.019, +0.074], p&lt;0.001. Scope: 100/594 candidate documents (time-boxed, and said so).</p>
+      <p class="changed"><b>What changed:</b> A shipped default was contradicted by a measurement of the system's own corpus. Reported at document granularity, with the time-boxed scope stated.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/chunking-ablation-v1.md">chunking-ablation-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0020-chunking-and-multiturn-ablations.md">ADR-0020</a></p>
+    </article>
+    <article class="card">
+      <p class="n">05 / 07</p>
+      <p class="belief">The larger embedding model earns its cost.</p>
+      <p class="verdict">No measurable difference against one 3.1x smaller.</p>
+      <p class="detail">The incumbent (768-dim, 0.21 GB) is indistinguishable from a model 3.1x smaller (384-dim, 0.07 GB): nDCG -0.001 (p=0.943), recall -0.002 (p=0.929). The extra size was not earning its cost on this corpus.</p>
+      <p class="changed"><b>What changed:</b> Quality reported alongside indexing throughput, so 'no difference' becomes a cost decision rather than a shrug.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/embedding-ablation-v1.md">embedding-ablation-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0021-embedding-model-ablation.md">ADR-0021</a></p>
+    </article>
+    <article class="card">
+      <p class="n">06 / 07</p>
+      <p class="belief">Concatenating conversation history will fix multi-turn retrieval.</p>
+      <p class="verdict">It does not. It trends worse.</p>
+      <p class="detail">Production retrieval ignores conversation history. The obvious fix -- concatenating the previous turn -- does not help: nDCG -0.074 (p=0.247), MRR -0.071 (p=0.301) across 50 two-turn conversations. It trends *worse*, not better. Published as a null result rather than assumed to work.</p>
+      <p class="changed"><b>What changed:</b> The intuitive fix was floor-tested before being shipped, and the null result was published with its significance test instead of being quietly dropped.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/multiturn-v1.md">multiturn-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0020-chunking-and-multiturn-ablations.md">ADR-0020</a></p>
+    </article>
+    <article class="card">
+      <p class="n">07 / 07</p>
+      <p class="belief">The relevance judge is sound — it recovered 100% of seed chunks.</p>
+      <p class="verdict">Systematically strict. Seed recovery was the easy question.</p>
+      <p class="detail">Audited on a blinded, stratified sample (n=190): the judge is systematically strict. Signed error +0.327 [+0.226, +0.430] on the 0-3 scale, precision 0.968 against TPR 0.571, quadratic kappa 0.717. Reference rater is <code>claude-opus-5</code> -- a **model**, not a person, so this is an optimistic ceiling and human labels remain open.</p>
+      <p class="changed"><b>What changed:</b> Absolute recall/nDCG on the golden set read low. But the bias is near-equal across all four retrieval modes, so the published comparisons stand: the levels move, the deltas do not.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/judge-validation-v1.md">judge-validation-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0022-judge-validation-against-a-second-rater.md">ADR-0022</a></p>
+    </article>
+  </div>
+
+  <div class="foot">
+    <h2>What this project does not claim</h2>
+    <ul>
+      <li><b>No before/after number for the fine-tune.</b> OpsLM-v1 is trained and published, but it has not been evaluated against base Qwen3-4B on a served endpoint. The runbook for that comparison is written (<code>docs/opslm-before-after-aws-runbook.md</code>); the run is deliberately not done.</li>
+      <li><b>The judge validation used a second model, not a human.</b> It narrows the 'one rater's opinion' limitation; it does not close it. Model-model agreement is biased upward. Human labels remain open.</li>
+      <li><b>Peak serving throughput is un-measured.</b> vLLM was still scaling at the top of the concurrency sweep (65% marginal efficiency at c=16), so the maximum was never found and is not reported as if it had been.</li>
+      <li><b>A single T4 cannot show tensor parallelism or multi-node serving.</b> Stated as a hardware limitation rather than simulated.</li>
+      <li><b>The public demo chat is canned.</b> <code>ops-verse.vercel.app</code> runs in labelled demo mode and does not call the fine-tuned model. The dashboard at the same site is real and measured.</li>
+      <li><b>The chunking ablation is time-boxed.</b> 100 of 594 candidate documents. The scope is printed next to the result.</li>
+    </ul>
+  </div>
+</main>
+</body>
+</html>
