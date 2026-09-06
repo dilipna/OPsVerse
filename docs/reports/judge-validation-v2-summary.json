@@ -1,0 +1,207 @@
+{
+  "dataset": "judge-validation-v2",
+  "n_shared": 40,
+  "n_model_full": 192,
+  "human_vs_judge": {
+    "TPR (rater says relevant -> judge found it)": {
+      "mean": 0.5563205728449463,
+      "ci_lo": 0.38534910339565054,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "TNR": {
+      "mean": 1.0,
+      "ci_lo": 1.0,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Precision of the judge's 'relevant'": {
+      "mean": 1.0,
+      "ci_lo": 1.0,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Cohen's kappa (binary)": {
+      "mean": 0.642109199700823,
+      "ci_lo": 0.42487980769230754,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Quadratic-weighted kappa (0-3)": {
+      "mean": 0.659386984003024,
+      "ci_lo": 0.49232486551857135,
+      "ci_hi": 0.8131811380614529,
+      "n": 40
+    },
+    "Exact grade agreement": {
+      "mean": 0.5054075235109718,
+      "ci_lo": 0.3266457680250784,
+      "ci_hi": 0.6816614420062695,
+      "n": 40
+    },
+    "Agreement within one grade": {
+      "mean": 0.9158307210031349,
+      "ci_lo": 0.789576802507837,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Mean signed error (rater - judge)": {
+      "mean": 0.2262539184952978,
+      "ci_lo": -0.0762539184952978,
+      "ci_hi": 0.570846394984326,
+      "n": 40
+    }
+  },
+  "model_vs_judge": {
+    "TPR (rater says relevant -> judge found it)": {
+      "mean": 0.4718465699532826,
+      "ci_lo": 0.3087691069991955,
+      "ci_hi": 0.7899882675009777,
+      "n": 40
+    },
+    "TNR": {
+      "mean": 0.988381456344185,
+      "ci_lo": 0.9619119449420195,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Precision of the judge's 'relevant'": {
+      "mean": 0.9500000000000001,
+      "ci_lo": 0.8500000000000001,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Cohen's kappa (binary)": {
+      "mean": 0.5313928409534767,
+      "ci_lo": 0.2984154057771664,
+      "ci_hi": 0.8574620196604114,
+      "n": 40
+    },
+    "Quadratic-weighted kappa (0-3)": {
+      "mean": 0.6873830092858462,
+      "ci_lo": 0.5410154218938165,
+      "ci_hi": 0.8060464692986137,
+      "n": 40
+    },
+    "Exact grade agreement": {
+      "mean": 0.4974921630094044,
+      "ci_lo": 0.3212382445141066,
+      "ci_hi": 0.6737460815047022,
+      "n": 40
+    },
+    "Agreement within one grade": {
+      "mean": 0.95,
+      "ci_lo": 0.8579153605015674,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Mean signed error (rater - judge)": {
+      "mean": 0.5050156739811912,
+      "ci_lo": 0.30250783699059564,
+      "ci_hi": 0.7391849529780564,
+      "n": 40
+    }
+  },
+  "human_vs_model": {
+    "TPR (rater says relevant -> judge found it)": {
+      "mean": 0.8242908289727346,
+      "ci_lo": 0.5563205728449463,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "TNR": {
+      "mean": 0.8823529411764707,
+      "ci_lo": 0.6875,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Precision of the judge's 'relevant'": {
+      "mean": 0.7359232849766411,
+      "ci_lo": 0.4777280684691693,
+      "ci_hi": 1.0,
+      "n": 40
+    },
+    "Cohen's kappa (binary)": {
+      "mean": 0.6819841679792175,
+      "ci_lo": 0.380771470563767,
+      "ci_hi": 0.9782117956289559,
+      "n": 40
+    },
+    "Quadratic-weighted kappa (0-3)": {
+      "mean": 0.7401113941795341,
+      "ci_lo": 0.5550907402788752,
+      "ci_hi": 0.874278311884246,
+      "n": 40
+    },
+    "Exact grade agreement": {
+      "mean": 0.5474921630094044,
+      "ci_lo": 0.36332288401253915,
+      "ci_hi": 0.7420846394984325,
+      "n": 40
+    },
+    "Agreement within one grade": {
+      "mean": 0.9579153605015674,
+      "ci_lo": 0.8737460815047021,
+      "ci_hi": 1.0000000000000002,
+      "n": 40
+    },
+    "Mean signed error (rater - judge)": {
+      "mean": -0.2787617554858934,
+      "ci_lo": -0.5391849529780565,
+      "ci_hi": -0.018338557993730405,
+      "n": 40
+    }
+  },
+  "confusion_human_vs_judge": [
+    [
+      7.0,
+      4.0,
+      0.0,
+      0.0
+    ],
+    [
+      4.0,
+      2.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0,
+      4.0,
+      1.0
+    ],
+    [
+      0.0,
+      1.0,
+      3.0,
+      12.0
+    ]
+  ],
+  "confusion_human_vs_model": [
+    [
+      4.0,
+      6.0,
+      1.0,
+      0.0
+    ],
+    [
+      1.0,
+      4.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      2.0,
+      4.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      2.0,
+      14.0
+    ]
+  ]
+}
