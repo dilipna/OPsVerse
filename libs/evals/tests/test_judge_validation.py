@@ -343,3 +343,68 @@ def test_labeler_page_is_self_contained_and_escapes_script_tags():
     for loader in ("<script src", "<link ", "<img ", "@import", "fetch(", "XMLHttpRequest"):
         assert loader not in html
     assert "localStorage" in html
+
+
+# --------------------------------------------------------------------------
+# partial labelling and second-rater subsets
+# --------------------------------------------------------------------------
+
+
+def test_weights_are_recomputed_from_what_was_actually_labelled():
+    """A subset must stay unbiased: the stored weight's denominator is the number
+    DRAWN, which is wrong the moment only part of the sample comes back."""
+    keys = _keys(40, [3, 2, 1, 0] * 10)  # 20 per stratum, weights 2.0 / 8.0
+    half = [
+        k
+        for stratum in (jv.STRATUM_POS, jv.STRATUM_NEG)
+        for k in [key for key in keys if key.stratum == stratum][:10]
+    ]
+    assert len(half) == 20
+    labels = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in half]
+
+    pairs = jv.build_pairs(keys, labels)
+    assert len(pairs) == 20
+    by_stratum = {p.stratum: p.weight for p in pairs}
+    # population was 2.0*20 = 40 and 8.0*20 = 160; labelled 10 each
+    assert by_stratum[jv.STRATUM_POS] == pytest.approx(40 / 10)
+    assert by_stratum[jv.STRATUM_NEG] == pytest.approx(160 / 10)
+
+
+def test_full_labelling_leaves_the_drawn_weights_untouched():
+    keys = _keys(40, [3, 2, 1, 0] * 10)
+    labels = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys]
+    for p in jv.build_pairs(keys, labels):
+        expected = 2.0 if p.stratum == jv.STRATUM_POS else 8.0
+        assert p.weight == pytest.approx(expected)
+
+
+def _subset_fixture(n: int = 40):
+    golden = _golden(40)
+    return jv.draw_sample(golden, _texts(golden), {}, n_total=n, seed=7)
+
+
+def test_draw_subset_is_balanced_and_reuses_task_ids():
+    tasks, keys = _subset_fixture(80)
+    subset = jv.draw_subset(tasks, keys, n_total=20, seed=3, exclude=frozenset())
+    assert len(subset) == 20
+    ids = {t.task_id for t in subset}
+    assert ids <= {t.task_id for t in tasks}  # same ids -> labels join to the key
+    strata = [k.stratum for k in keys if k.task_id in ids]
+    assert strata.count(jv.STRATUM_POS) == strata.count(jv.STRATUM_NEG) == 10
+
+
+def test_draw_subset_honours_exclusions_and_is_deterministic():
+    tasks, keys = _subset_fixture(80)
+    banned = frozenset({t.task_id for t in tasks[:10]})
+    a = jv.draw_subset(tasks, keys, 20, seed=3, exclude=banned)
+    b = jv.draw_subset(tasks, keys, 20, seed=3, exclude=banned)
+    assert [t.task_id for t in a] == [t.task_id for t in b]
+    assert not ({t.task_id for t in a} & banned)
+    c = jv.draw_subset(tasks, keys, 20, seed=4, exclude=banned)
+    assert [t.task_id for t in a] != [t.task_id for t in c]
+
+
+def test_draw_subset_stays_blinded():
+    tasks, keys = _subset_fixture(80)
+    subset = jv.draw_subset(tasks, keys, 20, seed=3, exclude=frozenset())
+    assert set(subset[0].model_dump()) == {"task_id", "question", "chunk_text"}

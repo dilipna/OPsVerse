@@ -1,6 +1,6 @@
 # Judge validation v1 - does the LLM relevance judge agree with a second model?
 
-Generated 2026-09-04 by `opsverse_evals.judge_validation` from the committed
+Generated 2026-09-06 by `opsverse_evals.judge_validation` from the committed
 golden set, corpus dump and label file. No Qdrant, no API, no network.
 
 Judge under test: **`gemini/gemini-3.1-flash-lite`** (the judge that labelled
@@ -139,8 +139,8 @@ than being evaluated on data it was fitted to.
 
 | split | n | binary kappa | quadratic kappa | TPR | TNR |
 |---|---|---|---|---|---|
-| dev | 95 | 0.676 | 0.741 | 0.596 | 0.995 |
-| test | 95 | 0.622 | 0.693 | 0.547 | 0.991 |
+| dev | 95 | 0.672 | 0.738 | 0.591 | 0.996 |
+| test | 95 | 0.625 | 0.695 | 0.552 | 0.991 |
 
 ## Limits
 
