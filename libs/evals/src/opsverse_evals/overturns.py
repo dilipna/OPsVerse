@@ -46,6 +46,7 @@ SOURCES = (
     "embedding-ablation-v1",
     "multiturn-v1",
     "judge-validation-v1",
+    "judge-validation-v2",
 )
 
 
@@ -221,17 +222,23 @@ def _judge_detail(s: Summaries) -> str:
     n = pluck(s, "judge-validation-v1", "n_labelled")
     rater = pluck(s, "judge-validation-v1", "rater_id")
     kind = pluck(s, "judge-validation-v1", "rater_kind")
-    caveat = (
-        f" Reference rater is `{rater}` -- a **{kind}**, not a person, so this is an "
-        "optimistic ceiling and human labels remain open."
-        if kind == "model"
-        else ""
-    )
+    del rater, kind, qk  # superseded by the human labels below
+    h = pluck(s, "judge-validation-v2", "human_vs_judge")
+    hn = pluck(s, "judge-validation-v2", "n_shared")
+    h_tpr = h["TPR (rater says relevant -> judge found it)"]
+    h_se = h["Mean signed error (rater - judge)"]
+    hm_se = pluck(s, "judge-validation-v2", "human_vs_model", "Mean signed error (rater - judge)")
     return (
-        f"Audited on a blinded, stratified sample (n={n}): the judge is systematically "
-        f"strict. Signed error {_signed(mse['mean'])} [{mse['ci_lo']:+.3f}, "
-        f"{mse['ci_hi']:+.3f}] on the 0-3 scale, precision {prec['mean']:.3f} against "
-        f"TPR {tpr['mean']:.3f}, quadratic kappa {qk['mean']:.3f}." + caveat
+        f"Audited on a blinded, stratified sample. Against a second *model* rater (n={n}) "
+        f"the judge looked systematically strict: signed error {_signed(mse['mean'])} "
+        f"[{mse['ci_lo']:+.3f}, {mse['ci_hi']:+.3f}], precision {prec['mean']:.3f} against "
+        f"TPR {tpr['mean']:.3f}. A **human** rater then labelled {hn} of the same tasks "
+        f"and reproduced the direction and the capability number -- TPR "
+        f"{h_tpr['mean']:.3f} -- but not the magnitude: signed error "
+        f"{_signed(h_se['mean'])} [{h_se['ci_lo']:+.3f}, {h_se['ci_hi']:+.3f}], which "
+        f"**spans zero**. Head to head the human grades {abs(hm_se['mean']):.2f} of a "
+        f"grade lower than the model ({_signed(hm_se['mean'])}, excluding zero): the model "
+        "rater was the lenient one, and its leniency inflated the offset."
     )
 
 
@@ -321,14 +328,16 @@ LEDGER: tuple[Claim, ...] = (
     Claim(
         key="judge-calibration",
         belief="The relevance judge is sound — it recovered 100% of seed chunks.",
-        verdict="Systematically strict. Seed recovery was the easy question.",
+        verdict="It misses about half the relevant material. Seed recovery was the easy question.",
         detail=_judge_detail,
         consequence=(
-            "Absolute recall/nDCG on the golden set read low. But the bias is near-equal "
-            "across all four retrieval modes, so the published comparisons stand: the "
-            "levels move, the deltas do not."
+            "Absolute recall/nDCG on the golden set read low, and the bias is near-equal "
+            "across all four retrieval modes, so the published comparisons stand — the "
+            "levels move, the deltas do not. Then the human labels overturned part of the "
+            "overturn: the second-model rater had exaggerated the size of the offset, so "
+            "the direction survives and the magnitude is back to being an open question."
         ),
-        reports=("judge-validation-v1",),
+        reports=("judge-validation-v1", "judge-validation-v2"),
         adr="0022-judge-validation-against-a-second-rater",
         tags=("eval-design", "methodology"),
     ),

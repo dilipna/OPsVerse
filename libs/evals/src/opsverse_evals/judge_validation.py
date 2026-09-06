@@ -967,6 +967,60 @@ def cmd_sample(args: argparse.Namespace) -> None:
     print(f"Then click 'Download labels' and save it as:\n  {args.labels}")
 
 
+def load_labels(path: Path) -> list[HumanLabel]:
+    return [
+        HumanLabel.model_validate_json(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
+def pairs_between(
+    keys: Sequence[JudgeValidationKey],
+    reference: Sequence[HumanLabel],
+    test: Sequence[HumanLabel],
+) -> list[LabelPair]:
+    """Agreement between two *raters*, on the tasks both of them labelled.
+
+    Reuses `LabelPair` so every statistic above applies unchanged, with the
+    reference rater in the `human` slot and the other in the `judge` slot. The
+    asymmetric statistics (TPR, precision) are still computable but stop meaning
+    'accuracy' here -- neither peer rater is ground truth -- so the three-way
+    report quotes only the symmetric ones: the kappas, exact and adjacent
+    agreement, and the mean signed difference.
+    """
+    ref = {label.task_id: label.human_grade for label in reference}
+    tst = {label.task_id: label.human_grade for label in test}
+    shared = ref.keys() & tst.keys()
+
+    drawn: dict[str, int] = {}
+    population: dict[str, float] = {}
+    for key in keys:
+        drawn[key.stratum] = drawn.get(key.stratum, 0) + 1
+        population[key.stratum] = key.weight * drawn[key.stratum]
+    labelled: dict[str, int] = {}
+    for key in keys:
+        if key.task_id in shared:
+            labelled[key.stratum] = labelled.get(key.stratum, 0) + 1
+
+    pairs: list[LabelPair] = []
+    for key in keys:
+        if key.task_id not in shared:
+            continue
+        n = labelled[key.stratum]
+        pairs.append(
+            LabelPair(
+                human=max(0, min(MAX_GRADE, ref[key.task_id])),
+                judge=max(0, min(MAX_GRADE, tst[key.task_id])),
+                weight=population[key.stratum] / n if n else key.weight,
+                stratum=key.stratum,
+                retrieved_by=tuple(key.retrieved_by),
+                is_seed=key.is_seed_chunk,
+            )
+        )
+    return pairs
+
+
 def draw_subset(
     tasks: Sequence[JudgeValidationTask],
     keys: Sequence[JudgeValidationKey],
@@ -1029,6 +1083,194 @@ def cmd_subset(args: argparse.Namespace) -> None:
     print(f"  tasks (blinded): {args.out_tasks}")
     print(f"\nOpen this file in a browser and label every task:\n  {args.out_labeler.resolve()}")
     print(f"Then click 'Download labels' and save it as:\n  {args.out_labels}")
+
+
+_THREE_WAY_STATS = (
+    ("TPR (rater says relevant -> judge found it)", tpr, False),
+    ("TNR", tnr, False),
+    ("Precision of the judge's 'relevant'", precision, False),
+    ("Cohen's kappa (binary)", cohen_kappa_binary, True),
+    ("Quadratic-weighted kappa (0-3)", quadratic_weighted_kappa, True),
+    ("Exact grade agreement", exact_agreement, True),
+    ("Agreement within one grade", adjacent_agreement, True),
+    ("Mean signed error (rater - judge)", mean_signed_error, True),
+)
+
+
+def _ci_of(pairs: Sequence[LabelPair], fn: Any, seed: int) -> dict[str, Any]:
+    return bootstrap_statistic_ci(
+        pairs,
+        lambda sample: fn(sample, True),
+        strata=[p.stratum for p in pairs],
+        seed=seed,
+    ).as_dict()
+
+
+def three_way(
+    keys: Sequence[JudgeValidationKey],
+    human: Sequence[HumanLabel],
+    model: Sequence[HumanLabel],
+    seed: int = 20260906,
+) -> dict[str, Any]:
+    """Judge vs human, judge vs model, and the two raters against each other.
+
+    All three are computed on the tasks the human actually labelled, so the two
+    rater-vs-judge columns are a like-for-like comparison rather than one at
+    n=190 and one at n=40.
+    """
+    shared = {label.task_id for label in human}
+    model_sub = [m for m in model if m.task_id in shared]
+
+    hj = build_pairs(keys, human)
+    mj = build_pairs(keys, model_sub)
+    hm = pairs_between(keys, human, model_sub)
+    if not (hj and mj and hm):
+        raise ValueError("need overlapping labels from both raters to compare them")
+
+    def block(pairs: Sequence[LabelPair]) -> dict[str, Any]:
+        return {name: _ci_of(pairs, fn, seed) for name, fn, _ in _THREE_WAY_STATS}
+
+    return {
+        "dataset": "judge-validation-v2",
+        "n_shared": len(hj),
+        "n_model_full": len(model),
+        "human_vs_judge": block(hj),
+        "model_vs_judge": block(mj),
+        "human_vs_model": block(hm),
+        "confusion_human_vs_judge": confusion(hj, False),
+        "confusion_human_vs_model": confusion(hm, False),
+    }
+
+
+def render_three_way(report: dict[str, Any], judge_model: str, date: str, full: dict) -> str:
+    h, m, hm = (report["human_vs_judge"], report["model_vs_judge"], report["human_vs_model"])
+    n = report["n_shared"]
+    hse, mse = h["Mean signed error (rater - judge)"], m["Mean signed error (rater - judge)"]
+    hm_se = hm["Mean signed error (rater - judge)"]
+    full_se = full["weighted"]["mean_signed_error"]
+    human_sig = hse["ci_lo"] > 0 or hse["ci_hi"] < 0
+
+    lines = [
+        "# Judge validation v2 - the human labels, and what they revise",
+        "",
+        f"Generated {date} by `opsverse_evals.judge_validation three-way`. Offline.",
+        "",
+        f"[v1](judge-validation-v1.md) audited the judge against a **second model**"
+        f" (n={full['n_labelled']}) and said plainly that this was an optimistic",
+        "ceiling, not human validation, and that human labels remained the open item.",
+        f"A human rater has now labelled **{n}** of those same tasks. This report is what",
+        "that changed.",
+        "",
+        "## What the human labels confirm",
+        "",
+        "**The direction replicates.** Both raters grade *above* the judge, so the judge is",
+        "the strict one under either reference. And the headline capability number is",
+        f"strikingly stable: the judge finds "
+        f"**{h['TPR (rater says relevant -> judge found it)']['mean']:.0%}**"
+        f" of what the human calls relevant and"
+        f" **{m['TPR (rater says relevant -> judge found it)']['mean']:.0%}** of what the model",
+        "does. It misses roughly half of the relevant material under either rater. That is",
+        "the finding that survives.",
+        "",
+        "## What they revise",
+        "",
+        "**The size of the offset is less certain than v1 made it look.** On the *same*",
+        "tasks, the two raters disagree about how big it is:",
+        "",
+        "| Mean signed error (rater - judge) | estimate |",
+        "|---|---|",
+        f"| Model rater, full v1 sample (n={full['n_labelled']}) | {_fmt(full_se)} |",
+        f"| Model rater, on these {n} tasks | {_fmt(mse)} |",
+        f"| **Human rater, on these {n} tasks** | **{_fmt(hse)}** |",
+        "",
+        "What is *established* here is the gap between the raters, not that v1's number",
+        "is wrong: the two offset intervals overlap, so they are not significantly",
+        "different from each other. But head to head on the same items, the human",
+        f"grades **{abs(hm_se['mean']):.2f} of a grade lower** than the model"
+        f" ({_fmt(hm_se)}, interval excluding zero). The model rater is systematically",
+        "**more lenient**, and leniency in the reference rater inflates the apparent gap",
+        "between rater and judge - which is the mechanism that would make v1's +0.327 too",
+        "high. Direction measured; magnitude still open.",
+        "",
+    ]
+    if not human_sig:
+        lines += [
+            "And on the human labels alone the offset is **not statistically significant**:",
+            f"{_fmt(hse)} spans zero at n={n}. So the honest statement is now weaker than",
+            "v1's: the judge grades below both raters, but *how far* below is not established",
+            "by these labels. n=40 buys a direction, not a magnitude.",
+            "",
+        ]
+
+    lines += [
+        "## All three comparisons, on the same tasks",
+        "",
+        "| statistic | human vs judge | model vs judge | human vs model |",
+        "|---|---|---|---|",
+    ]
+    for name, _, symmetric in _THREE_WAY_STATS:
+        cell = f"{_fmt_pos(hm[name])}" if symmetric else "n/a"
+        lines.append(f"| {name} | {_fmt_pos(h[name])} | {_fmt_pos(m[name])} | {cell} |")
+    lines += [
+        "",
+        "The asymmetric rows are `n/a` for rater-vs-rater on purpose: TPR and precision",
+        "presuppose a ground truth, and between two peer raters there isn't one. Only the",
+        "chance-corrected and symmetric statistics are meaningful in that column.",
+        "",
+        "## Was the model rater a usable stand-in?",
+        "",
+        "Partly, and now measurably so rather than as an assumption. The two raters reach",
+        f"quadratic kappa **{hm['Quadratic-weighted kappa (0-3)']['mean']:.3f}** and agree",
+        f"within one grade **{hm['Agreement within one grade']['mean']:.0%}** of the time, so",
+        "they are not reading different documents. But the model agreed with the judge on",
+        f"the graded scale slightly *more* than the human did"
+        f" ({m['Quadratic-weighted kappa (0-3)']['mean']:.3f} vs"
+        f" {h['Quadratic-weighted kappa (0-3)']['mean']:.3f}), which is the upward bias v1",
+        "warned about, and it was simultaneously more lenient in absolute grading, which",
+        "biases the signed-error estimate upward. **v1's caveat was the right caveat, and",
+        "it was pointing at a real effect.** The cross-check was directionally sound and",
+        "quantitatively soft - which is roughly what a second model should be trusted for.",
+        "",
+        "## Limits",
+        "",
+        f"- **n={n}.** Every interval here is wide; the human column establishes a direction",
+        "  and a TPR, not a precise offset. A larger human sample is the obvious next step.",
+        "- **Still one human rater**, and still the system's author. This measures",
+        "  judge-vs-rater agreement, not inter-annotator agreement among independent people.",
+        "- The human labelled a stratified subset of the v1 sample, not a fresh draw, so the",
+        "  three comparisons share tasks by design - that is what makes them comparable, and",
+        "  it also means they are not independent of one another.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def cmd_three_way(args: argparse.Namespace) -> None:
+    keys = [
+        JudgeValidationKey.model_validate_json(line)
+        for line in args.key.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    report = three_way(keys, load_labels(args.human), load_labels(args.model), seed=args.seed)
+    full = json.loads(args.full_summary.read_text(encoding="utf-8"))
+    golden = GradedRetrievalDataset.load_jsonl(args.golden)
+    date = datetime.now(UTC).strftime("%Y-%m-%d")
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(render_three_way(report, golden.judge_model, date, full), encoding="utf-8")
+    summary = args.out.with_name(args.out.stem + "-summary.json")
+    summary.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+    print(f"three-way agreement on {report['n_shared']} shared tasks")
+    for label, block in (
+        ("human vs judge", report["human_vs_judge"]),
+        ("model vs judge", report["model_vs_judge"]),
+        ("human vs model", report["human_vs_model"]),
+    ):
+        se = block["Mean signed error (rater - judge)"]
+        qk = block["Quadratic-weighted kappa (0-3)"]
+        print(f"  {label:16s} signed {_fmt(se)}   quad-kappa {_fmt_pos(qk)}")
+    print(f"\nwrote {args.out} and {summary}")
 
 
 def cmd_score(args: argparse.Namespace) -> None:
@@ -1110,6 +1352,24 @@ def main() -> None:
     b.add_argument("--seed", type=int, default=20260906)
     b.add_argument("--exclude", default="t0001,t0002")
     b.set_defaults(func=cmd_subset)
+
+    t = sub.add_parser(
+        "three-way", help="judge vs human, judge vs model, and the two raters vs each other"
+    )
+    t.add_argument("--golden", type=Path, default=Path("evalsets/retrieval-golden-v1.jsonl"))
+    t.add_argument("--key", type=Path, default=Path("evalsets/judge-validation-v1-key.jsonl"))
+    t.add_argument(
+        "--human", type=Path, default=Path("evalsets/judge-validation-v1-human-labels.jsonl")
+    )
+    t.add_argument("--model", type=Path, default=Path("evalsets/judge-validation-v1-labels.jsonl"))
+    t.add_argument(
+        "--full-summary",
+        type=Path,
+        default=Path("docs/reports/judge-validation-v1-summary.json"),
+    )
+    t.add_argument("--out", type=Path, default=Path("docs/reports/judge-validation-v2.md"))
+    t.add_argument("--seed", type=int, default=20260906)
+    t.set_defaults(func=cmd_three_way)
 
     c = sub.add_parser("score", help="score human labels against the judge")
     c.add_argument("--golden", type=Path, default=Path("evalsets/retrieval-golden-v1.jsonl"))

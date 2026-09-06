@@ -85,14 +85,26 @@ def test_numbers_are_plucked_from_json_not_typed_into_the_ledger(summaries):
             assert a["detail"] == b["detail"], a["key"]
 
 
-def test_judge_row_states_the_rater_kind_from_the_summary(summaries, rows):
-    """A model rater must never be silently presented as human validation."""
+def test_judge_row_distinguishes_the_model_rater_from_the_human(summaries, rows):
+    """The two raters must never be blurred into one 'validated' claim.
+
+    The model cross-check and the human labels disagree about the magnitude of the
+    judge's offset, so a row that reported only one of them -- in either direction --
+    would be presenting a contested number as settled.
+    """
     kind = ov.pluck(summaries, "judge-validation-v1", "rater_kind")
+    assert kind == "model"
     detail = next(r["detail"] for r in rows if r["key"] == "judge-calibration")
-    if kind == "model":
-        assert "not a person" in detail
-        assert "optimistic ceiling" in detail
-        assert "human labels remain open" in detail
+
+    assert "model* rater" in detail or "model rater" in detail
+    assert "human" in detail.lower()
+    # the human interval spans zero; the row must say so rather than quoting a point
+    assert "spans zero" in detail
+    # and the head-to-head rater gap, which is the thing that is actually established
+    assert "lower than the model" in detail
+
+    consequence = next(r["consequence"] for r in rows if r["key"] == "judge-calibration")
+    assert "open question" in consequence
 
 
 def test_markdown_carries_every_claim_and_the_disclaimers(rows):

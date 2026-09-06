@@ -408,3 +408,68 @@ def test_draw_subset_stays_blinded():
     tasks, keys = _subset_fixture(80)
     subset = jv.draw_subset(tasks, keys, 20, seed=3, exclude=frozenset())
     assert set(subset[0].model_dump()) == {"task_id", "question", "chunk_text"}
+
+
+# --------------------------------------------------------------------------
+# three-way: judge vs rater A, judge vs rater B, A vs B
+# --------------------------------------------------------------------------
+
+
+def test_pairs_between_uses_only_tasks_both_raters_labelled():
+    keys = _keys(8, [3, 2, 1, 0] * 2)
+    a = [HumanLabel(task_id=f"t{i:04d}", human_grade=3) for i in range(6)]
+    b = [HumanLabel(task_id=f"t{i:04d}", human_grade=1) for i in range(3, 8)]
+    pairs = jv.pairs_between(keys, a, b)
+    assert len(pairs) == 3  # t0003..t0005
+    assert all(p.human == 3 and p.judge == 1 for p in pairs)
+
+
+def test_pairs_between_is_directional():
+    """Swapping the raters negates the signed difference, and nothing else."""
+    keys = _keys(8, [3, 2, 1, 0] * 2)
+    a = [HumanLabel(task_id=k.task_id, human_grade=3) for k in keys]
+    b = [HumanLabel(task_id=k.task_id, human_grade=1) for k in keys]
+    ab = jv.pairs_between(keys, a, b)
+    ba = jv.pairs_between(keys, b, a)
+    assert jv.mean_signed_error(ab) == pytest.approx(-jv.mean_signed_error(ba))
+    assert jv.quadratic_weighted_kappa(ab) == pytest.approx(jv.quadratic_weighted_kappa(ba))
+
+
+def test_three_way_compares_both_raters_on_the_same_tasks():
+    keys = _keys(40, [3, 2, 1, 0] * 10)
+    model = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys]
+    human = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys[:20]]
+    report = jv.three_way(keys, human, model)
+    # the model column is restricted to the human's tasks, not scored at n=40
+    assert report["n_shared"] == 20
+    assert report["human_vs_judge"]["Cohen's kappa (binary)"]["n"] == 20
+    assert report["model_vs_judge"]["Cohen's kappa (binary)"]["n"] == 20
+    assert report["human_vs_model"]["Cohen's kappa (binary)"]["n"] == 20
+
+
+def test_three_way_needs_overlapping_labels():
+    keys = _keys(8, [3, 2, 1, 0] * 2)
+    human = [HumanLabel(task_id="t0000", human_grade=3)]
+    model = [HumanLabel(task_id="t0005", human_grade=3)]
+    with pytest.raises(ValueError, match="overlapping labels"):
+        jv.three_way(keys, human, model)
+
+
+def test_three_way_render_states_the_n_and_the_rater_gap():
+    keys = _keys(40, [3, 2, 1, 0] * 10)
+    model = [
+        HumanLabel(task_id=k.task_id, human_grade=min(jv.MAX_GRADE, k.judge_grade + 1))
+        for k in keys
+    ]
+    human = [HumanLabel(task_id=k.task_id, human_grade=k.judge_grade) for k in keys]
+    report = jv.three_way(keys, human, model)
+    full = {
+        "n_labelled": 190,
+        "weighted": {"mean_signed_error": {"mean": 0.3, "ci_lo": 0.2, "ci_hi": 0.4, "n": 190}},
+    }
+    text = jv.render_three_way(report, "gemini/test", "2026-09-06", full)
+    assert "n=40" in text
+    assert "human vs judge" in text
+    # rater-vs-rater must not quote accuracy statistics
+    assert text.count("n/a") >= 3
+    assert "not inter-annotator agreement" in text

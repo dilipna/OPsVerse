@@ -76,13 +76,13 @@ Evidence: [multiturn-v1](reports/multiturn-v1.md) · [ADR-0020](adr/0020-chunkin
 
 ### 7. The relevance judge is sound — it recovered 100% of seed chunks.
 
-**Systematically strict. Seed recovery was the easy question.**
+**It misses about half the relevant material. Seed recovery was the easy question.**
 
-Audited on a blinded, stratified sample (n=190): the judge is systematically strict. Signed error +0.327 [+0.226, +0.430] on the 0-3 scale, precision 0.968 against TPR 0.571, quadratic kappa 0.717. Reference rater is `claude-opus-5` -- a **model**, not a person, so this is an optimistic ceiling and human labels remain open.
+Audited on a blinded, stratified sample. Against a second *model* rater (n=190) the judge looked systematically strict: signed error +0.327 [+0.226, +0.430], precision 0.968 against TPR 0.571. A **human** rater then labelled 40 of the same tasks and reproduced the direction and the capability number -- TPR 0.556 -- but not the magnitude: signed error +0.226 [-0.076, +0.571], which **spans zero**. Head to head the human grades 0.28 of a grade lower than the model (-0.279, excluding zero): the model rater was the lenient one, and its leniency inflated the offset.
 
-*What changed:* Absolute recall/nDCG on the golden set read low. But the bias is near-equal across all four retrieval modes, so the published comparisons stand: the levels move, the deltas do not.
+*What changed:* Absolute recall/nDCG on the golden set read low, and the bias is near-equal across all four retrieval modes, so the published comparisons stand — the levels move, the deltas do not. Then the human labels overturned part of the overturn: the second-model rater had exaggerated the size of the offset, so the direction survives and the magnitude is back to being an open question.
 
-Evidence: [judge-validation-v1](reports/judge-validation-v1.md) · [ADR-0022](adr/0022-judge-validation-against-a-second-rater.md)
+Evidence: [judge-validation-v1](reports/judge-validation-v1.md) · [judge-validation-v2](reports/judge-validation-v2.md) · [ADR-0022](adr/0022-judge-validation-against-a-second-rater.md)
 
 ---
 

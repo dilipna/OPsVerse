@@ -130,3 +130,44 @@ comparisons — from a stratified sample instead.
   no prompt has been tuned against these labels, so both halves are held out today.
 - `stats.bootstrap_statistic_ci` is available for any future statistic that is not a
   mean of per-item scores.
+
+---
+
+## Update 2026-09-06 — the human labels arrived, and revised this
+
+The open item above ("human labels remain the open item") is now partly closed. A human
+rater labelled **40** of the same tasks, drawn as a stratified subset of the v1 sample so
+the labels join directly to both the judge key and the model rater's labels. Full
+analysis: [`judge-validation-v2.md`](../reports/judge-validation-v2.md).
+
+**What replicated.** The direction and the capability number, cleanly. Both raters grade
+*above* the judge, and the judge finds **56%** of what the human calls relevant against
+**47%** of what the model does. It misses roughly half the relevant material under either
+reference. That is the finding that survives, and it is the one that matters for reading
+absolute recall off the golden set.
+
+**What did not.** The magnitude. On the same 40 tasks the model rater puts the offset at
+**+0.505 [+0.303, +0.739]** and the human at **+0.226 [−0.076, +0.571]** — which spans
+zero. Head to head, the human grades **0.279 [−0.539, −0.018]** of a grade *lower* than
+the model, an interval excluding zero. The model rater is systematically **more lenient**,
+and leniency in the reference inflates the apparent gap between rater and judge.
+
+So the honest position is now weaker than v1's, in a specific way: *the judge grades below
+both raters, but how far below is not established.* n=40 buys a direction, not a magnitude.
+Note also that the two offset intervals overlap, so v1's +0.327 is not *refuted* — it is
+un-confirmed, with a measured mechanism (rater leniency) for why it may be too high.
+
+**What this says about model-as-rater.** v1 asserted that model-model agreement would be
+biased upward and should be read as an optimistic ceiling. That is now measured rather than
+asserted, and it held: the model agreed with the judge on the graded scale slightly more
+than the human did (quadratic kappa 0.687 vs 0.659) while being more lenient in absolute
+grading. The cross-check was **directionally sound and quantitatively soft** — which is a
+fair summary of what a second model should be trusted for, and worth carrying into any
+future use of LLM-as-judge here.
+
+**Consequences for the decision.** None of the retrieval conclusions change: the per-mode
+bias analysis in v1 is unaffected, so the ADR-0019/0020/0021 comparisons still stand. What
+changes is how the offset should be quoted — as a direction with an open magnitude, never
+as `+0.327` unqualified. The remaining next step is unchanged in kind and smaller in size:
+more human labels, and ideally a second *independent* human so this becomes inter-annotator
+agreement rather than one author's judgement.
