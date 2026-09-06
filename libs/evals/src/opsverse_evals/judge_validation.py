@@ -511,18 +511,40 @@ const TASKS = {payload};
 def build_pairs(
     keys: Sequence[JudgeValidationKey], labels: Sequence[HumanLabel]
 ) -> list[LabelPair]:
-    """Join the judge key to the human labels. Unlabelled tasks are dropped."""
+    """Join the judge key to the human labels. Unlabelled tasks are dropped.
+
+    Weights are **recomputed from what was actually labelled**, not taken from
+    the key as drawn. The stored weight is `stratum_population / stratum_drawn`;
+    if only part of the sample comes back labelled -- a smaller subset, or a
+    rater who stopped early -- that denominator is wrong, and every weighted
+    rate silently inherits the error. The stratum population is recovered as
+    `stored_weight * n_drawn_in_stratum` and re-divided by the number actually
+    labelled, so a partial or deliberately smaller subset stays unbiased.
+    """
     human = {label.task_id: label.human_grade for label in labels}
+    drawn: dict[str, int] = {}
+    population: dict[str, float] = {}
+    for key in keys:
+        drawn[key.stratum] = drawn.get(key.stratum, 0) + 1
+        population[key.stratum] = key.weight * drawn[key.stratum]
+
+    labelled: dict[str, int] = {}
+    for key in keys:
+        if key.task_id in human:
+            labelled[key.stratum] = labelled.get(key.stratum, 0) + 1
+
     pairs: list[LabelPair] = []
     for key in keys:
         grade = human.get(key.task_id)
         if grade is None:
             continue
+        n_labelled = labelled[key.stratum]
+        weight = population[key.stratum] / n_labelled if n_labelled else key.weight
         pairs.append(
             LabelPair(
                 human=max(0, min(MAX_GRADE, grade)),
                 judge=key.judge_grade,
-                weight=key.weight,
+                weight=weight,
                 stratum=key.stratum,
                 retrieved_by=tuple(key.retrieved_by),
                 is_seed=key.is_seed_chunk,
@@ -945,6 +967,70 @@ def cmd_sample(args: argparse.Namespace) -> None:
     print(f"Then click 'Download labels' and save it as:\n  {args.labels}")
 
 
+def draw_subset(
+    tasks: Sequence[JudgeValidationTask],
+    keys: Sequence[JudgeValidationKey],
+    n_total: int,
+    seed: int,
+    exclude: frozenset[str],
+) -> list[JudgeValidationTask]:
+    """A smaller stratified subset of an existing sample, for a second rater.
+
+    Deliberately reuses the *same* task ids rather than drawing fresh items, so
+    the new labels join directly to both the judge key and any rater who has
+    already labelled the full set. That buys three pairwise agreements
+    (judge-vs-A, judge-vs-B, A-vs-B) from one short labelling session; a fresh
+    draw would buy only the first and could not measure inter-rater agreement
+    at all.
+    """
+    by_id = {t.task_id: t for t in tasks}
+    buckets: dict[str, list[str]] = {}
+    for key in keys:
+        if key.task_id in exclude or key.task_id not in by_id:
+            continue
+        buckets.setdefault(key.stratum, []).append(key.task_id)
+
+    rng = random.Random(seed)
+    per_stratum = n_total // max(1, len(buckets))
+    chosen: list[str] = []
+    for stratum in sorted(buckets):
+        pool = sorted(buckets[stratum])
+        chosen.extend(rng.sample(pool, min(per_stratum, len(pool))))
+    rng.shuffle(chosen)
+    return [by_id[t] for t in chosen]
+
+
+def cmd_subset(args: argparse.Namespace) -> None:
+    tasks = [
+        JudgeValidationTask.model_validate_json(line)
+        for line in args.tasks.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    keys = [
+        JudgeValidationKey.model_validate_json(line)
+        for line in args.key.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    exclude = frozenset(t.strip() for t in args.exclude.split(",") if t.strip())
+    subset = draw_subset(tasks, keys, args.n, args.seed, exclude)
+
+    write_jsonl(args.out_tasks, subset)
+    args.out_labeler.parent.mkdir(parents=True, exist_ok=True)
+    args.out_labeler.write_text(
+        render_labeler(subset, f"OpsVerse judge validation - human subset ({len(subset)})"),
+        encoding="utf-8",
+    )
+    strata = {k.stratum: 0 for k in keys}
+    chosen = {t.task_id for t in subset}
+    for k in keys:
+        if k.task_id in chosen:
+            strata[k.stratum] += 1
+    print(f"subset of {len(subset)} tasks drawn from {len(tasks)}: {strata}")
+    print(f"  tasks (blinded): {args.out_tasks}")
+    print(f"\nOpen this file in a browser and label every task:\n  {args.out_labeler.resolve()}")
+    print(f"Then click 'Download labels' and save it as:\n  {args.out_labels}")
+
+
 def cmd_score(args: argparse.Namespace) -> None:
     keys = [
         JudgeValidationKey.model_validate_json(line)
@@ -998,6 +1084,32 @@ def main() -> None:
     s.add_argument("--n", type=int, default=192, help="total tasks (split evenly across strata)")
     s.add_argument("--seed", type=int, default=20260903)
     s.set_defaults(func=cmd_sample)
+
+    b = sub.add_parser(
+        "subset", help="draw a smaller stratified subset of an existing sample for a 2nd rater"
+    )
+    b.add_argument("--tasks", type=Path, default=Path("evalsets/judge-validation-v1-tasks.jsonl"))
+    b.add_argument("--key", type=Path, default=Path("evalsets/judge-validation-v1-key.jsonl"))
+    b.add_argument(
+        "--out-tasks",
+        type=Path,
+        default=Path("evalsets/judge-validation-v1-human-tasks.jsonl"),
+    )
+    b.add_argument(
+        "--out-labeler",
+        type=Path,
+        default=Path("evalsets/judge-validation-v1-human-labeler.html"),
+    )
+    b.add_argument(
+        "--out-labels",
+        type=Path,
+        default=Path("evalsets/judge-validation-v1-human-labels.jsonl"),
+        help="where to tell the rater to save their download (not written here)",
+    )
+    b.add_argument("--n", type=int, default=40)
+    b.add_argument("--seed", type=int, default=20260906)
+    b.add_argument("--exclude", default="t0001,t0002")
+    b.set_defaults(func=cmd_subset)
 
     c = sub.add_parser("score", help="score human labels against the judge")
     c.add_argument("--golden", type=Path, default=Path("evalsets/retrieval-golden-v1.jsonl"))

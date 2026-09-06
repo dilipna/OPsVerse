@@ -146,17 +146,17 @@
   "by_split": {
     "dev": {
       "n": 95,
-      "cohen_kappa_binary": 0.6758,
-      "quadratic_weighted_kappa": 0.7406,
-      "tpr": 0.5957,
-      "tnr": 0.9954
+      "cohen_kappa_binary": 0.672,
+      "quadratic_weighted_kappa": 0.7381,
+      "tpr": 0.5906,
+      "tnr": 0.9955
     },
     "test": {
       "n": 95,
-      "cohen_kappa_binary": 0.6216,
-      "quadratic_weighted_kappa": 0.6925,
-      "tpr": 0.5473,
-      "tnr": 0.9909
+      "cohen_kappa_binary": 0.6255,
+      "quadratic_weighted_kappa": 0.6951,
+      "tpr": 0.5525,
+      "tnr": 0.9907
     }
   },
   "rater_id": "claude-opus-5",
