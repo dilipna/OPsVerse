@@ -14,6 +14,19 @@ guided decoding — **measured on a real GPU, not asserted.**
 > T4 *cannot* show (tensor parallelism, multi-node) is stated as a limitation, never
 > faked. Every non-trivial decision has an [ADR](docs/adr/).
 
+### ⭐ Start here — [**the seven things this project was wrong about**](docs/evidence.md)
+
+The stack (hybrid RAG, a QLoRA fine-tune, a served model) is not unusual. This is:
+**seven claims believed, measured, and withdrawn** — four of them the project's own
+prior conclusions, two of them shipped defaults, and one the LLM judge that produced the
+labels for everything else. Each published with the statistic that overturned it.
+
+[`docs/evidence.md`](docs/evidence.md) is the six-minute reading path — claim → report →
+raw JSON → the *n* behind it — and it ends with **what this project does not claim**.
+Both it and the standalone visual page [`docs/overturns.html`](docs/overturns.html) are
+generated from the committed `*-summary.json` files by
+`uv run python -m opsverse_evals.overturns`, so the summary cannot drift from its sources.
+
 Built entirely on **free tiers and local compute** (Docker Compose, Colab T4). That
 constraint drives the architecture: **ephemeral-GPU measurement + always-on CPU
 serving** ([ADR-0016](docs/adr/0016-split-serving-ephemeral-gpu-vs-always-on-cpu.md)),
@@ -211,6 +224,7 @@ uv run python -m opsverse_evals.regression        # eval regression gate (15 thr
 python benchmarks/report.py --out docs/reports/inference-benchmark-v1.md   # regen from results/
 python benchmarks/capacity.py --out docs/reports/capacity-and-slo-v1.md    # goodput/cost/saturation
 python registry/registry.py --out docs/model-registry.md                   # regen registry
+uv run python -m opsverse_evals.overturns                                  # regen evidence.md + overturns.html
 ```
 
 ## Key decisions (ADRs)
