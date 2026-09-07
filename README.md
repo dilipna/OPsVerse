@@ -259,3 +259,7 @@ Published on [dilipna.hashnode.dev](https://dilipna.hashnode.dev):
 - [Evaluation-first: the RAG harness that stopped me shipping two wrong decisions](https://dilipna.hashnode.dev/evaluation-first-the-rag-harness-that-stopped-me-from-shipping-two-wrong-decisions) — [source](docs/blog/01-eval-first-changed-my-retrieval-twice.md)
 - [The document is the attack surface — RAG security at ingest, measured like a classifier](https://dilipna.hashnode.dev/the-document-is-the-attack-surface-rag-security-at-ingest-measured-like-a-classifier) — [source](docs/blog/02-the-document-is-the-attack-surface.md)
 - ["Which engine is faster?" is the wrong question — measuring continuous batching on a free T4](https://dilipna.hashnode.dev/which-engine-is-faster-is-the-wrong-question-measuring-continuous-batching-on-a-free-t4) — [source](docs/blog/03-measuring-continuous-batching-on-a-free-t4.md)
+
+Draft, not yet published:
+
+- [Who grades the grader? I audited my LLM judge — and then had to audit the audit](docs/blog/04-who-grades-the-grader.md) — the judge validation, the human labels that revised it, and the error analysis
