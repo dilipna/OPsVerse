@@ -1,4 +1,4 @@
-# OpsVerse AI — STATUS (last updated 2026-09-07, HEAD `055fc53`)
+# OpsVerse AI — STATUS (last updated 2026-09-07, HEAD `21da208`+)
 
 > **This file is a status record, not a task list.** Persistent memory:
 > `~/.claude/projects/c--Users-Dilip-OneDrive-Pictures-ftrag/memory/`
@@ -118,7 +118,30 @@ analysis / failure taxonomy**, and **an agent tool-use harness**. Item 1 is now 
 12. **Resume bullets** brought to HEAD, with an explicit ban on writing "validated against
     human labels" for the model cross-check.
 
-## What is genuinely left (all optional, none blocking a demo)
+## Project state: COMPLETE as a portfolio artifact (2026-09-07)
+
+**Everything from the researched job-application plan is done except the agent/tool-use
+harness, which was deliberately NOT built.** The reasoning, so a future session does not
+silently reverse it: it is multi-day and Gemini-quota-constrained (a *daily* budget, not
+compressible), and a rushed version would be a second `infra/oracle-oplsm/` — scaffolded,
+never run, sitting in the honest-gaps list. That would subtract from a project whose
+distinguishing feature is that it does not publish unmeasured claims. **Do not build it in
+a hurry to "finish" something. It is either a properly paced multi-day piece or nothing.**
+
+The user was advised, and agreed, that the binding constraint has moved from the repo to
+(a) actually applying and (b) interview-loop rehearsal. Weigh any future "let's add X"
+against that before starting.
+
+**Public surface, all live:**
+- Repo: https://github.com/dilipna/OPsVerse
+- Claim ledger: https://ops-verse.vercel.app/overturns.html (8 claims, verified serving)
+- Benchmark dashboard: https://ops-verse.vercel.app/dashboard.html
+- Three published posts on https://dilipna.hashnode.dev (linked from the README)
+- A fourth post is **drafted but unpublished**: `docs/blog/04-who-grades-the-grader.md`
+  (judge validation + human labels + error analysis). Every number in it was verified
+  against the committed summaries. Publishing it is the user's call.
+
+## What is genuinely left (all optional; none blocks anything)
 
 1. **Before/after eval (base Qwen3-4B vs OpsLM-v1)** — the one real content gap.
    **User explicitly deprioritized this** (2026-09-02: "let's skip the cloud part") after
