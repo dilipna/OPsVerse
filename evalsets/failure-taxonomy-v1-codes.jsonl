@@ -1,0 +1,28 @@
+{"case_id":"1ee07e4d","code":"answered_at_top","note":"found 5/6, first relevant at rank 2; the grade-3 flag tables above it are reference stubs, but the question is answered on screen"}
+{"case_id":"f5e72bd4","code":"redundant_pool","note":"the 'missed' chunk is a near-identical remote-MCP YAML block to the one retrieved at rank 4"}
+{"case_id":"ce6387a2","code":"answered_at_top","note":"rank 1 is the grade-3 Phase-3 procedure; the missing label is a fourth near-duplicate"}
+{"case_id":"cc935675","code":"redundant_pool","note":"`docker compose alpha publish` is a duplicate namespace of the same command doc"}
+{"case_id":"02093154","code":"answered_at_top","note":"rank 1 grade 3 gives the NodeResourcesFit weights directly"}
+{"case_id":"beb47d78","code":"answered_at_top","note":"rank 1 grade 3 is the full precedence table"}
+{"case_id":"13ba0624","code":"lexical_distraction","note":"ranks 1-3 are grade 0 (a compose file, an MLflow changelog, a Node.js blurb) pulled by 'docker'/'SparkJava'; the Dockerfile answer is at rank 4"}
+{"case_id":"eb1862e4","code":"lexical_distraction","note":"five generic foreground/detach/entrypoint chunks outrank the `daemon off;` Dockerfile; 'foreground' is a common word in the corpus"}
+{"case_id":"b86e4994","code":"specific_answer_missed","note":"retrieves DCO sign-off policy (right topic) but misses the `docs: <description>` commit-message template that actually answers"}
+{"case_id":"d46d4ee2","code":"label_error","note":"two `python train.py --learning-rate` chunks graded 3 for a question about launching the MLflow UI; the real answer ('Run mlflow server') was graded lower and not retrieved"}
+{"case_id":"803a8ded","code":"answered_at_top","note":"rank 1 grade 3 is the restart command doc"}
+{"case_id":"996c248e","code":"answered_at_top","note":"found 5/6; the ttlSecondsAfterFinished:100 manifest is retrieved at rank 5"}
+{"case_id":"1e25a00e","code":"answered_at_top","note":"rank 1 grade 3 covers os.environ/ references directly"}
+{"case_id":"7f41f0fa","code":"answered_at_top","note":"rank 2 grade 3 gives the AI21 key export; rank 1 is a grade-0 distractor but does not block the answer"}
+{"case_id":"e7fd8f48","code":"answered_at_top","note":"the grade-3 'storage capacity is used if:' chunk is retrieved at rank 4"}
+{"case_id":"4bbe8b4c","code":"answered_at_top","note":"rank 1 grade 3 shows `mlflow autolog claude -u sqlite:///`"}
+{"case_id":"21b9f7ba","code":"answered_at_top","note":"ranks 1-2 grade 3 cover kubelet PID limits and reservations"}
+{"case_id":"1d67d1d7","code":"answered_at_top","note":"rank 1 grade 3 is the cache-hf composite action itself; the two unfound labels are weakly relevant CI files"}
+{"case_id":"416e0b23","code":"answered_at_top","note":"five grade-2 chunks including the securityContext one; no grade-3 exists in the retrieved set but the question is served"}
+{"case_id":"37404e71","code":"answered_at_top","note":"ranks 1-2 grade 3 state the kubelet-API execution risk explicitly"}
+{"case_id":"ac6d1ba1","code":"true_miss","note":"nothing relevant in the top 10; retrieved the right workflow FILES but never the chunk explaining why two app tokens are used"}
+{"case_id":"be7dad51","code":"boilerplate_outranks_prose","note":"six near-identical 'Listing containers must show...' status dumps occupy ranks 1-6; `docker compose up -d` is at rank 7"}
+{"case_id":"1c6d6aa3","code":"redundant_pool","note":"13 'relevant' chunks are awesome-compose samples repeating the same `docker compose down` instruction; 5 retrieved fully answers"}
+{"case_id":"191c7e67","code":"answered_at_top","note":"rank 3 grade 3 is the canonical PV vs PVC definition"}
+{"case_id":"b1069a05","code":"redundant_pool","note":"13 near-identical sample READMEs; rank 4 grade 3 gives `docker compose down` and `-v`"}
+{"case_id":"5d8f0613","code":"answered_at_top","note":"rank 1 grade 3 is the samples index containing the nginx-flask-mongo entry"}
+{"case_id":"63041e63","code":"answered_at_top","note":"rank 1 grade 3 explains the dual-entry craco setup"}
+{"case_id":"43948127","code":"answered_at_top","note":"rank 1 grade 3 is the fork-and-PR procedure"}

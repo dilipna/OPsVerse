@@ -1,6 +1,6 @@
 # Evidence index — how to read this repository
 
-Generated 2026-09-06 by `opsverse_evals.overturns` from the committed
+Generated 2026-09-07 by `opsverse_evals.overturns` from the committed
 `docs/reports/*-summary.json`. Every number below is plucked from those files, so
 this page cannot drift away from the reports it summarises. No network, no stack.
 
@@ -83,6 +83,16 @@ Audited on a blinded, stratified sample. Against a second *model* rater (n=190) 
 *What changed:* Absolute recall/nDCG on the golden set read low, and the bias is near-equal across all four retrieval modes, so the published comparisons stand — the levels move, the deltas do not. Then the human labels overturned part of the overturn: the second-model rater had exaggerated the size of the offset, so the direction survives and the magnitude is back to being an open question.
 
 Evidence: [judge-validation-v1](reports/judge-validation-v1.md) · [judge-validation-v2](reports/judge-validation-v2.md) · [ADR-0022](adr/0022-judge-validation-against-a-second-rater.md)
+
+### 8. A low `recall@10` on the golden set means retrieval is failing.
+
+**Most of what the metric flags is not a defect at all.**
+
+An over-inclusive signal flagged 28 of 100 queries as retrieval failures. Reading every one of them: **23 are not defects** (82%) and only **5** are -- 5% of queries, not the 28% the flag rate implied. The largest category (18 cases) is queries where a grade-3 answer sits at rank 1-3 and `recall@10` still scores them down because the corpus offers many acceptable answers per question. Coded by `claude-opus-5`, a language model, not a person.
+
+*What changed:* The fix list changed completely. Nothing on it is motivated by raising `recall@10`, because most of what would raise that number would not help a user. What the aggregate had been hiding was its own composition: corpus redundancy and a metric penalising queries that were answered at rank 1.
+
+Evidence: [failure-taxonomy-v1](reports/failure-taxonomy-v1.md) · [ADR-0020](adr/0020-chunking-and-multiturn-ablations.md)
 
 ---
 

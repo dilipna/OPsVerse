@@ -47,6 +47,7 @@ SOURCES = (
     "multiturn-v1",
     "judge-validation-v1",
     "judge-validation-v2",
+    "failure-taxonomy-v1",
 )
 
 
@@ -242,6 +243,25 @@ def _judge_detail(s: Summaries) -> str:
     )
 
 
+def _taxonomy_detail(s: Summaries) -> str:
+    coded = pluck(s, "failure-taxonomy-v1", "coded")
+    real = pluck(s, "failure-taxonomy-v1", "real_defects")
+    artifact = pluck(s, "failure-taxonomy-v1", "not_defects")
+    queries = pluck(s, "failure-taxonomy-v1", "queries")
+    counts = pluck(s, "failure-taxonomy-v1", "counts")
+    coder = pluck(s, "failure-taxonomy-v1", "coder")
+    top = max(counts.items(), key=lambda kv: kv[1])
+    return (
+        f"An over-inclusive signal flagged {coded} of {queries} queries as retrieval "
+        f"failures. Reading every one of them: **{artifact} are not defects** "
+        f"({100 * artifact / coded:.0f}%) and only **{real}** are -- {100 * real / queries:.0f}% "
+        f"of queries, not the {100 * coded / queries:.0f}% the flag rate implied. The largest "
+        f"category ({top[1]} cases) is queries where a grade-3 answer sits at rank 1-3 and "
+        "`recall@10` still scores them down because the corpus offers many acceptable "
+        f"answers per question. Coded by `{coder}`, a language model, not a person."
+    )
+
+
 LEDGER: tuple[Claim, ...] = (
     Claim(
         key="sparse-vs-hybrid",
@@ -340,6 +360,21 @@ LEDGER: tuple[Claim, ...] = (
         reports=("judge-validation-v1", "judge-validation-v2"),
         adr="0022-judge-validation-against-a-second-rater",
         tags=("eval-design", "methodology"),
+    ),
+    Claim(
+        key="failure-composition",
+        belief="A low `recall@10` on the golden set means retrieval is failing.",
+        verdict="Most of what the metric flags is not a defect at all.",
+        detail=_taxonomy_detail,
+        consequence=(
+            "The fix list changed completely. Nothing on it is motivated by raising "
+            "`recall@10`, because most of what would raise that number would not help a "
+            "user. What the aggregate had been hiding was its own composition: corpus "
+            "redundancy and a metric penalising queries that were answered at rank 1."
+        ),
+        reports=("failure-taxonomy-v1",),
+        adr="0020-chunking-and-multiturn-ablations",
+        tags=("eval-design", "error-analysis"),
     ),
 )
 

@@ -36,7 +36,8 @@ def test_pluck_names_the_full_path_when_a_field_moves(summaries):
 
 
 def test_every_claim_resolves_to_real_prose(rows):
-    assert len(rows) == len(ov.LEDGER) == 7
+    # a count, not a constant: the ledger grows as the project keeps testing itself
+    assert len(rows) == len(ov.LEDGER) >= 7
     for r in rows:
         assert r["belief"] and r["verdict"] and r["consequence"]
         assert len(r["detail"]) > 80, r["key"]

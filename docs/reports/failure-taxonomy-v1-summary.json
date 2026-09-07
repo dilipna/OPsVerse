@@ -1,0 +1,27 @@
+{
+  "report": "failure-taxonomy-v1",
+  "coder": "claude-opus-5",
+  "coder_kind": "language model",
+  "mode": "hybrid",
+  "queries": 100,
+  "flagged": 28,
+  "coded": 28,
+  "uncoded": [],
+  "signals": {
+    "partial_recall": 22,
+    "best_available_not_retrieved": 3,
+    "first_relevant_buried": 2,
+    "no_relevant_in_top_k": 1
+  },
+  "counts": {
+    "answered_at_top": 18,
+    "redundant_pool": 4,
+    "lexical_distraction": 2,
+    "specific_answer_missed": 1,
+    "label_error": 1,
+    "true_miss": 1,
+    "boilerplate_outranks_prose": 1
+  },
+  "real_defects": 5,
+  "not_defects": 23
+}
