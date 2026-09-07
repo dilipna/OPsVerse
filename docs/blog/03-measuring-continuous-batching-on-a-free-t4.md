@@ -1,5 +1,7 @@
 # "Which engine is faster?" is the wrong question — measuring continuous batching on a free T4
 
+> **Published at [https://dilipna.hashnode.dev/which-engine-is-faster-is-the-wrong-question-measuring-continuous-batching-on-a-free-t4](https://dilipna.hashnode.dev/which-engine-is-faster-is-the-wrong-question-measuring-continuous-batching-on-a-free-t4)** — this file is the source copy.
+
 *OpsVerse AI serves a fine-tuned DevOps model, OpsLM (Qwen3-4B). This is the story
 of benchmarking two serving engines on one free GPU, the result that reversed
 itself under load, and the two ways the measurement almost lied to me.*

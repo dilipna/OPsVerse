@@ -165,3 +165,24 @@ def test_generated_files_on_disk_are_current(rows):
 def test_summary_files_are_valid_json():
     for name in ov.SOURCES:
         json.loads((REPORTS / f"{name}-summary.json").read_text(encoding="utf-8"))
+
+
+def test_the_claim_count_is_derived_not_typed(rows):
+    """The headline count drifts like any other number, so it must be computed.
+
+    This one had to be caught the hard way: the anti-drift module shipped with
+    'seven' hardcoded in its own title and its own markdown lede.
+    """
+    fewer = rows[:3]
+    md = ov.render_markdown(fewer, "2026-09-07")
+    html = ov.render_html(fewer, "2026-09-07", "https://example.test/repo")
+    assert "three claims" in md
+    assert "<h1>Three things" in html
+
+    md_all = ov.render_markdown(rows, "2026-09-07")
+    assert f"{ov._spell(len(rows))} claims" in md_all
+
+
+def test_spell_falls_back_to_digits_for_large_counts():
+    assert ov._spell(8) == "eight"
+    assert ov._spell(99) == "99"

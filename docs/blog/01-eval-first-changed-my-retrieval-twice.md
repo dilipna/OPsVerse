@@ -1,5 +1,7 @@
 # We built the eval harness before the model — and the numbers changed our retrieval design twice
 
+> **Published at [https://dilipna.hashnode.dev/evaluation-first-the-rag-harness-that-stopped-me-from-shipping-two-wrong-decisions](https://dilipna.hashnode.dev/evaluation-first-the-rag-harness-that-stopped-me-from-shipping-two-wrong-decisions)** — this file is the source copy.
+
 *OpsVerse AI is a production-grade RAG platform for DevOps knowledge. This is
 the story of why "evaluation-first" isn't a slogan here — it's the thing that
 stopped me shipping two wrong decisions.*

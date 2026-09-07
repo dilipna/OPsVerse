@@ -90,6 +90,28 @@ def _signed(x: float, places: int = 3) -> str:
     return f"{x:+.{places}f}"
 
 
+_WORDS = (
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+)
+
+
+def _spell(n: int) -> str:
+    """Spell small counts. The number of claims drifts too, so it is never typed."""
+    return _WORDS[n] if n < len(_WORDS) else str(n)
+
+
 @dataclass(frozen=True)
 class Claim:
     """One belief, the test that broke it, and where the evidence lives."""
@@ -436,6 +458,13 @@ READING_PATH = (
         "docs/adr/",
         "22 ADRs. Each states what was rejected and why, not just what was chosen.",
     ),
+    (
+        "7. The write-ups",
+        "https://dilipna.hashnode.dev",
+        "Three published posts: the eval harness that stopped two wrong decisions, RAG "
+        "security measured like a classifier, and continuous batching on a free T4. "
+        "Source copies in `docs/blog/`.",
+    ),
 )
 
 NOT_CLAIMED = (
@@ -483,7 +512,8 @@ def render_markdown(rows: list[dict[str, Any]], date: str) -> str:
         "",
         "> **The short version.** The stack here — hybrid RAG, a QLoRA fine-tune, a served",
         "> model, an eval harness — is not unusual. What is unusual is the record below:",
-        "> **seven claims this project believed, tested, and had to withdraw**, each",
+        f"> **{_spell(len(rows))} claims this project believed, tested, and had to "
+        "withdraw**, each",
         "> published with the statistic that overturned it. Four of them were the project's",
         "> own prior conclusions; two were shipped defaults; one was the grader itself.",
         "",
@@ -642,7 +672,7 @@ def render_html(rows: list[dict[str, Any]], date: str, repo: str) -> str:
 <body>
 <main class="wrap">
   <p class="eyebrow">OpsVerse AI · claim ledger</p>
-  <h1>Seven things this project was wrong about</h1>
+  <h1>{_spell(len(rows)).capitalize()} things this project was wrong about</h1>
   <p class="sub">The stack here — hybrid RAG, a QLoRA fine-tune, a served model, an
   evaluation harness — is not unusual. This is: <strong>every claim below was believed,
   measured, and withdrawn.</strong> Four were the project's own published conclusions,

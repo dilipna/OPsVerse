@@ -6,7 +6,7 @@ this page cannot drift away from the reports it summarises. No network, no stack
 
 > **The short version.** The stack here — hybrid RAG, a QLoRA fine-tune, a served
 > model, an eval harness — is not unusual. What is unusual is the record below:
-> **seven claims this project believed, tested, and had to withdraw**, each
+> **eight claims this project believed, tested, and had to withdraw**, each
 > published with the statistic that overturned it. Four of them were the project's
 > own prior conclusions; two were shipped defaults; one was the grader itself.
 
@@ -115,6 +115,9 @@ The golden set's own judge, audited against a blinded second rater.
 
 **6. The decisions, with their tradeoffs** — `docs/adr/`  
 22 ADRs. Each states what was rejected and why, not just what was chosen.
+
+**7. The write-ups** — `https://dilipna.hashnode.dev`  
+Three published posts: the eval harness that stopped two wrong decisions, RAG security measured like a classifier, and continuous batching on a free T4. Source copies in `docs/blog/`.
 
 ---
 

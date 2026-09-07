@@ -8,7 +8,7 @@ application, matched to the variant below that fits the role.
 
 ## Variant A — LLM / AI Engineer (generalist, RAG + fine-tuning)
 
-- Built an LLM engineering platform (hybrid RAG + fine-tuning + evaluation, 258 tests,
+- Built an LLM engineering platform (hybrid RAG + fine-tuning + evaluation, 280 tests,
   22 ADRs) that fine-tuned Qwen3-4B into a DevOps assistant (**OpsLM-v1**, published on
   Hugging Face) served behind a citation-grounded, hybrid dense+sparse retrieval
   pipeline with streaming chat, degradation handling, and vision input.
@@ -109,17 +109,29 @@ application, matched to the variant below that fits the role.
 
 ---
 
+## Links to include on every application
+
+- Repo: https://github.com/dilipna/OPsVerse
+- **Start-here page** (the 8 overturns, one screen): `docs/evidence.md` in the repo
+- Measured benchmark dashboard: https://ops-verse.vercel.app/dashboard.html
+- Claim ledger, hosted: https://ops-verse.vercel.app/overturns.html
+- Writing: https://dilipna.hashnode.dev — three posts, listed in the README
+
+Anthropic's careers page says to put independent research and blog posts at the *top* of
+a resume. These three are the closest thing this project has to that, so lead with them
+rather than burying them under the repo link.
+
 ## The one-line version (for a LinkedIn headline or the top of a cover letter)
 
 > Built an LLM inference + evaluation platform on free tiers, then used it to prove myself
-> wrong seven times — including that the grader scoring everything else was miscalibrated —
+> wrong eight times — including that the grader scoring everything else was miscalibrated —
 > and published each with the significance test that caught it.
 
 ## The 30-second spoken version (phone screens)
 
 > "It's an LLM inference and ops platform — fine-tuned model, hybrid RAG, benchmarked on a
 > real T4. But the part I'd defend is the evaluation. I built the harness before the model,
-> and it's overturned seven things: two shipped defaults, four of my own prior conclusions,
+> and it's overturned eight things: two shipped defaults, four of my own prior conclusions,
 > and eventually the LLM judge producing the labels — which turned out to be systematically
 > strict, precision 0.97 against TPR 0.57. That last one mattered because it told me my
 > absolute recall numbers read low, but the bias was equal across retrieval modes, so the
