@@ -24,9 +24,11 @@ Each published with the statistic that overturned it.
 
 [`docs/evidence.md`](docs/evidence.md) is the six-minute reading path — claim → report →
 raw JSON → the *n* behind it — and it ends with **what this project does not claim**.
-Both it and the standalone visual page [`docs/overturns.html`](docs/overturns.html) are
-generated from the committed `*-summary.json` files by
-`uv run python -m opsverse_evals.overturns`, so the summary cannot drift from its sources.
+Both it and the standalone visual page — live at
+**[ops-verse.vercel.app/overturns.html](https://ops-verse.vercel.app/overturns.html)**,
+source [`docs/overturns.html`](docs/overturns.html) — are generated from the committed
+`*-summary.json` files by `uv run python -m opsverse_evals.overturns`, so the summary
+cannot drift from its sources.
 
 Built entirely on **free tiers and local compute** (Docker Compose, Colab T4). That
 constraint drives the architecture: **ephemeral-GPU measurement + always-on CPU
