@@ -81,12 +81,12 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
   measured, and withdrawn.</strong> Four were the project's own published conclusions,
   two were shipped defaults, and one was the grader that produced the labels for
   everything else.</p>
-  <p class="meta">Generated 2026-09-06 from the committed *-summary.json files · every
+  <p class="meta">Generated 2026-09-07 from the committed *-summary.json files · every
   number plucked from source, never typed · no network, no running stack</p>
 
   <div class="grid">
     <article class="card">
-      <p class="n">01 / 07</p>
+      <p class="n">01 / 08</p>
       <p class="belief">Sparse retrieval beats hybrid — the v2 ablation measured it.</p>
       <p class="verdict">Wrong twice, in two different ways.</p>
       <p class="detail">v2 raw set: sparse MRR@10 0.759 vs hybrid 0.705. v3 reworded queries: sparse falls to 0.611 (-0.149) while hybrid holds at 0.655 (-0.049) -- the 'win' was vocabulary leakage. Pooled graded labels: nDCG +0.008, p=0.573 -- a statistical tie.</p>
@@ -94,7 +94,7 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-ablation-v2.md">retrieval-ablation-v2</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-ablation-v3.md">retrieval-ablation-v3</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-golden-v1.md">retrieval-golden-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0019-golden-set-pooled-graded-relevance.md">ADR-0019</a></p>
     </article>
     <article class="card">
-      <p class="n">02 / 07</p>
+      <p class="n">02 / 08</p>
       <p class="belief">Adding <code>precision@k</code>, <code>recall@k</code> and contextual precision makes the eval suite more rigorous.</p>
       <p class="verdict">Three of them were the same column twice.</p>
       <p class="detail">On single-gold-label sets <code>recall@k</code> == <code>hit@k</code>, <code>precision@k</code> == <code>hit@k/k</code>, and contextual precision == <code>mrr@k</code>. Verified per case across 3 datasets / 300 cases: the identities hold exactly, to the last bit of floating point (max deviation 0, against a 1e-12 tolerance). Three of the five new metrics carried no independent information, so they were not reported.</p>
@@ -102,7 +102,7 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-metrics-audit-v1.md">retrieval-metrics-audit-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0018-retrieval-metrics-independence-audit.md">ADR-0018</a></p>
     </article>
     <article class="card">
-      <p class="n">03 / 07</p>
+      <p class="n">03 / 08</p>
       <p class="belief"><code>hit@10</code> is a meaningful headline metric for this corpus.</p>
       <p class="verdict">Saturated. It cannot separate anything.</p>
       <p class="detail">All four retrieval modes score 0.97-0.99 on <code>hit@10</code>, and no pairwise difference is significant (worst p=1.000). The metric most prominent in the project's own earlier reports had no remaining power to separate anything.</p>
@@ -110,7 +110,7 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/retrieval-golden-v1.md">retrieval-golden-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0019-golden-set-pooled-graded-relevance.md">ADR-0019</a></p>
     </article>
     <article class="card">
-      <p class="n">04 / 07</p>
+      <p class="n">04 / 08</p>
       <p class="belief">The shipped 350-token chunk size is the right default.</p>
       <p class="verdict">It is not the best-measured option.</p>
       <p class="detail">Re-parsing the real source documents under three chunk sizes: 150-token chunks beat the shipped 350-token default by nDCG +0.044 [+0.019, +0.074], p&lt;0.001. Scope: 100/594 candidate documents (time-boxed, and said so).</p>
@@ -118,7 +118,7 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/chunking-ablation-v1.md">chunking-ablation-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0020-chunking-and-multiturn-ablations.md">ADR-0020</a></p>
     </article>
     <article class="card">
-      <p class="n">05 / 07</p>
+      <p class="n">05 / 08</p>
       <p class="belief">The larger embedding model earns its cost.</p>
       <p class="verdict">No measurable difference against one 3.1x smaller.</p>
       <p class="detail">The incumbent (768-dim, 0.21 GB) is indistinguishable from a model 3.1x smaller (384-dim, 0.07 GB): nDCG -0.001 (p=0.943), recall -0.002 (p=0.929). The extra size was not earning its cost on this corpus.</p>
@@ -126,7 +126,7 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/embedding-ablation-v1.md">embedding-ablation-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0021-embedding-model-ablation.md">ADR-0021</a></p>
     </article>
     <article class="card">
-      <p class="n">06 / 07</p>
+      <p class="n">06 / 08</p>
       <p class="belief">Concatenating conversation history will fix multi-turn retrieval.</p>
       <p class="verdict">It does not. It trends worse.</p>
       <p class="detail">Production retrieval ignores conversation history. The obvious fix -- concatenating the previous turn -- does not help: nDCG -0.074 (p=0.247), MRR -0.071 (p=0.301) across 50 two-turn conversations. It trends *worse*, not better. Published as a null result rather than assumed to work.</p>
@@ -134,12 +134,20 @@ h1{font-size:clamp(26px,4.4vw,38px);font-weight:680;letter-spacing:-.02em;
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/multiturn-v1.md">multiturn-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0020-chunking-and-multiturn-ablations.md">ADR-0020</a></p>
     </article>
     <article class="card">
-      <p class="n">07 / 07</p>
+      <p class="n">07 / 08</p>
       <p class="belief">The relevance judge is sound — it recovered 100% of seed chunks.</p>
       <p class="verdict">It misses about half the relevant material. Seed recovery was the easy question.</p>
       <p class="detail">Audited on a blinded, stratified sample. Against a second *model* rater (n=190) the judge looked systematically strict: signed error +0.327 [+0.226, +0.430], precision 0.968 against TPR 0.571. A **human** rater then labelled 40 of the same tasks and reproduced the direction and the capability number -- TPR 0.556 -- but not the magnitude: signed error +0.226 [-0.076, +0.571], which **spans zero**. Head to head the human grades 0.28 of a grade lower than the model (-0.279, excluding zero): the model rater was the lenient one, and its leniency inflated the offset.</p>
       <p class="changed"><b>What changed:</b> Absolute recall/nDCG on the golden set read low, and the bias is near-equal across all four retrieval modes, so the published comparisons stand — the levels move, the deltas do not. Then the human labels overturned part of the overturn: the second-model rater had exaggerated the size of the offset, so the direction survives and the magnitude is back to being an open question.</p>
       <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/judge-validation-v1.md">judge-validation-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/judge-validation-v2.md">judge-validation-v2</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0022-judge-validation-against-a-second-rater.md">ADR-0022</a></p>
+    </article>
+    <article class="card">
+      <p class="n">08 / 08</p>
+      <p class="belief">A low <code>recall@10</code> on the golden set means retrieval is failing.</p>
+      <p class="verdict">Most of what the metric flags is not a defect at all.</p>
+      <p class="detail">An over-inclusive signal flagged 28 of 100 queries as retrieval failures. Reading every one of them: **23 are not defects** (82%) and only **5** are -- 5% of queries, not the 28% the flag rate implied. The largest category (18 cases) is queries where a grade-3 answer sits at rank 1-3 and <code>recall@10</code> still scores them down because the corpus offers many acceptable answers per question. Coded by <code>claude-opus-5</code>, a language model, not a person.</p>
+      <p class="changed"><b>What changed:</b> The fix list changed completely. Nothing on it is motivated by raising <code>recall@10</code>, because most of what would raise that number would not help a user. What the aggregate had been hiding was its own composition: corpus redundancy and a metric penalising queries that were answered at rank 1.</p>
+      <p class="links"><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/failure-taxonomy-v1.md">failure-taxonomy-v1</a><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/adr/0020-chunking-and-multiturn-ablations.md">ADR-0020</a></p>
     </article>
   </div>
 

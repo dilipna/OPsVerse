@@ -14,12 +14,13 @@ guided decoding — **measured on a real GPU, not asserted.**
 > T4 *cannot* show (tensor parallelism, multi-node) is stated as a limitation, never
 > faked. Every non-trivial decision has an [ADR](docs/adr/).
 
-### ⭐ Start here — [**the seven things this project was wrong about**](docs/evidence.md)
+### ⭐ Start here — [**the eight things this project was wrong about**](docs/evidence.md)
 
 The stack (hybrid RAG, a QLoRA fine-tune, a served model) is not unusual. This is:
-**seven claims believed, measured, and withdrawn** — four of them the project's own
-prior conclusions, two of them shipped defaults, and one the LLM judge that produced the
-labels for everything else. Each published with the statistic that overturned it.
+**eight claims believed, measured, and withdrawn** — four of them the project's own
+prior conclusions, two of them shipped defaults, one the LLM judge that produced the
+labels for everything else, and one the assumption that a low metric meant a real defect.
+Each published with the statistic that overturned it.
 
 [`docs/evidence.md`](docs/evidence.md) is the six-minute reading path — claim → report →
 raw JSON → the *n* behind it — and it ends with **what this project does not claim**.
@@ -95,6 +96,7 @@ not asserted — and it has already changed the design:
 |---|---|
 | **Golden set** — pooled (TREC-style), **graded 0-3**, position-randomised, **1,914 judgements** | 100 queries, mean **19.1 candidates/query** pooled across all 4 modes, **70/100 multi-label**; judge sanity-checked at **100% seed recovery** ([report](docs/reports/retrieval-golden-v1.md), [ADR-0019](docs/adr/0019-golden-set-pooled-graded-relevance.md)) |
 | **Judge validation** — the golden set's own labels audited against a blinded second rater, then a human | the judge **misses about half the relevant material** — TPR **0.556** vs a human rater, **0.472** vs a model, on the same 40 tasks. A second *model* first put the calibration offset at +0.327; the **human labels reproduced the direction but not the magnitude** (+0.226, spanning zero), and the model rater proved the more lenient of the two (−0.279, excluding zero). Direction measured, magnitude open; the per-mode bias is equal so the **comparisons stand** ([v1](docs/reports/judge-validation-v1.md), [v2](docs/reports/judge-validation-v2.md), [ADR-0022](docs/adr/0022-judge-validation-against-a-second-rater.md)) |
+| **Error analysis** — every metric-flagged retrieval failure read and coded by hand | an over-inclusive signal flagged **28 of 100** queries; reading all 28, **23 are not defects** (82%) and only **5** are — 5% of queries, not 28%. The largest category is queries answered at rank 1–3 that `recall@10` still marks down, because the corpus offers many acceptable answers each. **This is the mechanism behind the low absolute recall**, and it changed the fix list: nothing on it is motivated by raising `recall@10` ([report](docs/reports/failure-taxonomy-v1.md)). Coded by a language model, not a person |
 | **Significance testing** — bootstrap CIs + **paired permutation tests**, not bare means | every gap vs `hybrid` tested at 10k permutations; **`hit@10` is saturated** (0.97-0.99, no significant difference anywhere) and **sparse vs hybrid is a statistical tie** (nDCG +0.008, p=0.57) — two prior "wins" downgraded |
 | **Contextual recall** — independent reference answers (412 atomic claims), scored against retrieved context | dense **significantly worse** than hybrid (p=0.048) — reproduces the retrieval-side finding with a completely different, generator-side measurement ([report](docs/reports/generator-golden-v1.md)) |
 | **Chunking ablation** — re-parsed the original source docs under 3 chunk-size configs | shipped default (350 tok) is **not** the best-measured option: smaller chunks (150 tok) score significantly better on `nDCG_graded@10` (+0.044, p=0.0002) ([report](docs/reports/chunking-ablation-v1.md), [ADR-0020](docs/adr/0020-chunking-and-multiturn-ablations.md)) |
