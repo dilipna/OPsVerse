@@ -6,7 +6,7 @@
 ## Current state
 
 **Everything is pushed, CI is green, working tree is clean.** `origin/main` == local
-`HEAD` at `f2945a9`. **278 tests · 22 ADRs · 14 reports · ruff + format + pyright clean.**
+`HEAD` at `f2945a9`. **280 tests · 22 ADRs · 14 reports · ruff + format + pyright clean.**
 
 **The user has (or just had) a major conference demo they consider career-critical** —
 treat any mention of "the demo" as high-stakes. If a new session starts and the demo

@@ -124,7 +124,7 @@ not asserted — and it has already changed the design:
 | **DPO alignment** — prefer grounded/hedged answers over confident hallucinations | pipeline + TRL DPOTrainer, tested ([ADR-0015](docs/adr/0015-dpo-preference-alignment.md)); v2 run pending |
 | **Demo site** — terminal-aesthetic Next.js, OpenAI-compatible chat | [ops-verse.vercel.app](https://ops-verse.vercel.app) — serves the live [benchmark dashboard](https://ops-verse.vercel.app/dashboard.html); chat runs in **labelled demo mode** (canned answers); no model endpoint is wired yet. Always-on path = Oracle ARM + Ollama, scaffolded in `infra/oracle-opslm/`, not yet provisioned |
 
-**245 tests · ruff + pyright clean · CI + eval-gate green · 22 ADRs.**
+**280 tests · ruff + pyright clean · CI + eval-gate green · 22 ADRs.**
 
 A single `/chat` request as Langfuse sees it — retrieval and generation spans with the latency split:
 
@@ -219,7 +219,7 @@ docs/blog         3 posts        opslm-demo  Vercel demo site        infra/  com
 ## Development
 
 ```bash
-uv run pytest -q            # 245 tests
+uv run pytest -q            # 280 tests
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 uv run python -m opsverse_evals.regression        # eval regression gate (15 thresholds)
@@ -252,6 +252,8 @@ uv run python -m opsverse_evals.overturns                                  # reg
 
 ## Writing
 
-- [We built the eval harness before the model — and the numbers changed our retrieval design twice](docs/blog/01-eval-first-changed-my-retrieval-twice.md)
-- [The document is the attack surface — RAG security at ingest, measured like a classifier](docs/blog/02-the-document-is-the-attack-surface.md)
-- ["Which engine is faster?" is the wrong question — measuring continuous batching on a free T4](docs/blog/03-measuring-continuous-batching-on-a-free-t4.md)
+Published on [dilipna.hashnode.dev](https://dilipna.hashnode.dev):
+
+- [Evaluation-first: the RAG harness that stopped me shipping two wrong decisions](https://dilipna.hashnode.dev/evaluation-first-the-rag-harness-that-stopped-me-from-shipping-two-wrong-decisions) — [source](docs/blog/01-eval-first-changed-my-retrieval-twice.md)
+- [The document is the attack surface — RAG security at ingest, measured like a classifier](https://dilipna.hashnode.dev/the-document-is-the-attack-surface-rag-security-at-ingest-measured-like-a-classifier) — [source](docs/blog/02-the-document-is-the-attack-surface.md)
+- ["Which engine is faster?" is the wrong question — measuring continuous batching on a free T4](https://dilipna.hashnode.dev/which-engine-is-faster-is-the-wrong-question-measuring-continuous-batching-on-a-free-t4) — [source](docs/blog/03-measuring-continuous-batching-on-a-free-t4.md)

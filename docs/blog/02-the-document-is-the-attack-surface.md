@@ -1,5 +1,7 @@
 # The document is the attack surface — RAG security at ingest, measured like a classifier
 
+> **Published at [https://dilipna.hashnode.dev/the-document-is-the-attack-surface-rag-security-at-ingest-measured-like-a-classifier](https://dilipna.hashnode.dev/the-document-is-the-attack-surface-rag-security-at-ingest-measured-like-a-classifier)** — this file is the source copy.
+
 *OpsVerse AI is a production-grade RAG platform for DevOps knowledge. Blog #1
 was about evaluating retrieval before trusting it. This one applies the same
 discipline to security: every defense is either measured or deliberately
