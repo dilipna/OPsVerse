@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "opsverse-core",
     "opsverse-rag",
+    "opsverse-ingestion",
     "pydantic>=2.10",
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30",
@@ -16,6 +17,7 @@ dependencies = [
 [tool.uv.sources]
 opsverse-core = { workspace = true }
 opsverse-rag = { workspace = true }
+opsverse-ingestion = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

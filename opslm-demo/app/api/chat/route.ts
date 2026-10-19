@@ -43,9 +43,20 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { messages = [] } = await req.json().catch(() => ({ messages: [] }));
-  const last = [...messages].reverse().find((m: any) => m.role === "user");
+  let messages: {role: "user" | "assistant"; content: string}[];
+  try {
+    const text = await req.text();
+    if (text.length > 32000) return Response.json({error:"Conversation is too large."},{status:413});
+    const data = JSON.parse(text);
+    if (!Array.isArray(data.messages) || !data.messages.length || data.messages.length > 32 ||
+      data.messages.some((m: {role?: unknown; content?: unknown} | null) => !m || !["user","assistant"].includes(String(m.role)) || typeof m.content !== "string" || m.content.length > 4000)) {
+      return Response.json({error:"Provide 1–32 user/assistant messages, each under 4001 characters."},{status:400});
+    }
+    messages=data.messages;
+  } catch {return Response.json({error:"Invalid JSON conversation."},{status:400});}
+  const last = [...messages].reverse().find(m => m.role === "user");
   const question: string = last?.content ?? "";
+  if (!question.trim()) return Response.json({error:"Enter a question."},{status:400});
 
   const endpoint = process.env.OPSLM_ENDPOINT;
   if (!endpoint) {
@@ -70,15 +81,14 @@ export async function POST(req: Request) {
         temperature: 0.3,
         max_tokens: 512,
       }),
+      signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) throw new Error(`upstream ${res.status}`);
     const data = await res.json();
     const reply = data?.choices?.[0]?.message?.content?.trim();
-    return Response.json({ reply: reply || "(empty response)" });
-  } catch (err: any) {
-    return Response.json({
-      reply: cannedReply(question),
-      note: `backend unreachable (${err?.message ?? "error"}) · served a demo answer`,
-    });
+    if (!reply) throw new Error("empty response");
+    return Response.json({ reply, note:"Live model response; retrieval is not connected to this proxy." });
+  } catch {
+    return Response.json({error:"The configured model did not return a usable response. Try again later."},{status:502});
   }
 }

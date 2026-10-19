@@ -6,6 +6,34 @@ on:
   pull_request:
 
 jobs:
+  runbook-product:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --frozen
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: opslm-demo/package-lock.json
+      - name: Raw documents through real ingestion must match browser corpus
+        run: uv run python -m opsverse_evals.runbook_fixture --check
+      - run: npm ci --no-audit --no-fund
+        working-directory: opslm-demo
+      - run: npm test
+        working-directory: opslm-demo
+      - name: Rerun actual browser retrieval and both baselines
+        run: node opslm-demo/scripts/evaluate-runbooks.mjs --out docs/reports/runbook-ci.json
+      - run: npm run build
+        working-directory: opslm-demo
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runbook-evaluation
+          path: docs/reports/runbook-ci.json
   lint-and-test:
     runs-on: ubuntu-latest
     steps:

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "test": "node --test scripts/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "eval": "node scripts/evaluate-runbooks.mjs"
   },
   "dependencies": {
     "next": "^16.2.11",

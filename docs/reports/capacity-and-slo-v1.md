@@ -6,23 +6,22 @@
 > flagged wherever it is used.
 
 - **Hardware:** Tesla T4
-- **SLO:** p95 TTFT ≤ 1s and p95 end-to-end ≤ 30s
+- **SLO:** p95 TTFT ≤ 1s and p95 end-to-end ≤ 30s; error rate ≤ 0.0%; ≥20 successes
 - **Assumed GPU cost:** $0.35/hour *(assumption, not a measurement — pass `--gpu-cost-per-hour` to change it)*
 
-## 1. SLO-constrained goodput
+## 1. SLO-admissible throughput
 
-Raw throughput counts tokens generated for requests the user may have already
-abandoned. **Goodput** counts only throughput delivered at a concurrency that
-still meets the SLO. This is the number that decides how many users one GPU
-actually serves.
+This selects throughput at configurations meeting latency, error-rate and sample
+requirements. It is not per-request deadline goodput or a production capacity
+guarantee. Historical summaries omit per-request deadline outcomes.
 
-| Config | Max serviceable concurrency | Goodput | Cost / 1M tokens | Levels passing SLO |
+| Config | Best-throughput concurrency | Admitted throughput | Cost / 1M tokens | Levels passing SLO |
 |---|---|---|---|---|
 | `vllm/fp16` | **c=16** | **233.18 tok/s** | $0.42 | c=1, c=4, c=16 of 3 measured |
-| `vllm/fp16-noprefixcache` *(control)* | **c=1** | **21.32 tok/s** | $4.56 | c=1 of 1 measured |
+| `vllm/fp16-noprefixcache` *(control)* | **none** | — | — | **none** of 1 measured |
 | `ollama/q4_k_m` | **c=1** | **37.22 tok/s** | $2.61 | c=1 of 3 measured |
 
-**`vllm/fp16` delivers 6.3x the goodput of `ollama/q4_k_m` under this SLO** — and at $0.42 vs $2.61 per million tokens, the same ratio in cost.
+**`vllm/fp16` delivers 6.3x the admitted throughput of `ollama/q4_k_m` under this SLO** — and at $0.42 vs $2.61 per million tokens, the same ratio in cost.
 
 This is a *different, smaller* number than the headline throughput-scaling
 figure, and it is the more defensible one: it is the advantage that survives
@@ -67,15 +66,19 @@ it is the first thing a reviewer should be able to check.
 | `ollama/q4_k_m` | throughput @ c=4 | 34.61 tok/s | n=32 requests |
 | `ollama/q4_k_m` | throughput @ c=16 | 33.21 tok/s | n=32 requests |
 
-### Run-to-run repeatability
+**Repeatability not measured:** no fully identified matching repeats.
 
-Where two independent sessions measured the same engine at the same
-concurrency, their spread bounds the noise floor. **A single-run difference
-smaller than this spread is not evidence of anything.**
+## Admission decisions
 
-| Engine | Concurrency | Sessions | Throughput range | Spread |
-|---|---|---|---|---|
-| vllm | c=1 | `vllm/fp16`, `vllm/fp16-noprefixcache` | 17.42 - 21.32 tok/s | **+/-22%** |
+| Config | Concurrency | Decision | Reasons |
+|---|---|---|---|
+| vllm/fp16 | 1 | ADMIT | all requirements met |
+| vllm/fp16 | 4 | ADMIT | all requirements met |
+| vllm/fp16 | 16 | ADMIT | all requirements met |
+| vllm/fp16-noprefixcache | 1 | REJECT | insufficient successful samples |
+| ollama/q4_k_m | 1 | ADMIT | all requirements met |
+| ollama/q4_k_m | 4 | REJECT | ttft_s.p95 exceeds policy |
+| ollama/q4_k_m | 16 | REJECT | ttft_s.p95 exceeds policy, latency_s.p95 exceeds policy |
 
 ## What this analysis does not establish
 
@@ -84,7 +87,9 @@ smaller than this spread is not evidence of anything.**
 - **One GPU, one model, one prompt shape.** Nothing here generalizes to a
   different sequence-length mix without re-measurement.
 - **Cost is arithmetic on an assumed hourly rate**, not an observed bill.
-- **Output tokens are approximated by streamed-chunk count** (see `harness.py`),
-  so absolute tok/s carries that approximation; ratios between engines do not,
-  because the approximation is identical on both sides.
+- Token counts prefer server usage and fall back to content chunks. Historical
+  summaries do not record which was used. Cross-engine ratios may inherit
+  different token-counting bias; they do not isolate engine scheduling.
+- Historical summaries do not pin model revisions or measurement code. They
+  are stored observations, not newly rerun GPU evidence.
 

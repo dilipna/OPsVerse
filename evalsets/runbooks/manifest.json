@@ -1,0 +1,57 @@
+{
+  "repository": "https://github.com/kubernetes/website",
+  "revision": "3d8f3d7b579d7dfcef7b835fee8da2a37199012d",
+  "license": "CC-BY-4.0",
+  "license_url": "https://kubernetes.io/docs/contribute/participate/",
+  "retrieved_at": "2026-10-19",
+  "documents": [
+    {
+      "id": "probes",
+      "file": "probes.md",
+      "sha256": "bf80ca8ec4ffa9c71c06a11c515dcb34f18132b4cbe52896b5acd9b5989c6c0c",
+      "source": "https://github.com/kubernetes/website/blob/3d8f3d7b579d7dfcef7b835fee8da2a37199012d/content/en/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes.md",
+      "canonical": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "bytes": 14823
+    },
+    {
+      "id": "debug-pods",
+      "file": "debug-pods.md",
+      "sha256": "387851f607319187a0c82c93518a54840b899d24b387da5f26f7ad0233b4fb3a",
+      "source": "https://github.com/kubernetes/website/blob/3d8f3d7b579d7dfcef7b835fee8da2a37199012d/content/en/docs/tasks/debug/debug-application/debug-pods.md",
+      "canonical": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/",
+      "bytes": 8231
+    },
+    {
+      "id": "debug-services",
+      "file": "debug-services.md",
+      "sha256": "76915e474e88fbedecbfe205fb45a85867ea4612453358eda73a330ec991262d",
+      "source": "https://github.com/kubernetes/website/blob/3d8f3d7b579d7dfcef7b835fee8da2a37199012d/content/en/docs/tasks/debug/debug-application/debug-service.md",
+      "canonical": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+      "bytes": 23343
+    },
+    {
+      "id": "resources",
+      "file": "resources.md",
+      "sha256": "cbb176ded47da163df33bcf0e643dc38361b19f6dc77a98302320704e20c95ac",
+      "source": "https://github.com/kubernetes/website/blob/3d8f3d7b579d7dfcef7b835fee8da2a37199012d/content/en/docs/concepts/configuration/manage-resources-containers.md",
+      "canonical": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+      "bytes": 34575
+    },
+    {
+      "id": "deployments",
+      "file": "deployments.md",
+      "sha256": "ca4571585f3af4039292fdbbe127e296e1b86d44b4df52cec75dbf51c96da513",
+      "source": "https://github.com/kubernetes/website/blob/3d8f3d7b579d7dfcef7b835fee8da2a37199012d/content/en/docs/concepts/workloads/controllers/deployment.md",
+      "canonical": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "bytes": 59790
+    },
+    {
+      "id": "images",
+      "file": "images.md",
+      "sha256": "019267d271888ab7e9b505c748a5bd0b7f99029a2270fb08390f43f94d5ddf5e",
+      "source": "https://github.com/kubernetes/website/blob/3d8f3d7b579d7dfcef7b835fee8da2a37199012d/content/en/docs/concepts/containers/images.md",
+      "canonical": "https://kubernetes.io/docs/concepts/containers/images/",
+      "bytes": 28900
+    }
+  ]
+}
