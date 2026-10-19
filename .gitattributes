@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Preserve exact upstream bytes used by the source-hash manifest.
+evalsets/runbooks/raw/*.md -text

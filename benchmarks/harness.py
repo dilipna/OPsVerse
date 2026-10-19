@@ -102,6 +102,7 @@ def summarize(results: list[RequestResult], wall_clock_s: float) -> dict[str, An
         "requests": len(results),
         "ok": len(ok),
         "errors": len(results) - len(ok),
+        "ttft_samples": len(ttfts),
         "ttft_s": {"p50": round(percentile(ttfts, 50), 4), "p95": round(percentile(ttfts, 95), 4)},
         # inter-token latency (TPOT): the steady-state decode metric
         "itl_s": {"p50": round(percentile(itls, 50), 4), "p95": round(percentile(itls, 95), 4)},
@@ -159,11 +160,10 @@ async def _one_request(client: Any, base_url: str, model: str, prompt: str) -> R
                 # The terminal usage chunk carries an empty choices list, so
                 # guard the index before touching it.
                 choices = chunk.get("choices") or []
-                if choices:
+                if choices and (choices[0].get("delta") or {}).get("content"):
                     if ttft is None:
                         ttft = time.perf_counter() - start
-                    if (choices[0].get("delta") or {}).get("content"):
-                        chunk_tokens += 1
+                    chunk_tokens += 1
                 usage = chunk.get("usage") or {}
                 if usage.get("completion_tokens"):
                     usage_tokens = usage["completion_tokens"]
@@ -171,7 +171,9 @@ async def _one_request(client: Any, base_url: str, model: str, prompt: str) -> R
         tokens = usage_tokens or chunk_tokens
         return RequestResult(ttft, time.perf_counter() - start, tokens, ok=False)
     tokens = usage_tokens or chunk_tokens
-    return RequestResult(ttft, time.perf_counter() - start, tokens, ok=True)
+    return RequestResult(
+        ttft, time.perf_counter() - start, tokens, ok=ttft is not None and tokens > 0
+    )
 
 
 async def run_level(base_url: str, model: str, concurrency: int, n_requests: int) -> dict[str, Any]:

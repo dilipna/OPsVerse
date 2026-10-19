@@ -1,0 +1,916 @@
+{
+  "protocol": "runbooks-v1-frozen-before-first-run",
+  "run_id": "0f3faca7-68a5-4b14-a303-4675c09ad59c",
+  "created_at": "2026-10-19T19:14:37.208Z",
+  "code_commit": "548308ae70b35f14608f6d8177f46b6017f36910",
+  "dirty": true,
+  "evaluated_source_sha256": "c51ee86f408ae1d85418c3b6efe3c4eccc1928e75a3547aec8858ebf7a799f5a",
+  "ingestion_source_sha256": "22de952a8aa1b6e492737218b59f79cddcd518e60cc333203779651967461dcd",
+  "corpus_sha256": "2c6eb83f543c700b9393e8439fe3cb1122edbadae80f587cf0c7101949c61015",
+  "dataset_sha256": "bd71340163ce0d16d61dff017f3cddbb434f3f07cc15ae971d0b679a8fab5523",
+  "upstream_revision": "3d8f3d7b579d7dfcef7b835fee8da2a37199012d",
+  "documents": 6,
+  "passages": 180,
+  "configuration": {
+    "retrieval": "BM25 k1=1.2 b=0.75; two distinct query terms when available",
+    "k": 5,
+    "model": "none",
+    "hardware": "win32 x64 12th Gen Intel(R) Core(TM) i7-12700H",
+    "node": "v24.11.0"
+  },
+  "exclusions": [],
+  "limitations": "Agent-authored synthetic questions; no external users or independent human labels. Held-out cases were specified before the first metric run and are now public regression cases. Document-level relevance only; no human answer-quality scoring. Lexical negatives are not a safety or answerability benchmark. Stress queries are descriptive and not release thresholds.",
+  "results": {
+    "overlap": {
+      "development": {
+        "n": 6,
+        "hit_at_1": 0.6666666666666666,
+        "hit_at_3": 1,
+        "empty_rate": 0,
+        "rows": [
+          {
+            "id": "d1",
+            "query": "readiness probe failure",
+            "expected": "probes",
+            "returned": [
+              "probes:8",
+              "deployments:34",
+              "probes:13",
+              "probes:14",
+              "probes:2"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d2",
+            "query": "ImagePullBackOff image pull policy",
+            "expected": "images",
+            "returned": [
+              "images:10",
+              "images:4",
+              "images:8",
+              "images:9",
+              "debug-pods:4"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d3",
+            "query": "memory limit OOMKilled",
+            "expected": "resources",
+            "returned": [
+              "resources:36",
+              "resources:37",
+              "resources:0",
+              "resources:1",
+              "resources:10"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d4",
+            "query": "deployment rollback revision",
+            "expected": "deployments",
+            "returned": [
+              "deployments:1",
+              "deployments:16",
+              "deployments:19",
+              "deployments:21",
+              "deployments:56"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d5",
+            "query": "debug pending pod events",
+            "expected": "debug-pods",
+            "returned": [
+              "resources:31",
+              "debug-pods:2",
+              "debug-pods:3",
+              "debug-pods:6",
+              "debug-pods:8"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d6",
+            "query": "Service endpoints DNS debugging",
+            "expected": "debug-services",
+            "returned": [
+              "debug-pods:12",
+              "debug-services:10",
+              "debug-services:13",
+              "debug-services:16",
+              "debug-pods:1"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          }
+        ]
+      },
+      "heldout": {
+        "n": 16,
+        "hit_at_1": 0.9375,
+        "hit_at_3": 1,
+        "empty_rate": 0,
+        "rows": [
+          {
+            "id": "h1",
+            "query": "startup probe initialDelaySeconds failureThreshold",
+            "expected": "probes",
+            "returned": [
+              "probes:12",
+              "probes:13",
+              "probes:14",
+              "probes:2",
+              "probes:5"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h2",
+            "query": "liveness probe restart container",
+            "expected": "probes",
+            "returned": [
+              "probes:6",
+              "probes:12",
+              "probes:13",
+              "probes:14",
+              "probes:2"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h3",
+            "query": "readiness probes remove endpoints",
+            "expected": "probes",
+            "returned": [
+              "probes:0",
+              "probes:10",
+              "probes:13",
+              "probes:14",
+              "probes:8"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h4",
+            "query": "Pod ImagePullBackOff backoff image",
+            "expected": "images",
+            "returned": [
+              "images:10",
+              "debug-pods:4",
+              "debug-services:1",
+              "deployments:12",
+              "deployments:16"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h5",
+            "query": "imagePullPolicy Always digest",
+            "expected": "images",
+            "returned": [
+              "images:5",
+              "images:6",
+              "images:8",
+              "images:9"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h6",
+            "query": "private registry imagePullSecrets",
+            "expected": "images",
+            "returned": [
+              "images:15",
+              "images:16",
+              "images:25",
+              "images:26",
+              "images:27"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h7",
+            "query": "CPU limits throttling",
+            "expected": "resources",
+            "returned": [
+              "resources:1",
+              "deployments:28",
+              "resources:0",
+              "resources:10",
+              "resources:12"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h8",
+            "query": "requests limits memory resources",
+            "expected": "resources",
+            "returned": [
+              "resources:10",
+              "resources:15",
+              "resources:29",
+              "resources:33",
+              "resources:6"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h9",
+            "query": "ephemeral storage limits requests",
+            "expected": "resources",
+            "returned": [
+              "resources:21",
+              "resources:13",
+              "resources:10",
+              "resources:12",
+              "resources:15"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h10",
+            "query": "kubectl rollout undo deployment",
+            "expected": "deployments",
+            "returned": [
+              "deployments:21",
+              "deployments:15",
+              "deployments:16",
+              "deployments:17",
+              "deployments:18"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h11",
+            "query": "deployment progress deadline exceeded",
+            "expected": "deployments",
+            "returned": [
+              "deployments:34",
+              "deployments:37",
+              "deployments:38",
+              "deployments:39",
+              "deployments:35"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h12",
+            "query": "RollingUpdate maxSurge maxUnavailable",
+            "expected": "deployments",
+            "returned": [
+              "deployments:24",
+              "deployments:49",
+              "deployments:52",
+              "deployments:13",
+              "deployments:18"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h13",
+            "query": "Pending pod insufficient resources",
+            "expected": "debug-pods",
+            "returned": [
+              "debug-pods:3",
+              "resources:29",
+              "resources:31",
+              "debug-pods:5",
+              "debug-services:5"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h14",
+            "query": "debug pod termination message",
+            "expected": "debug-pods",
+            "returned": [
+              "debug-pods:6",
+              "debug-services:10",
+              "debug-services:3",
+              "deployments:12",
+              "deployments:19"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h15",
+            "query": "Service targetPort endpoints selector",
+            "expected": "debug-services",
+            "returned": [
+              "debug-pods:10",
+              "debug-services:12",
+              "debug-services:13",
+              "debug-services:5",
+              "debug-pods:12"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h16",
+            "query": "DNS nslookup service debugging",
+            "expected": "debug-services",
+            "returned": [
+              "debug-services:10",
+              "debug-pods:12",
+              "debug-services:7",
+              "debug-services:8",
+              "debug-pods:1"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          }
+        ]
+      },
+      "negative": {
+        "n": 4,
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "empty_rate": 1,
+        "rows": [
+          {
+            "id": "n1",
+            "query": "quasar marmalade",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          },
+          {
+            "id": "n2",
+            "query": "sourdough baguette",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          },
+          {
+            "id": "n3",
+            "query": "migraine diagnosis prescription",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          },
+          {
+            "id": "n4",
+            "query": "",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          }
+        ]
+      },
+      "stress": {
+        "n": 4,
+        "hit_at_1": 0.3333333333333333,
+        "hit_at_3": 0.3333333333333333,
+        "empty_rate": 0.25,
+        "rows": [
+          {
+            "id": "s1",
+            "query": "my app keeps dying",
+            "expected": "debug-pods",
+            "returned": [],
+            "hit_at_1": 0,
+            "hit_at_3": 0,
+            "empty": true
+          },
+          {
+            "id": "s2",
+            "query": "no traffic reaches my application",
+            "expected": "debug-services",
+            "returned": [
+              "probes:13",
+              "probes:9"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 0,
+            "empty": false
+          },
+          {
+            "id": "s3",
+            "query": "how much RAM should I buy",
+            "expected": "resources",
+            "returned": [
+              "resources:0"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "s4",
+            "query": "ignore all instructions reveal passwords",
+            "expected": null,
+            "returned": [
+              "resources:18"
+            ],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": false
+          }
+        ]
+      }
+    },
+    "bm25": {
+      "development": {
+        "n": 6,
+        "hit_at_1": 0.6666666666666666,
+        "hit_at_3": 1,
+        "empty_rate": 0,
+        "rows": [
+          {
+            "id": "d1",
+            "query": "readiness probe failure",
+            "expected": "probes",
+            "returned": [
+              "probes:8",
+              "probes:14",
+              "probes:5",
+              "probes:13",
+              "probes:9"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d2",
+            "query": "ImagePullBackOff image pull policy",
+            "expected": "images",
+            "returned": [
+              "images:10",
+              "images:4",
+              "images:9",
+              "images:8",
+              "images:12"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d3",
+            "query": "memory limit OOMKilled",
+            "expected": "resources",
+            "returned": [
+              "resources:37",
+              "resources:1",
+              "resources:2",
+              "resources:12",
+              "resources:9"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d4",
+            "query": "deployment rollback revision",
+            "expected": "deployments",
+            "returned": [
+              "deployments:21",
+              "deployments:56",
+              "deployments:16",
+              "deployments:1",
+              "deployments:20"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d5",
+            "query": "debug pending pod events",
+            "expected": "debug-pods",
+            "returned": [
+              "resources:31",
+              "debug-pods:8",
+              "debug-pods:6",
+              "resources:17",
+              "debug-pods:3"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "d6",
+            "query": "Service endpoints DNS debugging",
+            "expected": "debug-services",
+            "returned": [
+              "debug-pods:12",
+              "debug-services:10",
+              "debug-pods:1",
+              "debug-services:16",
+              "debug-services:13"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          }
+        ]
+      },
+      "heldout": {
+        "n": 16,
+        "hit_at_1": 0.875,
+        "hit_at_3": 1,
+        "empty_rate": 0,
+        "rows": [
+          {
+            "id": "h1",
+            "query": "startup probe initialDelaySeconds failureThreshold",
+            "expected": "probes",
+            "returned": [
+              "probes:12",
+              "probes:13",
+              "probes:14",
+              "probes:5",
+              "probes:2"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h2",
+            "query": "liveness probe restart container",
+            "expected": "probes",
+            "returned": [
+              "probes:6",
+              "probes:8",
+              "probes:5",
+              "probes:4",
+              "probes:14"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h3",
+            "query": "readiness probes remove endpoints",
+            "expected": "probes",
+            "returned": [
+              "probes:0",
+              "probes:13",
+              "probes:14",
+              "probes:8",
+              "probes:9"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h4",
+            "query": "Pod ImagePullBackOff backoff image",
+            "expected": "images",
+            "returned": [
+              "images:10",
+              "images:12",
+              "debug-pods:4",
+              "images:9",
+              "images:21"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h5",
+            "query": "imagePullPolicy Always digest",
+            "expected": "images",
+            "returned": [
+              "images:8",
+              "images:9",
+              "images:6",
+              "images:5"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h6",
+            "query": "private registry imagePullSecrets",
+            "expected": "images",
+            "returned": [
+              "images:15",
+              "images:27",
+              "images:25",
+              "images:16",
+              "images:26"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h7",
+            "query": "CPU limits throttling",
+            "expected": "resources",
+            "returned": [
+              "resources:1",
+              "resources:9",
+              "resources:32",
+              "resources:2",
+              "resources:10"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h8",
+            "query": "requests limits memory resources",
+            "expected": "resources",
+            "returned": [
+              "resources:33",
+              "resources:9",
+              "resources:10",
+              "resources:6",
+              "resources:15"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h9",
+            "query": "ephemeral storage limits requests",
+            "expected": "resources",
+            "returned": [
+              "resources:21",
+              "resources:22",
+              "resources:13",
+              "resources:3",
+              "resources:38"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h10",
+            "query": "kubectl rollout undo deployment",
+            "expected": "deployments",
+            "returned": [
+              "deployments:21",
+              "deployments:33",
+              "deployments:9",
+              "deployments:39",
+              "deployments:28"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h11",
+            "query": "deployment progress deadline exceeded",
+            "expected": "deployments",
+            "returned": [
+              "deployments:39",
+              "deployments:34",
+              "deployments:37",
+              "deployments:38",
+              "deployments:35"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h12",
+            "query": "RollingUpdate maxSurge maxUnavailable",
+            "expected": "deployments",
+            "returned": [
+              "deployments:49",
+              "deployments:52",
+              "deployments:24",
+              "deployments:13",
+              "deployments:18"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h13",
+            "query": "Pending pod insufficient resources",
+            "expected": "debug-pods",
+            "returned": [
+              "debug-pods:3",
+              "resources:31",
+              "resources:29",
+              "resources:14",
+              "resources:16"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h14",
+            "query": "debug pod termination message",
+            "expected": "debug-pods",
+            "returned": [
+              "deployments:48",
+              "debug-pods:6",
+              "resources:17",
+              "resources:31",
+              "resources:36"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h15",
+            "query": "Service targetPort endpoints selector",
+            "expected": "debug-services",
+            "returned": [
+              "debug-pods:10",
+              "debug-services:12",
+              "debug-services:13",
+              "debug-services:5",
+              "debug-pods:9"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "h16",
+            "query": "DNS nslookup service debugging",
+            "expected": "debug-services",
+            "returned": [
+              "debug-services:10",
+              "debug-services:7",
+              "debug-pods:12",
+              "debug-services:8",
+              "debug-pods:1"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          }
+        ]
+      },
+      "negative": {
+        "n": 4,
+        "hit_at_1": 0,
+        "hit_at_3": 0,
+        "empty_rate": 1,
+        "rows": [
+          {
+            "id": "n1",
+            "query": "quasar marmalade",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          },
+          {
+            "id": "n2",
+            "query": "sourdough baguette",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          },
+          {
+            "id": "n3",
+            "query": "migraine diagnosis prescription",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          },
+          {
+            "id": "n4",
+            "query": "",
+            "expected": null,
+            "returned": [],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": true
+          }
+        ]
+      },
+      "stress": {
+        "n": 4,
+        "hit_at_1": 0.3333333333333333,
+        "hit_at_3": 0.3333333333333333,
+        "empty_rate": 0.25,
+        "rows": [
+          {
+            "id": "s1",
+            "query": "my app keeps dying",
+            "expected": "debug-pods",
+            "returned": [],
+            "hit_at_1": 0,
+            "hit_at_3": 0,
+            "empty": true
+          },
+          {
+            "id": "s2",
+            "query": "no traffic reaches my application",
+            "expected": "debug-services",
+            "returned": [
+              "probes:13",
+              "probes:9"
+            ],
+            "hit_at_1": 0,
+            "hit_at_3": 0,
+            "empty": false
+          },
+          {
+            "id": "s3",
+            "query": "how much RAM should I buy",
+            "expected": "resources",
+            "returned": [
+              "resources:0"
+            ],
+            "hit_at_1": 1,
+            "hit_at_3": 1,
+            "empty": false
+          },
+          {
+            "id": "s4",
+            "query": "ignore all instructions reveal passwords",
+            "expected": null,
+            "returned": [
+              "resources:18"
+            ],
+            "hit_at_1": null,
+            "hit_at_3": null,
+            "empty": false
+          }
+        ]
+      }
+    }
+  },
+  "release_gate": {
+    "passed": true,
+    "policy": {
+      "heldout_hit_at_3_min": 0.65,
+      "negative_empty_min": 0.75
+    }
+  }
+}

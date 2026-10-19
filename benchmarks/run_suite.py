@@ -34,11 +34,13 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import platform
 import subprocess
 import sys
 import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -50,6 +52,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from harness import (
+    PROMPTS,
     RequestResult,
     _one_request,
     percentile,
@@ -143,6 +146,17 @@ def suite_metadata(config: SuiteConfig) -> dict[str, Any]:
     latency number without them is not a measurement, it is a rumour.
     """
     return {
+        "run_id": str(uuid.uuid4()),
+        "model_revision": None,
+        "engine_version": None,
+        "prefix_caching": None,
+        "hardware_revision": None,
+        "server_config_sha256": None,
+        "workload_sha256": hashlib.sha256(json.dumps(PROMPTS).encode()).hexdigest(),
+        "output_policy": "max_tokens=256; temperature=server-default; stream=true",
+        "protocol_revision": hashlib.sha256(
+            Path(__file__).read_bytes() + Path(__file__).with_name("harness.py").read_bytes()
+        ).hexdigest(),
         "engine": config.engine,
         "quant": config.quant,
         "model": config.model,
@@ -330,6 +344,13 @@ def main() -> None:
     parser.add_argument("--model", required=True, help="model name as the server knows it")
     parser.add_argument("--engine", required=True, help="vllm | ollama | sglang | ...")
     parser.add_argument("--quant", required=True, help="fp16 | awq | q8_0 | q4_k_m | ...")
+    parser.add_argument("--model-revision", help="immutable served model revision (not a tag)")
+    parser.add_argument("--engine-version", help="version reported by the serving engine")
+    parser.add_argument("--hardware-revision", help="hardware/driver/CUDA/host identity")
+    parser.add_argument(
+        "--server-config", type=Path, help="server launch config; only its hash is stored"
+    )
+    parser.add_argument("--prefix-caching", choices=["on", "off", "unknown"], default="unknown")
     parser.add_argument("--notes", default="", help="free text stamped into the result file")
     parser.add_argument("--concurrency", default="1,4,16")
     parser.add_argument("--requests", type=int, default=32)
@@ -343,6 +364,17 @@ def main() -> None:
         engine=args.engine,
         quant=args.quant,
         notes=args.notes,
+        extra={
+            "model_revision": args.model_revision,
+            "engine_version": args.engine_version,
+            "hardware_revision": args.hardware_revision,
+            "server_config_sha256": (
+                hashlib.sha256(args.server_config.read_bytes()).hexdigest()
+                if args.server_config
+                else None
+            ),
+            "prefix_caching": {"on": True, "off": False, "unknown": None}[args.prefix_caching],
+        },
     )
     report = asyncio.run(
         run_suite(
