@@ -1,12 +1,12 @@
 {
   "protocol": "runbooks-v1-frozen-before-first-run",
-  "run_id": "0f3faca7-68a5-4b14-a303-4675c09ad59c",
-  "created_at": "2026-10-19T19:14:37.208Z",
-  "code_commit": "548308ae70b35f14608f6d8177f46b6017f36910",
-  "dirty": true,
-  "evaluated_source_sha256": "c51ee86f408ae1d85418c3b6efe3c4eccc1928e75a3547aec8858ebf7a799f5a",
-  "ingestion_source_sha256": "22de952a8aa1b6e492737218b59f79cddcd518e60cc333203779651967461dcd",
-  "corpus_sha256": "2c6eb83f543c700b9393e8439fe3cb1122edbadae80f587cf0c7101949c61015",
+  "run_id": "715dd2db-20f9-42f8-b727-55be985bdcff",
+  "created_at": "2026-10-19T19:24:58.979Z",
+  "code_commit": "dff6935ca3ec53505fe861693bd7948c45ea1268",
+  "dirty": false,
+  "evaluated_source_sha256": "7ad90f3d8e02a23a60d720c48ed88f5689bc092d6d9237b3dc4b9ffa9772036c",
+  "ingestion_source_sha256": "ddbd48d626a6cbc56c6203dca15ba72de583f9ace92f1a9c7ddf71bcca12110a",
+  "corpus_sha256": "31baa00aa5dd60c0c332fbe975a1281a887fa040847a626d16e9fcc0ff8c0c75",
   "dataset_sha256": "bd71340163ce0d16d61dff017f3cddbb434f3f07cc15ae971d0b679a8fab5523",
   "upstream_revision": "3d8f3d7b579d7dfcef7b835fee8da2a37199012d",
   "documents": 6,
@@ -906,6 +906,7 @@
       }
     }
   },
+  "selected_implementation": "term-overlap: tied hit@3, higher observed hit@1; no significant superiority claimed; selection used these now-public cases",
   "release_gate": {
     "passed": true,
     "policy": {
