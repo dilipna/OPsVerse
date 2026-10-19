@@ -7,7 +7,7 @@
 <meta name="description" content="Measured vLLM vs Ollama serving comparison for OpsLM-v1 (Qwen3-4B) on a Tesla T4.">
 <style>*{margin:0;padding:0;box-sizing:border-box}html,body{background:#f6f7f9}@media(prefers-color-scheme:dark){html,body{background:#0a0c0f}}:root[data-theme="dark"] html,:root[data-theme="dark"] body{background:#0a0c0f}:root[data-theme="light"] html,:root[data-theme="light"] body{background:#f6f7f9}</style>
 </head>
-<body>
+<body><aside style="padding:20px;background:#fff1d6;color:#352609;font:16px/1.6 system-ui">Historical stored T4 measurements, not a fresh GPU run. FP16 vs Q4 does not isolate scheduling. Token-counting provenance is incomplete; ratios may inherit bias. Capacity means throughput at an admissible configuration, not per-request goodput. Historical repeatability is not measured. <a href="https://github.com/dilipna/OPsVerse/blob/main/docs/claims.md">Read corrections and evidence</a></aside>
 <style>
   .dash {
     /* light (default) */
@@ -258,7 +258,7 @@
   </div>
 
   <div class="slo">
-    <h2 class="panel-h">Capacity under an SLO — goodput, not throughput</h2>
+    <h2 class="panel-h">Throughput at SLO-admissible configurations</h2>
     <p class="slo-note">A concurrency level counts only if it meets <b>p95 TTFT &le; 1s</b>
       and <b>p95 end-to-end &le; 30s</b>. Tokens generated past that point are served to
       users who have already left, and raw throughput counts them anyway.</p>
@@ -266,7 +266,7 @@
     <p class="note">vLLM holds all three levels. Ollama is serviceable only at
       <b>c=1</b> — it violates the contract at 4 and at 16, where its p95 TTFT reaches
       64.6&nbsp;s. That turns a 13.4&times; throughput headline into a <b>6.3&times;
-      goodput</b> advantage: smaller, and the one that survives a latency contract.
+      admitted throughput</b> ratio: smaller, and the one that survives a latency contract.
       Cost assumes $0.35/hr T4 — an assumption, not a measurement.</p>
   </div>
 
@@ -419,7 +419,7 @@
       row.innerHTML=`<div class="slo-eng"><span class="sw" style="background:${col}"></span>${s.eng}</div>
         <div class="chips">${chips}</div>
         <div class="slo-num"><b style="color:${col}">${s.goodput}</b>
-          <span>goodput @ ${s.best} · ${s.cost}</span></div>`;
+          <span>admitted throughput @ ${s.best} · ${s.cost}</span></div>`;
       mount.appendChild(row);
     });
   }
