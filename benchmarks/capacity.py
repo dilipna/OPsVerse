@@ -142,6 +142,8 @@ def goodput(session: dict[str, Any], slo: Slo) -> tuple[int, float] | None:
 
 
 def cost_per_million_tokens(throughput_tokens_s: float, gpu_cost_per_hour: float) -> float | None:
+    if not math.isfinite(gpu_cost_per_hour) or gpu_cost_per_hour < 0:
+        raise ValueError("GPU hourly cost must be finite and nonnegative")
     if throughput_tokens_s <= 0:
         return None
     tokens_per_hour = throughput_tokens_s * SECONDS_PER_HOUR
