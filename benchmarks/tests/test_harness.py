@@ -45,6 +45,7 @@ def test_summarize_excludes_errors_and_computes_throughput():
         "requests": 3,
         "ok": 2,
         "errors": 1,
+        "ttft_samples": 2,
         "ttft_s": {"p50": 0.15, "p95": 0.195},
         # itl: (1.0-0.10)/99=0.00909 and (2.0-0.20)/199=0.00905 -> both round to 0.0091
         "itl_s": {"p50": 0.0091, "p95": 0.0091},

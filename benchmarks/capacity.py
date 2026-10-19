@@ -3,10 +3,9 @@
 `report.py` answers "what did each engine do?". This answers the three
 questions that actually decide a deployment, using the same committed JSON:
 
-1. **SLO-constrained goodput.** Raw throughput counts tokens the user may have
-   already given up waiting for. Goodput counts only throughput delivered at a
-   concurrency level that still meets a latency SLO. An engine that is fast at
-   a concurrency nobody can be served at has a goodput of zero there.
+1. **SLO-admissible throughput.** Select throughput only at configurations meeting
+   latency, error-rate and successful-sample requirements. This does not measure
+   the fraction of individual requests completing before a deadline.
 
 2. **Cost per million tokens.** Throughput becomes a budget only after it is
    divided by what the hardware costs. The GPU hourly rate is an *assumption*
@@ -18,10 +17,8 @@ questions that actually decide a deployment, using the same committed JSON:
    sweep ends, the maximum has *not* been found and must not be reported as if
    it had.
 
-It also emits a measurement-confidence section: the `n` behind every probe and
-an empirical repeatability bound derived from repeated runs of the same
-configuration. A number without its `n` is an anecdote; this file refuses to
-print one without the other.
+It emits sample counts and descriptive ranges only for fully identified matching
+repeats. Legacy measurements cannot establish run-to-run uncertainty.
 
     python benchmarks/capacity.py --results benchmarks/results \\
         --slo-ttft-p95 1.0 --slo-latency-p95 30 --gpu-cost-per-hour 0.35 \\
@@ -32,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from dataclasses import dataclass
 from itertools import pairwise
@@ -54,15 +52,58 @@ class Slo:
 
     ttft_p95_s: float
     latency_p95_s: float
+    max_error_rate: float = 0.0
+    min_successes: int = 20
+
+    def __post_init__(self) -> None:
+        if any(not math.isfinite(v) or v <= 0 for v in (self.ttft_p95_s, self.latency_p95_s)):
+            raise ValueError("latency bounds must be finite and positive")
+        if not math.isfinite(self.max_error_rate) or not 0 <= self.max_error_rate < 1:
+            raise ValueError("max_error_rate must be in [0, 1)")
+        if type(self.min_successes) is not int or self.min_successes < 20:
+            raise ValueError("min_successes must be an integer >= 20")
 
     def describe(self) -> str:
-        return f"p95 TTFT ≤ {self.ttft_p95_s:g}s and p95 end-to-end ≤ {self.latency_p95_s:g}s"
+        return (
+            f"p95 TTFT ≤ {self.ttft_p95_s:g}s and p95 end-to-end ≤ {self.latency_p95_s:g}s; "
+            f"error rate ≤ {self.max_error_rate:.1%}; ≥{self.min_successes} successes"
+        )
 
     def admits(self, level: dict[str, Any]) -> bool:
-        return (
-            level["ttft_s"]["p95"] <= self.ttft_p95_s
-            and level["latency_s"]["p95"] <= self.latency_p95_s
-        )
+        return not self.reasons(level)
+
+    def reasons(self, level: dict[str, Any]) -> list[str]:
+        """Fail closed on missing, inconsistent, or insufficient evidence."""
+        reasons = []
+        counts = [level.get(k) for k in ("requests", "ok", "errors")]
+        if any(type(n) is not int or n < 0 for n in counts):
+            reasons.append("invalid or missing request counts")
+        else:
+            requests, ok, errors = counts
+            if requests == 0 or ok + errors != requests:
+                reasons.append("inconsistent request counts")
+            if ok < self.min_successes:
+                reasons.append("insufficient successful samples")
+            if requests and errors / requests > self.max_error_rate:
+                reasons.append("error rate exceeds policy")
+            if "ttft_samples" in level and level["ttft_samples"] != ok:
+                reasons.append("missing successful TTFT samples")
+        for field, bound in (("ttft_s", self.ttft_p95_s), ("latency_s", self.latency_p95_s)):
+            metric = level.get(field)
+            value = metric.get("p95") if isinstance(metric, dict) else None
+            if not finite_positive(value):
+                reasons.append(f"invalid or missing {field}.p95")
+            elif value > bound:
+                reasons.append(f"{field}.p95 exceeds policy")
+        if not finite_positive(level.get("throughput_tokens_s")):
+            reasons.append("invalid or missing throughput")
+        if type(level.get("concurrency")) is not int or level["concurrency"] < 1:
+            reasons.append("invalid concurrency")
+        return reasons
+
+
+def finite_positive(value: Any) -> bool:
+    return type(value) in (int, float) and math.isfinite(value) and value > 0
 
 
 def config_label(session: dict[str, Any]) -> str:
@@ -101,6 +142,8 @@ def goodput(session: dict[str, Any], slo: Slo) -> tuple[int, float] | None:
 
 
 def cost_per_million_tokens(throughput_tokens_s: float, gpu_cost_per_hour: float) -> float | None:
+    if not math.isfinite(gpu_cost_per_hour) or gpu_cost_per_hour < 0:
+        raise ValueError("GPU hourly cost must be finite and nonnegative")
     if throughput_tokens_s <= 0:
         return None
     tokens_per_hour = throughput_tokens_s * SECONDS_PER_HOUR
@@ -151,34 +194,52 @@ def saturation_verdict(session: dict[str, Any]) -> str:
     )
 
 
+IDENTITY_FIELDS = (
+    "model",
+    "model_revision",
+    "engine",
+    "engine_version",
+    "quant",
+    "prefix_caching",
+    "gpu",
+    "gpu_memory",
+    "workload_sha256",
+    "output_policy",
+    "protocol_revision",
+    "hardware_revision",
+    "server_config_sha256",
+)
+
+
 def repeatability(sessions: list[dict[str, Any]]) -> list[str]:
-    """Spread between independent runs of the same engine at the same concurrency.
+    """Descriptive ranges for distinct, fully identified, identical-condition runs.
 
-    Different configurations of one engine still share a decode path, so where
-    two runs measure the same concurrency they bound run-to-run noise — which
-    is the only honest basis for saying whether a single-run delta is real.
+    Unknown identities are not evidence of matching conditions. Legacy sessions
+    remain useful measurements but cannot establish repeatability.
     """
-    by_key: dict[tuple[str, int], list[tuple[str, dict[str, Any]]]] = {}
+    groups: dict[str, dict[str, float]] = {}
+    labels: dict[str, tuple[str, int]] = {}
     for session in sessions:
-        engine = session["meta"]["engine"]
+        meta = session["meta"]
+        if any(meta.get(field) is None for field in IDENTITY_FIELDS) or not meta.get("run_id"):
+            continue
         for level in sorted_levels(session):
-            by_key.setdefault((engine, level["concurrency"]), []).append(
-                (config_label(session), level)
-            )
-
+            if not Slo(float("1e12"), float("1e12")).admits(level):
+                continue
+            identity = {field: meta[field] for field in IDENTITY_FIELDS}
+            identity.update(concurrency=level["concurrency"], requests=level["requests"])
+            key = json.dumps(identity, sort_keys=True)
+            groups.setdefault(key, {})[meta["run_id"]] = level["throughput_tokens_s"]
+            labels[key] = (config_label(session), level["concurrency"])
     rows = []
-    for (engine, conc), entries in sorted(by_key.items()):
-        if len(entries) < 2:
+    for key, runs in sorted(groups.items()):
+        if len(runs) < 2:
             continue
-        values = [level["throughput_tokens_s"] for _, level in entries]
-        lo, hi = min(values), max(values)
-        if lo <= 0:
-            continue
-        spread = (hi - lo) / lo
-        labels = ", ".join(f"`{label}`" for label, _ in entries)
+        lo, hi = min(runs.values()), max(runs.values())
+        label, conc = labels[key]
         rows.append(
-            f"| {engine} | c={conc} | {labels} | "
-            f"{lo:.2f} - {hi:.2f} tok/s | **+/-{spread * 100:.0f}%** |"
+            f"| {label} | c={conc} | n={len(runs)} distinct runs | "
+            f"{lo:.2f} - {hi:.2f} tok/s | relative range {(hi - lo) / lo:.1%} |"
         )
     return rows
 
@@ -229,14 +290,13 @@ def render(sessions: list[dict[str, Any]], slo: Slo, gpu_cost_per_hour: float) -
         f"- **Assumed GPU cost:** ${gpu_cost_per_hour:.2f}/hour "
         "*(assumption, not a measurement — pass `--gpu-cost-per-hour` to change it)*",
         "",
-        "## 1. SLO-constrained goodput",
+        "## 1. SLO-admissible throughput",
         "",
-        "Raw throughput counts tokens generated for requests the user may have already",
-        "abandoned. **Goodput** counts only throughput delivered at a concurrency that",
-        "still meets the SLO. This is the number that decides how many users one GPU",
-        "actually serves.",
+        "This selects throughput at configurations meeting latency, error-rate and sample",
+        "requirements. It is not per-request deadline goodput or a production capacity",
+        "guarantee. Historical summaries omit per-request deadline outcomes.",
         "",
-        "| Config | Max serviceable concurrency | Goodput | Cost / 1M tokens "
+        "| Config | Best-throughput concurrency | Admitted throughput | Cost / 1M tokens "
         "| Levels passing SLO |",
         "|---|---|---|---|---|",
     ]
@@ -276,7 +336,7 @@ def render(sessions: list[dict[str, Any]], slo: Slo, gpu_cost_per_hour: float) -
         best_cost = cost_per_million_tokens(best_tp, gpu_cost_per_hour)
         worst_cost = cost_per_million_tokens(worst_tp, gpu_cost_per_hour)
         out += [
-            f"**`{best_label}` delivers {best_tp / worst_tp:.1f}x the goodput of "
+            f"**`{best_label}` delivers {best_tp / worst_tp:.1f}x the admitted throughput of "
             f"`{worst_label}` under this SLO** — and at ${best_cost:.2f} vs "
             f"${worst_cost:.2f} per million tokens, the same ratio in cost.",
             "",
@@ -327,15 +387,32 @@ def render(sessions: list[dict[str, Any]], slo: Slo, gpu_cost_per_hour: float) -
         out += [
             "### Run-to-run repeatability",
             "",
-            "Where two independent sessions measured the same engine at the same",
-            "concurrency, their spread bounds the noise floor. **A single-run difference",
-            "smaller than this spread is not evidence of anything.**",
+            "Only complete matching identities and distinct run IDs qualify. Ranges describe",
+            "the observed runs; they are not confidence intervals or noise bounds.",
             "",
             "| Engine | Concurrency | Sessions | Throughput range | Spread |",
             "|---|---|---|---|---|",
             *repeat_rows,
             "",
         ]
+
+    if not repeat_rows:
+        out += ["**Repeatability not measured:** no fully identified matching repeats.", ""]
+    out += [
+        "## Admission decisions",
+        "",
+        "| Config | Concurrency | Decision | Reasons |",
+        "|---|---|---|---|",
+    ]
+    for session in sessions:
+        for level in sorted_levels(session):
+            reasons = slo.reasons(level)
+            out.append(
+                f"| {config_label(session)} | {level['concurrency']} | "
+                f"{'REJECT' if reasons else 'ADMIT'} | "
+                f"{', '.join(reasons) or 'all requirements met'} |"
+            )
+    out.append("")
 
     out += [
         "## What this analysis does not establish",
@@ -345,9 +422,11 @@ def render(sessions: list[dict[str, Any]], slo: Slo, gpu_cost_per_hour: float) -
         "- **One GPU, one model, one prompt shape.** Nothing here generalizes to a",
         "  different sequence-length mix without re-measurement.",
         "- **Cost is arithmetic on an assumed hourly rate**, not an observed bill.",
-        "- **Output tokens are approximated by streamed-chunk count** (see `harness.py`),",
-        "  so absolute tok/s carries that approximation; ratios between engines do not,",
-        "  because the approximation is identical on both sides.",
+        "- Token counts prefer server usage and fall back to content chunks. Historical",
+        "  summaries do not record which was used. Cross-engine ratios may inherit",
+        "  different token-counting bias; they do not isolate engine scheduling.",
+        "- Historical summaries do not pin model revisions or measurement code. They",
+        "  are stored observations, not newly rerun GPU evidence.",
         "",
     ]
     return "\n".join(out) + "\n"
@@ -372,6 +451,8 @@ def main() -> None:
     parser.add_argument("--results", type=Path, default=Path("benchmarks/results"))
     parser.add_argument("--slo-ttft-p95", type=float, default=1.0)
     parser.add_argument("--slo-latency-p95", type=float, default=30.0)
+    parser.add_argument("--max-error-rate", type=float, default=0.0)
+    parser.add_argument("--min-successes", type=int, default=20)
     parser.add_argument("--gpu-cost-per-hour", type=float, default=0.35)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
@@ -379,7 +460,7 @@ def main() -> None:
     sessions = load_sessions(args.results)
     markdown = render(
         sessions,
-        Slo(ttft_p95_s=args.slo_ttft_p95, latency_p95_s=args.slo_latency_p95),
+        Slo(args.slo_ttft_p95, args.slo_latency_p95, args.max_error_rate, args.min_successes),
         args.gpu_cost_per_hour,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)

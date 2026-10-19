@@ -135,8 +135,7 @@ def test_repeatability_bounds_noise_across_two_runs():
         session("vllm", "fp16-noprefix", [level(1, tput=21.32, ttft_p95=0.10, lat_p95=13.0)]),
     ]
     rows = capacity.repeatability(sessions)
-    assert len(rows) == 1
-    assert "+/-22%" in rows[0]
+    assert rows == [], "cache settings and unknown revisions cannot establish repeats"
 
 
 def test_repeatability_silent_without_a_repeat():
@@ -187,7 +186,7 @@ def test_control_runs_are_excluded_from_the_headline_comparison():
     sessions[1]["meta"]["notes"] = "CONTROL: prefix caching disabled"
     text = capacity.render(sessions, STRICT, 0.35)
     # 233.18 / 37.22 = 6.3x against ollama, NOT 10.9x against the control.
-    assert "6.3x the goodput" in text
+    assert "6.3x the admitted throughput" in text
     assert "10.9x" not in text
     assert "*(control)*" in text
 
