@@ -27,13 +27,21 @@ jobs:
         working-directory: opslm-demo
       - name: Rerun actual browser retrieval and both baselines
         run: node opslm-demo/scripts/evaluate-runbooks.mjs --out docs/reports/runbook-ci.json
+      - name: Check fresh scenario overlap against committed training inputs
+        run: uv run python -m opsverse_evals.troubleshooting_contamination --check
+      - name: Check displayed evidence provenance
+        run: node opslm-demo/scripts/build-study.mjs --check
+      - name: Exercise frozen scenarios through the actual HTTP handler without a model
+        run: node opslm-demo/scripts/model-study.mjs --label excerpts --out docs/reports/troubleshooting-ci.json
       - run: npm run build
         working-directory: opslm-demo
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: runbook-evaluation
-          path: docs/reports/runbook-ci.json
+          path: |
+            docs/reports/runbook-ci.json
+            docs/reports/troubleshooting-ci.json
   lint-and-test:
     runs-on: ubuntu-latest
     steps:

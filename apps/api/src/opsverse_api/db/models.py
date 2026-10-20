@@ -119,7 +119,7 @@ class RequestLedger(Base):
     id: Mapped[uuid.UUID] = mapped_column(sa.Uuid, primary_key=True, default=uuid.uuid4)
     route: Mapped[str] = mapped_column(sa.String(64))
     model: Mapped[str | None] = mapped_column(sa.String(128), default=None)
-    status: Mapped[str] = mapped_column(sa.String(16), default="ok")  # ok|degraded|error
+    status: Mapped[str] = mapped_column(sa.String(16), default="ok")  # ok|degraded|abstained|error
     prompt_tokens: Mapped[int | None] = mapped_column(sa.Integer, default=None)
     completion_tokens: Mapped[int | None] = mapped_column(sa.Integer, default=None)
     cost_usd: Mapped[float | None] = mapped_column(sa.Numeric(12, 8), default=None)

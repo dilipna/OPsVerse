@@ -131,7 +131,7 @@ async def test_rerank_failure_degrades_not_fails():
     assert done.degraded == ["rerank_skipped"]
 
 
-async def test_retrieval_failure_answers_ungrounded():
+async def test_retrieval_failure_abstains_without_model_call():
     service = ChatService(
         FakeRetriever(fail_all=True), llm := FakeLLM(["general answer"]), rerank=True
     )
@@ -142,11 +142,20 @@ async def test_retrieval_failure_answers_ungrounded():
     assert sources.sources == []
     assert sources.degraded == ["rerank_skipped", "retrieval_skipped"]
 
-    assert llm.messages is not None
-    assert "knowledge base is unreachable" in llm.messages[0]["content"]
+    assert llm.messages is None
     done = events[-1]
     assert isinstance(done, ChatDone)
     assert done.cited == []
+    assert done.status == "abstained"
+    assert done.model == "none"
+
+
+async def test_empty_retrieval_abstains_without_model_call():
+    llm = FakeLLM(["an unsupported answer"])
+    events = await collect(ChatService(FakeRetriever(chunks=[]), llm))
+    assert llm.messages is None
+    assert isinstance(events[-1], ChatDone)
+    assert events[-1].status == "abstained"
 
 
 async def test_image_flows_into_retrieval_and_prompt():

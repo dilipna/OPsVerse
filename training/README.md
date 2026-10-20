@@ -14,13 +14,15 @@ the trained model is published to the HF Hub.
 | Decontamination vs frozen eval sets | ✅ enforced — `ContaminationGuard`, per ADR-0007's sibling policy |
 | SFT dataset prep (train/val split) | ✅ runnable — `scripts/prepare_sft.py`, verified locally |
 | QLoRA training script | ✅ written, pinned, resumable — `scripts/train_opslm_qlora.py` |
-| **Actual training run on Colab** | ⏳ **not yet run** — needs a Colab session + HF token |
-| Before/after eval (base vs OpsLM) | ⏳ blocked on the training run |
-| GGUF export + HF model card | ⏳ blocked on the training run |
+| Actual training run on Colab | Recorded July 22, 2026; see ADR-0009 and model registry |
+| Before/after eval (base vs OpsLM) | Outstanding; inference deferred by project owner |
+| GGUF export + HF model card | Published at `dhf1234/OpsLM-v1`; pinned in troubleshooting-v1/artifacts.json |
 
-Nothing here claims a trained model exists. The eval harness (Phase 4) is the
-gate the trained model must pass, and it existed first — that ordering is the
-point.
+The recorded training consumed 534 train / 59 validation examples, not the later
+838-example generator output. A published artifact does not establish a quality
+improvement. The new frozen troubleshooting protocol has no base/SFT inference
+results yet; do not claim a training gain. See [ADR-0009](../docs/adr/0009-qwen3-4b-qlora-for-opslm.md)
+and [model registry](../docs/model-registry.md) for historical provenance.
 
 ## Pipeline
 

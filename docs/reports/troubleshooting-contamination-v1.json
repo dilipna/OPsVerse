@@ -1,0 +1,192 @@
+{
+  "dataset_sha256": "27b53251fea9ad1be80919f920e81295ce64a4560e6c81e77ca5e85217764ef9",
+  "sft_sha256": {
+    "train": "b018603441b03018ee8e7c7fafb8382358ae4bae57708b6eba68136deae146c1",
+    "val": "b202bac170f23c22b069f7570492f9f7bf53185c96ac212ec27673b638c51986"
+  },
+  "sft_inputs": 593,
+  "cases": [
+    {
+      "id": "d1",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "d2",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "d3",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "d4",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "d5",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "d6",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h01",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h02",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h03",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h04",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h05",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h06",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h07",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h08",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h09",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h10",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h11",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h12",
+      "exact": false,
+      "max_shingle_jaccard": 0.047619047619047616,
+      "flagged": false
+    },
+    {
+      "id": "h13",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h14",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h15",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h16",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h17",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h18",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h19",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h20",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h21",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h22",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h23",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    },
+    {
+      "id": "h24",
+      "exact": false,
+      "max_shingle_jaccard": 0.0,
+      "flagged": false
+    }
+  ],
+  "flagged": 0,
+  "limitations": "Exact/lexical overlap only. Semantic and pretraining overlap unknown. No cases silently excluded; source documentation overlap is expected."
+}
