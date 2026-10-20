@@ -36,3 +36,7 @@ docs/reports/.chunking-ablation-cache/
 # generated labeling instrument (regenerate with `judge_validation sample`)
 evalsets/judge-validation-v1-labeler.html
 evalsets/judge-validation-v1-human-labeler.html
+
+# Ephemeral CI reruns (release evidence remains tracked)
+docs/reports/runbook-ci.json
+docs/reports/troubleshooting-ci.json

@@ -23,3 +23,17 @@ Old findings were revalidated against unchanged HEAD `548308ae70b35f14608f6d8177
 The machine-readable report records revisions, hashes, code commit, dirty status and
 exclusions. Fresh CI artifacts are the authoritative clean-commit rerun. A green stored
 report assertion is not evidence of a new experiment. No adoption or production impact is claimed.
+
+## Incident workspace release
+
+Implemented: browser-local diagnostic intake, eight recognized status signatures,
+source passages, best-effort credential redaction, JSON brief export, and a recruiter
+case study. Evidence: `opslm-demo/app/troubleshoot/page.tsx` and shared
+`lib/troubleshoot.mjs`. Optional generation has schema/source/quote/completion and
+command-form checks exercised through the actual HTTP handler tests. Python RAG
+retrieval failures and empty results now abstain before model invocation.
+
+Not established: generated-answer quality, model-vs-model gains, calibrated
+answerability, comprehensive secret detection, production SLOs or external-user
+impact. Models were not loaded for this release. Fresh scenario freeze and lexical
+training-overlap checks are preparation, not evidence of model improvement.

@@ -73,7 +73,7 @@ export default function Page() {
   }
 
   return (
-    <div className="wrap"><p><a href="/">← Runbook navigator</a> · Sample model console; not retrieval-grounded</p>
+    <div className="wrap"><p><a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded</p>
       <div className="topbar">
         <div className="brand">
           <b>OpsLM · sample console</b>

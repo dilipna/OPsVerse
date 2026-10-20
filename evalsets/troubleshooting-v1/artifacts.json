@@ -1,0 +1,23 @@
+{
+  "models": [
+    {
+      "label": "base",
+      "repository": "mradermacher/Qwen3-4B-Base-GGUF",
+      "revision": "ce314c106205af8647443c3e06009e349ef1eec6",
+      "file": "Qwen3-4B-Base.Q4_K_M.gguf",
+      "sha256": "a7eb1d92eaf34e116f8b522aeeaf4072e66d69b5b10676e0cb7cd9e11889bed6",
+      "bytes": 2497280736,
+      "local_file": "base.gguf"
+    },
+    {
+      "label": "sft",
+      "repository": "dhf1234/OpsLM-v1",
+      "revision": "7951bd9f9b27381a4b4d6827ecd0bc4d435aac29",
+      "file": "qwen3-4b-base.Q4_K_M.gguf",
+      "sha256": "7769655984f43b105d090f5cb96e7e5d5cb7d6f791d62f961dadea8f5e927aeb",
+      "bytes": 2497280928,
+      "local_file": "sft.gguf"
+    }
+  ],
+  "scope": "Served artifact comparison. Independent GGUF conversions are a confound; no causal SFT effect isolated."
+}

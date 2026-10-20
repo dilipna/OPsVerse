@@ -1,8 +1,11 @@
 # Resume evidence and interview notes
 
-- Built a browser-based Kubernetes runbook navigator over 180 passages from six
-  revision-pinned official documents; connected raw-document ingestion to the shipped
-  retrieval path and added reproducible CI checks.
+- Built and deployed a Kubernetes investigation workspace that turns diagnostic text
+  into source-linked incident briefs over 180 passages from six revision-pinned
+  official documents; connected ingestion, browser retrieval, export and CI checks.
+- Hardened optional model output handling with source/quote validation and restricted
+  command suggestions; added failure-path tests and made the RAG service abstain
+  without invoking a model when retrieval is unavailable or empty.
 - Compared term overlap and BM25 on 16 synthetic held-out questions; shipped the simpler
   baseline after 15/16 document hit@1 and 16/16 hit@3, documenting paraphrase failures
   and coarse-label limitations.
@@ -26,3 +29,8 @@ Interview talking points:
    hybrid retrieval on paraphrases before training another model.
 6. Unknowns: base-versus-SFT quality, completed DPO, generated-answer quality, external-user
    usefulness and production reliability. No fabricated adoption or impact.
+
+Demo sequence: open the workspace, choose Image won't pull, find evidence, inspect
+the pinned source, export the brief, then show /engineering and /study. Explain
+why the public path works without inference. Model comparisons remain deferred;
+structural quote validation is not an answer-quality guarantee.

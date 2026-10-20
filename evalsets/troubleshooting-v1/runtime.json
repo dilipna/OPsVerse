@@ -1,0 +1,6 @@
+{
+  "tag": "b11748",
+  "asset": "llama-b11748-bin-win-cpu-x64.zip",
+  "sha256": "sha256:59083a1df768be176d851ddbab6bbde2d8a67a1ea7f1d42f770753d13dc74f60",
+  "source": "https://github.com/ggml-org/llama.cpp/releases/tag/b11748"
+}
