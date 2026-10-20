@@ -33,10 +33,13 @@ Failures degrade quality; they do not 500. Each step down is recorded in the
 |---|---|---|---|
 | 1 | happy path | hybrid retrieval + rerank → grounded, cited answer | — |
 | 2 | rerank fails or retrieval times out | retry hybrid retrieval without rerank | `rerank_skipped` |
-| 3 | retrieval fails entirely (Qdrant down, embedder broken) | answer from the LLM alone; the system prompt forces a visible "answering from general knowledge" disclaimer and no citations are emitted | `retrieval_skipped` |
+| 3 | retrieval fails entirely (Qdrant down, embedder broken) | deterministic abstention, no model call, no citations, done status `abstained` | `retrieval_skipped` |
 | 4 | LLM fails (all models in the fallback chain, or mid-stream) | `error` SSE event; ledger row with `status=error` | — |
 
 Provider fallback (`chat_fallback_models`, e.g. Groq) happens inside step 4's
 "all models" clause: the next model is tried only if the current one produced
 no tokens yet — once tokens have streamed, switching providers would splice
 two answers, so we fail instead (see ADR-0004).
+
+An empty successful retrieval also abstains before generation. These SSE semantics
+are separate from the browser workspace and its optional structured JSON endpoint.

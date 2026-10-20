@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OpsVerse — Kubernetes runbook navigator",
+  title: "OpsVerse — Kubernetes investigation workspace",
   description:
-    "Search pinned Kubernetes documentation in your browser. Inspect source excerpts, reproducible retrieval checks, and bounded serving research.",
+    "Turn Kubernetes symptoms into an inspectable incident brief. Find official source passages, review evidence, and explore the engineering behind OpsVerse.",
   icons: {
     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080808'/%3E%3Ctext x='4' y='24' font-family='monospace' font-size='22' fill='%23ff2b2b'%3E%3E_%3C/text%3E%3C/svg%3E",
   },
