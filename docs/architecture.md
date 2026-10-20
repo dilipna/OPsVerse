@@ -8,16 +8,26 @@ it. This document is the map; the [ADRs](adr/) hold the *why* for each decision.
 > **The serving layer has its own technical design doc:**
 > [inference-design.md](inference-design.md) — inference flow (prefill/decode,
 > KV cache, prefix caching, guided decoding), scaling (continuous batching,
-> measured 13.4×), failure handling, and tradeoffs. Numbers in
+> historical engine/precision-confounded comparisons), failure handling, and tradeoffs. Numbers in
 > [inference-benchmark-v1](reports/inference-benchmark-v1.md).
 
-## Request lifecycle (a chat query)
+## Public product lifecycle
+
+The deployed Next.js app (`opslm-demo`) provides diagnostic intake, browser-local
+signal recognition and passage retrieval, pinned sources, and JSON brief export.
+See [troubleshooting.md](troubleshooting.md) for the shared implementation contract,
+optional model boundary and frozen scenario evaluation. `/engineering` and `/study`
+explain decisions and evidence. This public workflow does not require the research
+stack below. A missing/failed retrieval in that stack now abstains before generation,
+and the request ledger records `abstained` rather than a successful answer.
+
+## Request lifecycle (research-stack chat query)
 
 ```
 client ─POST /v1/chat─► API
    │  1. security: scan_injection(query) → flag in request_ledger (not blocked)
    │  2. retrieval: embed query (BGE dense + BM25 sparse) → Qdrant RRF fusion → top-k
-   │       degradation ladder: hybrid+rerank → hybrid → no-retrieval → error
+   │       degradation ladder: hybrid+rerank → hybrid → abstain without generation
    │  3. prompt: numbered context blocks + grounded system prompt
    │  4. gateway: exact-match Redis cache? → hit: replay (free) │ miss: budget check
    │  5. generate: OpenAI-compatible client → serving layer (vLLM/Ollama serving

@@ -157,3 +157,22 @@ async def test_chat_error_recorded(env):
         row = (await session.execute(sa.select(RequestLedger))).scalar_one()
     assert row.status == "error"
     assert row.model is None
+
+
+async def test_abstention_is_recorded_as_abstention(env):
+    class AbstainingService:
+        async def stream_chat(self, *args, **kwargs):
+            yield ChatSources(sources=[])
+            yield ChatDelta(text="No supporting passages.")
+            yield ChatDone(model="none", status="abstained", cited=[])
+
+    env.app.dependency_overrides[deps.get_chat_service] = lambda: AbstainingService()
+    env.app.state.db_sessionmaker = env.sessionmaker
+    async with AsyncClient(transport=ASGITransport(app=env.app), base_url="http://t") as client:
+        resp = await client.post("/v1/chat", json={"query": "unsupported", "stream": False})
+    assert resp.json()["done"]["status"] == "abstained"
+    async with env.sessionmaker() as session:
+        row = (await session.execute(sa.select(RequestLedger))).scalar_one()
+    assert row.status == "abstained"
+    assert row.model == "none"
+    assert row.completion_tokens is None
