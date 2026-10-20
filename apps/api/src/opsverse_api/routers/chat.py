@@ -41,6 +41,8 @@ async def _write_ledger(
     """Best-effort ledger row; never fails the response."""
     if error is not None:
         status = "error"
+    elif done is not None and done.status == "abstained":
+        status = "abstained"
     elif done is not None and done.degraded:
         status = "degraded"
     else:

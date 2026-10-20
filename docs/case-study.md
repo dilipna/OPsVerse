@@ -12,8 +12,10 @@ a relative range as symmetric uncertainty. Matching now requires model revision,
 version, precision, cache policy, hardware, workload, output policy, protocol, concurrency,
 request count and distinct run IDs. Missing historical metadata means uncertainty is unmeasured.
 
-For the public workflow, a small excerpt navigator earned its complexity better than an
-always-on generator. Six attributed official Kubernetes source files pass through the real
+For the public workflow, an incident workspace connects sanitized diagnostic text
+to recognized signals, pinned source passages and an exportable investigation brief.
+Three synthetic incidents make onboarding immediate; an engineering page explains
+the implemented system and its decisions. The default path needs no model. Six attributed official Kubernetes source files pass through the real
 ingestion pipeline; the browser searches 180 passages and displays pinned source links.
 CI starts at raw input and exercises the exact shipped retrieval function.
 
