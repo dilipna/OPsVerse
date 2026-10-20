@@ -69,3 +69,13 @@ was flagged. Semantic and pretraining overlap are unknown. Reference phrase cove
 in returned passages is not generated-answer accuracy; excerpt mode cannot answer
 questions or satisfy answer-status labels. No base/SFT improvement is reported.
 The independent pinned GGUF conversions would confound a causal training claim.
+
+## Recorded excerpt-only run
+
+[Per-case report](reports/troubleshooting-excerpts-v1.json): clean commit
+`2f88668fb9b0eeb469ff6d70e6b2c47899aa0839` completed all 24 held-out requests with HTTP 200 and
+zero generated answers. Returned passages covered 31 of 32 reference phrase groups;
+this measures lexical presence, not whether an answer is correct. Three cases
+abstained with no passages. A Redis out-of-scope scenario still retrieved tangential
+Kubernetes material: nonempty retrieval must not be read as answerability. No cases
+were removed or tuned after this run.
