@@ -1,19 +1,25 @@
 # OpsVerse
 
-**Find a Kubernetes runbook passage and inspect its source before changing a cluster.**
+**Turn Kubernetes symptoms into an inspectable investigation brief.**
 
-[Open the navigator](https://ops-verse.vercel.app/) · [Claims ledger](docs/claims.md) ·
-[Engineering case study](docs/case-study.md) · [Resume evidence](docs/resume-and-interview.md)
+[Open the workspace](https://ops-verse.vercel.app/) | [Engineering case study](https://ops-verse.vercel.app/engineering) | [Evaluation](https://ops-verse.vercel.app/study) | [Resume evidence](docs/resume-and-interview.md)
 
-The public tool searches six pinned official Kubernetes documents entirely in your
-browser. It returns exact excerpts, with links to both the pinned revision and current
-documentation. No account, model download, paid API, or cluster access is needed.
-It does not generate answers or execute commands. The search code does not upload
-questions; normal hosting access logs still apply.
+Describe a symptom, paste sanitized Pod events, and inspect pinned official source
+passages alongside recognized status signals. Export the redacted investigation as
+JSON. Three synthetic examples make the workflow usable immediately. No account,
+model download, paid API, or cluster access is needed for the public workflow.
 
-Try `readiness probe failure`, `ImagePullBackOff image pull policy`, or
-`deployment rollback revision`. `quasar marmalade` shows an explicit empty state.
-Editing a query clears old results. Loading, retry and input-error states are explicit.
+The default analysis runs in the browser over six official documents / 180 passages.
+It does not upload your diagnostic text or execute commands; normal hosting access
+logs still apply. Credential-pattern redaction is best-effort: sanitize input first.
+A separate optional model path validates JSON, source IDs, exact quotes, output
+completion, and permitted read-only command forms. Those checks do not prove factual
+support. No model endpoint is configured on the public deployment.
+
+Explore [all runbooks](https://ops-verse.vercel.app/runbooks),
+[architecture and decisions](https://ops-verse.vercel.app/engineering), or
+[the implementation contract](docs/troubleshooting.md). The original sample model
+console remains at `/model-demo`; it is separate from this evidence workflow.
 
 ## What changed
 
