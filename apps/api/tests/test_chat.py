@@ -164,7 +164,7 @@ async def test_abstention_is_recorded_as_abstention(env):
         async def stream_chat(self, *args, **kwargs):
             yield ChatSources(sources=[])
             yield ChatDelta(text="No supporting passages.")
-            yield ChatDone(model="none", status="abstained", cited=[])
+            yield ChatDone(model="none", status="abstained", cited=[], latency_ms=1.0)
 
     env.app.dependency_overrides[deps.get_chat_service] = lambda: AbstainingService()
     env.app.state.db_sessionmaker = env.sessionmaker
