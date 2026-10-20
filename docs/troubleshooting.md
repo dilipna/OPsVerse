@@ -79,3 +79,9 @@ this measures lexical presence, not whether an answer is correct. Three cases
 abstained with no passages. A Redis out-of-scope scenario still retrieved tangential
 Kubernetes material: nonempty retrieval must not be read as answerability. No cases
 were removed or tuned after this run.
+
+The memory onboarding example asks specifically how Kubernetes enforces container
+memory limits. During production mobile QA, its earlier vague question ranked a
+deployment-rollout passage first. The more specific example ranks the resource-limit
+enforcement section first. This is an onboarding correction, not a retrieval algorithm
+change or a held-out quality gain; vague user questions can still match tangential text.

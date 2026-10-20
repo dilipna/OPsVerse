@@ -7,7 +7,7 @@ import type {Corpus} from "../../lib/runbooks.mjs";
 const EXAMPLES=[
   {title:"Image won't pull",issue:"Why has this container not started, and what should I inspect?",diagnostics:"Name: web\nNamespace: shop\nState: Waiting\nReason: ImagePullBackOff\nFailed to pull image registry.example/web:missing"},
   {title:"Readiness failed",issue:"The process is running, but the Pod receives no traffic. What does this signal mean?",diagnostics:"Name: api\nNamespace: shop\nWarning Unhealthy Readiness probe failed: HTTP probe failed with statuscode: 503"},
-  {title:"Memory termination",issue:"What can I infer from this termination, and what evidence is still missing?",diagnostics:"Name: worker\nNamespace: batch\nLast State: Terminated\nReason: OOMKilled\nExit Code: 137\nNo memory-usage profile provided"},
+  {title:"Memory termination",issue:"How does Kubernetes enforce container memory limits?",diagnostics:"Name: worker\nNamespace: batch\nLast State: Terminated\nReason: OOMKilled\nExit Code: 137\nNo memory-usage profile provided"},
 ];
 
 export default function TroubleshootPage(){
