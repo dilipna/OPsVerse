@@ -12,7 +12,9 @@ try{
   const top=execFileSync("git",["rev-parse","--show-toplevel"],{cwd:repo,encoding:"utf8",stdio:["ignore","pipe","ignore"]}).trim();
   if(path.resolve(top).toLowerCase()===repo.toLowerCase()){
     gitCommit=execFileSync("git",["rev-parse","HEAD"],{cwd:repo,encoding:"utf8"}).trim();
-    const status=execFileSync("git",["status","--porcelain"],{cwd:repo,encoding:"utf8"}).trim();
+    // Hosting may generate untracked configuration. Report it separately;
+    // source cleanliness means tracked source, never silently modified files.
+    const status=execFileSync("git",["status","--porcelain","--untracked-files=no"],{cwd:repo,encoding:"utf8"}).trim();
     dirty=Boolean(status);
     if(dirty)console.log(JSON.stringify({build_changed_paths:status.split("\n")}));
   }
@@ -35,6 +37,6 @@ const hash=value=>crypto.createHash("sha256").update(value).digest("hex");
 const sources=Object.fromEntries(files.sort().map(file=>[file,hash(fs.readFileSync(path.join(web,file),"utf8").replace(/\r\n/g,"\n"))]));
 const data={schema:1,source_commit:sourceCommit,git_commit:gitCommit,dirty_source:dirty,
   created_at:new Date().toISOString(),source_files:sources,source_files_sha256:hash(JSON.stringify(sources)),
-  scope:"Build identity and normalized source hashes; not model health, answer accuracy or a CI certification."};
+  scope:"Build identity and normalized source hashes. dirty_source covers tracked files; hosting-generated untracked files are excluded. Not model health, answer accuracy or a CI certification."};
 fs.writeFileSync(path.join(web,"public/release.json"),JSON.stringify(data,null,2)+"\n");
 console.log(JSON.stringify({source_commit:sourceCommit,dirty_source:dirty,source_files_sha256:data.source_files_sha256}));
