@@ -73,7 +73,7 @@ export default function Page() {
   }
 
   return (
-    <div className="wrap"><p><a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded</p>
+    <main className="wrap"><p><a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded</p>
       <div className="topbar">
         <div className="brand">
           <b>OpsLM · sample console</b>
@@ -287,6 +287,6 @@ export default function Page() {
           </a>
         </span>
       </footer>
-    </div>
+    </main>
   );
 }

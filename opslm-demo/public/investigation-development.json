@@ -1,0 +1,576 @@
+{
+  "baseline": {
+    "created_at": "2026-10-23T23:30:26.288Z",
+    "commit": "c385cc5f867834dc63dc93daa98d323dc98c48fe",
+    "dirty": true,
+    "dataset_sha256": "3a7dae6ece985ac73091d5cf342d07ccdbe7939f59077541fd653097aebf55c6",
+    "implementation_sha256": "7763f6f6b599d4b14913b9b14bc2b309030eff89f5651c5a87c15619d109707d",
+    "limitations": "Development-only document-family coverage. Not held-out answer quality, diagnosis correctness, or calibrated answerability. Synthetic cases authored during the flagship redevelopment after source inspection; labels reflect the six-document corpus scope.",
+    "summary": {
+      "cases": 14,
+      "document_targets": 20,
+      "covered": 14,
+      "complete": 8,
+      "empty_correct": 2,
+      "budget_violations": 0
+    },
+    "observations": [
+      {
+        "id": "image",
+        "expected_documents": [
+          "images"
+        ],
+        "returned": [
+          "images:10",
+          "debug-pods:4",
+          "images:17"
+        ],
+        "covered": [
+          "images"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 1675,
+        "within_budget": true
+      },
+      {
+        "id": "memory",
+        "expected_documents": [
+          "resources"
+        ],
+        "returned": [
+          "deployments:28",
+          "resources:0",
+          "resources:10"
+        ],
+        "covered": [
+          "resources"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4041,
+        "within_budget": true
+      },
+      {
+        "id": "readiness",
+        "expected_documents": [
+          "probes"
+        ],
+        "returned": [
+          "probes:13",
+          "probes:8",
+          "debug-services:16"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4878,
+        "within_budget": true
+      },
+      {
+        "id": "liveness",
+        "expected_documents": [
+          "probes"
+        ],
+        "returned": [
+          "probes:12",
+          "probes:6",
+          "probes:13"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3667,
+        "within_budget": true
+      },
+      {
+        "id": "startup",
+        "expected_documents": [
+          "probes"
+        ],
+        "returned": [
+          "probes:13",
+          "probes:14",
+          "probes:9"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3239,
+        "within_budget": true
+      },
+      {
+        "id": "scheduling",
+        "expected_documents": [
+          "resources"
+        ],
+        "returned": [
+          "debug-pods:3",
+          "resources:29",
+          "resources:10"
+        ],
+        "covered": [
+          "resources"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3121,
+        "within_budget": true
+      },
+      {
+        "id": "rollout",
+        "expected_documents": [
+          "deployments"
+        ],
+        "returned": [
+          "deployments:34",
+          "deployments:38",
+          "deployments:39"
+        ],
+        "covered": [
+          "deployments"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3035,
+        "within_budget": true
+      },
+      {
+        "id": "memory-readiness",
+        "expected_documents": [
+          "resources",
+          "probes"
+        ],
+        "returned": [
+          "deployments:28",
+          "probes:13",
+          "probes:8"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [
+          "resources"
+        ],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 5020,
+        "within_budget": true
+      },
+      {
+        "id": "image-scheduling",
+        "expected_documents": [
+          "images",
+          "resources"
+        ],
+        "returned": [
+          "resources:29",
+          "debug-pods:3",
+          "images:10"
+        ],
+        "covered": [
+          "images",
+          "resources"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3164,
+        "within_budget": true
+      },
+      {
+        "id": "rollout-readiness",
+        "expected_documents": [
+          "deployments",
+          "probes"
+        ],
+        "returned": [
+          "deployments:34",
+          "deployments:38",
+          "deployments:39"
+        ],
+        "covered": [
+          "deployments"
+        ],
+        "missing": [
+          "probes"
+        ],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3035,
+        "within_budget": true
+      },
+      {
+        "id": "three-families",
+        "expected_documents": [
+          "images",
+          "resources",
+          "probes"
+        ],
+        "returned": [
+          "deployments:28",
+          "images:10",
+          "resources:29"
+        ],
+        "covered": [
+          "images",
+          "resources"
+        ],
+        "missing": [
+          "probes"
+        ],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4272,
+        "within_budget": true
+      },
+      {
+        "id": "four-families-budget",
+        "expected_documents": [
+          "images",
+          "resources",
+          "probes",
+          "deployments"
+        ],
+        "returned": [
+          "deployments:34",
+          "deployments:28",
+          "deployments:20"
+        ],
+        "covered": [
+          "deployments"
+        ],
+        "missing": [
+          "images",
+          "resources",
+          "probes"
+        ],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 5037,
+        "within_budget": true
+      },
+      {
+        "id": "no-lexical-match",
+        "expected_documents": [],
+        "returned": [],
+        "covered": [],
+        "missing": [],
+        "empty_correct": true,
+        "sources": 0,
+        "characters": 0,
+        "within_budget": true
+      },
+      {
+        "id": "stopwords",
+        "expected_documents": [],
+        "returned": [],
+        "covered": [],
+        "missing": [],
+        "empty_correct": true,
+        "sources": 0,
+        "characters": 0,
+        "within_budget": true
+      }
+    ]
+  },
+  "candidate": {
+    "created_at": "2026-10-24T03:26:26.057Z",
+    "commit": "c385cc5f867834dc63dc93daa98d323dc98c48fe",
+    "dirty": true,
+    "dataset_sha256": "3a7dae6ece985ac73091d5cf342d07ccdbe7939f59077541fd653097aebf55c6",
+    "implementation_sha256": "7bf717a37062ddcfeac3ff5aa6ca20eda677c12a6ccff44fd451d4e589b7b540",
+    "evidence_policy_sha256": "28f70b10ddad0857a4e04f19806993e1a8365fbb37406543eaae90363b408d8f",
+    "limitations": "Development-only document-family coverage. Not held-out answer quality, diagnosis correctness, or calibrated answerability. Synthetic cases authored during the flagship redevelopment after source inspection; labels reflect the six-document corpus scope.",
+    "summary": {
+      "cases": 14,
+      "document_targets": 20,
+      "covered": 19,
+      "complete": 11,
+      "empty_correct": 2,
+      "budget_violations": 0
+    },
+    "observations": [
+      {
+        "id": "image",
+        "expected_documents": [
+          "images"
+        ],
+        "returned": [
+          "images:10",
+          "debug-pods:4",
+          "images:17"
+        ],
+        "covered": [
+          "images"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 1675,
+        "within_budget": true
+      },
+      {
+        "id": "memory",
+        "expected_documents": [
+          "resources"
+        ],
+        "returned": [
+          "resources:0",
+          "deployments:28",
+          "resources:10"
+        ],
+        "covered": [
+          "resources"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4041,
+        "within_budget": true
+      },
+      {
+        "id": "readiness",
+        "expected_documents": [
+          "probes"
+        ],
+        "returned": [
+          "probes:13",
+          "probes:8",
+          "debug-services:16"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4878,
+        "within_budget": true
+      },
+      {
+        "id": "liveness",
+        "expected_documents": [
+          "probes"
+        ],
+        "returned": [
+          "probes:12",
+          "probes:6",
+          "probes:13"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3667,
+        "within_budget": true
+      },
+      {
+        "id": "startup",
+        "expected_documents": [
+          "probes"
+        ],
+        "returned": [
+          "probes:13",
+          "probes:14",
+          "probes:9"
+        ],
+        "covered": [
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3239,
+        "within_budget": true
+      },
+      {
+        "id": "scheduling",
+        "expected_documents": [
+          "resources"
+        ],
+        "returned": [
+          "resources:29",
+          "debug-pods:3",
+          "resources:10"
+        ],
+        "covered": [
+          "resources"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3121,
+        "within_budget": true
+      },
+      {
+        "id": "rollout",
+        "expected_documents": [
+          "deployments"
+        ],
+        "returned": [
+          "deployments:34",
+          "deployments:38",
+          "deployments:39"
+        ],
+        "covered": [
+          "deployments"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3035,
+        "within_budget": true
+      },
+      {
+        "id": "memory-readiness",
+        "expected_documents": [
+          "resources",
+          "probes"
+        ],
+        "returned": [
+          "probes:13",
+          "resources:0",
+          "deployments:28"
+        ],
+        "covered": [
+          "resources",
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4798,
+        "within_budget": true
+      },
+      {
+        "id": "image-scheduling",
+        "expected_documents": [
+          "images",
+          "resources"
+        ],
+        "returned": [
+          "images:10",
+          "resources:29",
+          "debug-pods:3"
+        ],
+        "covered": [
+          "images",
+          "resources"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3164,
+        "within_budget": true
+      },
+      {
+        "id": "rollout-readiness",
+        "expected_documents": [
+          "deployments",
+          "probes"
+        ],
+        "returned": [
+          "deployments:34",
+          "probes:13",
+          "deployments:38"
+        ],
+        "covered": [
+          "deployments",
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 4112,
+        "within_budget": true
+      },
+      {
+        "id": "three-families",
+        "expected_documents": [
+          "images",
+          "resources",
+          "probes"
+        ],
+        "returned": [
+          "images:10",
+          "resources:29",
+          "probes:13"
+        ],
+        "covered": [
+          "images",
+          "resources",
+          "probes"
+        ],
+        "missing": [],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3554,
+        "within_budget": true
+      },
+      {
+        "id": "four-families-budget",
+        "expected_documents": [
+          "images",
+          "resources",
+          "probes",
+          "deployments"
+        ],
+        "returned": [
+          "deployments:34",
+          "images:10",
+          "resources:0"
+        ],
+        "covered": [
+          "images",
+          "resources",
+          "deployments"
+        ],
+        "missing": [
+          "probes"
+        ],
+        "empty_correct": null,
+        "sources": 3,
+        "characters": 3313,
+        "within_budget": true
+      },
+      {
+        "id": "no-lexical-match",
+        "expected_documents": [],
+        "returned": [],
+        "covered": [],
+        "missing": [],
+        "empty_correct": true,
+        "sources": 0,
+        "characters": 0,
+        "within_budget": true
+      },
+      {
+        "id": "stopwords",
+        "expected_documents": [],
+        "returned": [],
+        "covered": [],
+        "missing": [],
+        "empty_correct": true,
+        "sources": 0,
+        "characters": 0,
+        "within_budget": true
+      }
+    ]
+  }
+}

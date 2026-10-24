@@ -39,7 +39,7 @@ export default function Page() {
     finally {setBusy(false);}
     requestAnimationFrame(() => {resultRef.current?.focus(); resultRef.current?.scrollIntoView({block:"start", behavior:"smooth"});});
   }
-  return <div className="navigator">
+  return <div className="navigator flagship-workspace flagship-secondary">
     <a className="skip" href="#question">Skip to search</a>
     <header className="site-header"><a className="wordmark" href="/">OPS<span>VERSE</span><small> / engineering lab</small></a>
       <nav aria-label="Main navigation"><a href="/troubleshoot">Troubleshoot</a><a href="/study">Evidence</a><a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a></nav></header>

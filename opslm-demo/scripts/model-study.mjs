@@ -23,6 +23,7 @@ const provenance={run_id:crypto.randomUUID(),created_at:new Date().toISOString()
   dataset_sha256:hash(read("evalsets/troubleshooting-v1/cases.json")),corpus_sha256:hash(read("opslm-demo/public/runbooks.json")),prompt_sha256:hash(SYSTEM),
   implementation_sha256:hash(read("opslm-demo/lib/troubleshoot.mjs").toString().replace(/\r\n/g,"\n")),
   http_handler_sha256:hash(read("opslm-demo/lib/troubleshoot-http.mjs").toString().replace(/\r\n/g,"\n")),
+  evidence_policy_sha256:hash(read("opslm-demo/lib/investigation-evidence.mjs").toString().replace(/\r\n/g,"\n")),
   node:process.version,hardware:{platform:os.platform(),arch:os.arch(),cpu:os.cpus()[0]?.model,ram_bytes:os.totalmem()},
   configuration:{label,split,temperature:0,seed:42,max_tokens:384,context_characters:6000,max_passages:3,diagnostic_characters:2000,timeout_ms:55000},
   limitations:dataset.authorship+" Valid source IDs and matching quotes do not prove entailment. Reference phrase coverage is not factual accuracy. Independent GGUF conversions confound causal SFT interpretation. Synthetic application tests are not an adversarial security certification.",exclusions:[]};

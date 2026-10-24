@@ -40,3 +40,4 @@ evalsets/judge-validation-v1-human-labeler.html
 # Ephemeral CI reruns (release evidence remains tracked)
 docs/reports/runbook-ci.json
 docs/reports/troubleshooting-ci.json
+docs/reports/investigation-ci.json
