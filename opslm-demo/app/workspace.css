@@ -60,12 +60,12 @@
 .flagship-workspace .panel-number { display:grid; place-items:center; width:34px; height:34px; border:1px solid #49312f; background:#ff63580a; color:#ff8179; font-family:var(--mono); font-size:11px; }
 .flagship-workspace .panel-heading p { margin:0 0 5px; color:#9b9da4; font-size:9px; }
 .flagship-workspace .panel-heading h2 { font-size:19px; font-weight:500; letter-spacing:-.4px; margin:0; }
-.flagship-workspace .intake-note { font-size:11px; line-height:1.65; color:#a6a8b1; }
+.flagship-workspace .intake-note { font-size:12px; line-height:1.65; color:#a6a8b1; }
 .flagship-workspace .examples { display:flex; align-items:center; flex-wrap:wrap; gap:7px; font-family:var(--mono); font-size:9px; color:#a4a5ad; padding:18px 0 21px; margin:0; }
 .flagship-workspace .examples button { border:1px solid #3b3d43; color:#d3d4d9; background:#18191e; font-size:10px; padding:7px 8px; }
 .flagship-workspace .examples button:hover { background:#2b1f20; border-color:#ff6358; }
 .flagship-workspace form label { display:block; font-size:12px; margin:15px 0 9px; color:#e5e5e9; }
-.flagship-workspace textarea { width:100%; min-width:0; border:1px solid #36383e; background:#0b0c0e; color:#e7e7eb; padding:13px 14px; font-family:var(--mono); font-size:11px; line-height:1.8; resize:vertical; border-radius:3px; }
+.flagship-workspace textarea { width:100%; min-width:0; border:1px solid #36383e; background:#0b0c0e; color:#e7e7eb; padding:13px 14px; font-family:var(--mono); font-size:13px; line-height:1.8; resize:vertical; border-radius:3px; }
 .flagship-workspace textarea::placeholder { color:#82858f; }
 .flagship-workspace textarea:focus { outline:2px solid #ff8179; outline-offset:3px; }
 .flagship-workspace button:focus-visible,.flagship-workspace a:focus-visible,.flagship-workspace summary:focus-visible { outline:2px solid #ff8179; outline-offset:4px; }
@@ -94,6 +94,7 @@
 .flagship-workspace .signal-row>span { font:9px var(--mono); color:#a0a3ae; }
 .flagship-workspace .signal-row>b { border:1px solid #66413a; background:#271916; color:#ffb5a7; font:10px var(--mono); padding:5px 8px; }
 .flagship-workspace .signal-row>p { font-size:12px; color:#b0b2bc; }
+.flagship-workspace .signal-row>.signal-meaning { width:100%; font-size:11px; line-height:1.7; }
 .flagship-workspace .investigation-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
 .flagship-workspace .investigation-metrics strong { display:block; font-size:23px; font-weight:500; letter-spacing:-.5px; }
 .flagship-workspace .investigation-metrics small { font-size:10px; font-weight:normal; color:#9397a1; }

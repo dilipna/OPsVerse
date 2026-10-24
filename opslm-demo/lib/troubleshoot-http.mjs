@@ -1,8 +1,21 @@
 import {prepare,completeInvestigation} from "./troubleshoot.mjs";
 
 export async function handleRequest(request, {corpus,endpoint,apiKey,model="opslm",fetcher=fetch,timeoutMs=55000}) {
-  const text=await request.text();
-  if(new TextEncoder().encode(text).length>24000)return Response.json({error:"Request is too large."},{status:413});
+  // Bound bytes while reading, before allocating an arbitrarily large string.
+  const reader=request.body?.getReader(),decoder=new TextDecoder();
+  let text="",bytes=0;
+  if(reader){
+    try{
+      while(true){
+        const {value,done}=await reader.read();if(done)break;
+        bytes+=value.byteLength;
+        if(bytes>24000){await reader.cancel();return Response.json({error:"Request is too large."},{status:413});}
+        text+=decoder.decode(value,{stream:true});
+      }
+      text+=decoder.decode();
+    }catch{return Response.json({error:"The request body could not be read."},{status:400});}
+    finally{reader.releaseLock();}
+  }
   let input;
   try {input=JSON.parse(text);}catch{return Response.json({error:"Send a valid JSON request."},{status:400});}
   // Keep input/schema errors separate from model/upstream failures.
