@@ -1,9 +1,11 @@
-# OpsVerse flagship website release candidate
+# OpsVerse flagship website release engineering notes
 
 This release improves the real browser-local Kubernetes investigation workflow and
 the research stack's tested failure boundaries. It does not establish a generated
-answer-quality gain or deploy a hosted model. The user's latest request authorizes
-completion and deployment; production remains unchanged until the release gates pass.
+answer-quality gain or deploy a hosted model. The approved d253a71 release passed
+CI and actual production verification on October 24; see PR #4 and its linked
+verification runs. Subsequent release corrections require fresh exact-head checks
+before replacing it. Main merge and hosting-setting changes remain excluded.
 
 ## Changes
 
@@ -29,7 +31,7 @@ completion and deployment; production remains unchanged until the release gates 
 
 ## Verification
 
-Local: 333 Python tests, 49 Node tests, Ruff, Pyright, TypeScript, optimized build,
+Local: 333 Python tests, 56 Node tests, Ruff, Pyright, TypeScript, optimized build,
 raw-source corpus regeneration, contamination identity, development coverage checks
 and real production HTTP mode/failure tests passed. npm and the installed default
 Python environment report no known vulnerabilities at the time of their audits.

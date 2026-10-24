@@ -1,6 +1,20 @@
-# Claims ledger — 19 October 2026
+# Claims ledger — updated October 24, 2026
 
-## Flagship candidate — October 23, 2026 (local, not released)
+## Verified flagship website release — October 24, 2026
+
+The public evidence workflow is deployed at https://ops-verse.vercel.app/.
+Release `d253a71ed782c86de81d6046c9b6963f2f51cac4` passed all five CI jobs,
+333 Python tests, 56 Node tests and 23 browser tests against actual production.
+The [production verification](https://github.com/dilipna/OPsVerse/actions/runs/40080719125)
+and public `/release.json` record its scope and identity. Follow-up corrections
+must pass fresh exact-head CI and production checks; these historical counts are
+not proof for a later commit. The current source is reviewable in
+[PR #4](https://github.com/dilipna/OPsVerse/pull/4); `main` has not been merged.
+No hosted model, cluster execution, model-quality gain or external-user impact
+is established. Optional tooling advisories and budget-accounting limits remain
+documented in `reports/flagship-release-candidate.md`.
+
+## Historical flagship foundation — October 23, 2026 (then local)
 
 The isolated candidate adds bounded signal-family retrieval, per-request evidence
 gaps/context accounting, stricter output-state validation and an updated workspace.
@@ -14,9 +28,10 @@ corrected after per-case review. Raw observations and limitations are retained i
 The research gateway now refuses budgeted calls when its counter is absent,
 unavailable or invalid. Its accounting is still post-call, without in-flight
 reservation or complete fallback-attempt billing; a hard spend cap is unproved.
-No provider call, model load, DPO run, source publication or production update was
-performed for this candidate. Visual/browser release verification remains pending.
-See `docs/reports/flagship-foundation-v1.md` for local checks and remaining work.
+At that foundation checkpoint, no provider call, model load, DPO run, source
+publication or production update had been performed. Visual/browser release
+verification was then pending. See `reports/flagship-foundation-v1.md` for the
+historical local checks; the verified release above supersedes its release status.
 
 ## Historical released baseline
 

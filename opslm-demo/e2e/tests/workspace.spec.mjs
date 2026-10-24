@@ -15,6 +15,8 @@ for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runb
   test(`layout ${width} ${route}`,async({page},info)=>{
     await page.setViewportSize({width,height:1000});
     const response=await page.goto(route);expect(response.status()).toBe(200);
+    if(route==="/"||route==="/troubleshoot")await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+    if(route==="/runbooks")await expect(page.getByRole("button",{name:"Find passages →"})).toBeEnabled();
     await expect(page.locator("main")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
@@ -32,6 +34,39 @@ test("public identity and model-free operating mode",async({request})=>{
   expect(identity.dirty_source).toBe(false);
   expect((await (await request.get("/api/troubleshoot")).json()).generation_configured).toBe(false);
   expect((await (await request.get("/api/chat")).json()).live).toBe(false);
+});
+
+for(const route of ["/","/runbooks"]){
+  test(`documentation download failure and retry ${route}`,async({page})=>{
+    let attempts=0;
+    await page.route("**/runbooks.json",async request=>{
+      attempts++;
+      if(attempts===1)await request.fulfill({status:503,body:"Synthetic documentation outage"});
+      else await request.continue();
+    });
+    await page.goto(route);
+    const submit=page.getByRole("button",{name:route==="/"?"Find incident evidence →":"Find passages →"});
+    await expect(page.getByRole("alert")).toContainText("could not load");
+    await expect(submit).toBeDisabled();
+    await page.getByRole("button",{name:/Retry loading/}).click();
+    await expect(submit).toBeEnabled();await expect(page.getByRole("alert")).toHaveCount(0);
+    expect(attempts).toBe(2);
+    if(route==="/"){
+      await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await submit.click();
+      await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
+    }else{
+      await page.locator("#question").fill("ImagePullBackOff image pull policy");await submit.click();
+      await expect(page.locator(".passage").first()).toContainText("ImagePullBackOff");
+    }
+  });
+}
+
+test("reviewer links and reproduction select the released branch",async({page})=>{
+  await page.goto("/engineering");
+  await expect(page.getByRole("link",{name:"Source code ↗",exact:true})).toHaveAttribute("href","https://github.com/dilipna/OPsVerse/tree/improve/flagship-investigation");
+  await expect(page.getByRole("link",{name:"Read the failure-path tests ↗",exact:true})).toHaveAttribute("href","https://github.com/dilipna/OPsVerse/blob/improve/flagship-investigation/opslm-demo/scripts/troubleshoot.test.mjs");
+  await expect(page.locator(".study-code")).toContainText("git clone --branch improve/flagship-investigation");
+  expect(await page.locator('a[href*="/blob/main/"]').count()).toBe(0);
 });
 
 test("real evidence, notes, redaction and actual JSON download",async({page},info)=>{

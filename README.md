@@ -4,6 +4,13 @@
 
 [Open the workspace](https://ops-verse.vercel.app/) | [Engineering case study](https://ops-verse.vercel.app/engineering) | [Evaluation](https://ops-verse.vercel.app/study) | [Resume evidence](docs/resume-and-interview.md)
 
+The deployed flagship implementation is on
+[`improve/flagship-investigation`](https://github.com/dilipna/OPsVerse/tree/improve/flagship-investigation),
+reviewable in [PR #4](https://github.com/dilipna/OPsVerse/pull/4). The release was
+approved without a `main` merge. Select that branch when reproducing the public
+website; its exact deployed commit and source hashes are at
+[`/release.json`](https://ops-verse.vercel.app/release.json).
+
 Describe a symptom, paste sanitized Pod events, and inspect pinned official source
 passages alongside recognized status signals. Export the redacted investigation as
 JSON. Three synthetic examples make the workflow usable immediately. No account,
