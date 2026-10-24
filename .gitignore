@@ -17,6 +17,7 @@ build/
 # Node (apps/web, later phases)
 node_modules/
 .next/
+.vercel/
 
 # Data & artifacts: DVC-tracked content is ignored via data/.gitignore
 # (written by `dvc add`); the small .dvc pointer files DO belong in git.

@@ -12,7 +12,9 @@ try{
   const top=execFileSync("git",["rev-parse","--show-toplevel"],{cwd:repo,encoding:"utf8",stdio:["ignore","pipe","ignore"]}).trim();
   if(path.resolve(top).toLowerCase()===repo.toLowerCase()){
     gitCommit=execFileSync("git",["rev-parse","HEAD"],{cwd:repo,encoding:"utf8"}).trim();
-    dirty=Boolean(execFileSync("git",["status","--porcelain"],{cwd:repo,encoding:"utf8"}).trim());
+    const status=execFileSync("git",["status","--porcelain"],{cwd:repo,encoding:"utf8"}).trim();
+    dirty=Boolean(status);
+    if(dirty)console.log(JSON.stringify({build_changed_paths:status.split("\n")}));
   }
 }catch{ /* Immutable source archives identify their commit through build metadata. */ }
 const sourceCommit=process.env.OPSVERSE_RELEASE_COMMIT||gitCommit;
