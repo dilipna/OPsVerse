@@ -46,10 +46,11 @@ for(const route of ["/","/runbooks"]){
     });
     await page.goto(route);
     const submit=page.getByRole("button",{name:route==="/"?"Find incident evidence →":"Find passages →"});
-    await expect(page.getByRole("alert")).toContainText("could not load");
+    const loadAlert=page.locator("main").getByRole("alert");
+    await expect(loadAlert).toContainText("could not load");
     await expect(submit).toBeDisabled();
     await page.getByRole("button",{name:/Retry loading/}).click();
-    await expect(submit).toBeEnabled();await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(submit).toBeEnabled();await expect(loadAlert).toHaveCount(0);
     expect(attempts).toBe(2);
     if(route==="/"){
       await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await submit.click();
