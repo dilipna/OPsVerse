@@ -1,6 +1,16 @@
 # ADR-0008: LLM gateway as a library layer, not a proxy binary
 
-**Status:** accepted (2026-07-18)
+**Status:** accepted (2026-07-18); spend-counter failure policy amended locally October 23, 2026.
+
+## October 23 correction
+
+The historical fail-open budget policy below is superseded for enabled spend guards.
+Missing Redis, lookup failure and non-finite/negative/corrupt counters now refuse new
+provider calls. Cache misses remain recoverable; explicit zero disables the spend
+guard. Synthetic complete/stream tests reproduce the old paths and verify no provider
+invocation after rejection. This does not repair concurrent in-flight overspend or
+unknown costs: accounting remains post-call. Do not advertise it as a hard billing
+ceiling. Historical latency measurements below were not rerun in this change.
 
 ## Context
 

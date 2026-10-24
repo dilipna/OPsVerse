@@ -1,0 +1,36 @@
+name: Production website verification
+on:
+  pull_request:
+    types: [labeled]
+permissions:
+  contents: read
+jobs:
+  production-browser:
+    if: github.event.label.name == 'verify-production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: opslm-demo/package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: opslm-demo
+      - run: npx playwright install --with-deps chromium
+        working-directory: opslm-demo
+      - name: Verify the actual public production website
+        run: npm run test:browser:ci
+        working-directory: opslm-demo
+        env:
+          OPSVERSE_E2E_ORIGIN: https://ops-verse.vercel.app
+          OPSVERSE_EXPECTED_COMMIT: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-browser-evidence
+          path: opslm-demo/e2e-results/

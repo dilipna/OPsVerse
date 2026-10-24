@@ -1,5 +1,8 @@
 "use client";
 
+import {sourceTree,sourceFile} from "../../lib/source-links";
+
+
 import {useEffect, useRef, useState} from "react";
 import {search, type Corpus} from "../../lib/runbooks.mjs";
 
@@ -39,10 +42,10 @@ export default function Page() {
     finally {setBusy(false);}
     requestAnimationFrame(() => {resultRef.current?.focus(); resultRef.current?.scrollIntoView({block:"start", behavior:"smooth"});});
   }
-  return <div className="navigator">
+  return <div className="navigator flagship-workspace flagship-secondary">
     <a className="skip" href="#question">Skip to search</a>
     <header className="site-header"><a className="wordmark" href="/">OPS<span>VERSE</span><small> / engineering lab</small></a>
-      <nav aria-label="Main navigation"><a href="/troubleshoot">Troubleshoot</a><a href="/study">Evidence</a><a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a></nav></header>
+      <nav aria-label="Main navigation"><a href="/troubleshoot">Troubleshoot</a><a href="/study">Evidence</a><a href={sourceTree}>GitHub ↗</a></nav></header>
     <main>
       <section className="intro"><p className="eyebrow">01 / RUNBOOK NAVIGATOR</p>
         <h1>Find the passage.<br/><span>Check the source.</span></h1>
@@ -68,9 +71,9 @@ export default function Page() {
         {hits === null && !error && <div className="before-search"><span>READY WHEN YOU ARE</span><p>Results will show exact source text. This tool does not diagnose your cluster or execute commands.</p></div>}
       </section>
       <section id="evidence" className="evidence"><p className="eyebrow">02 / WHAT YOU CAN VERIFY</p><h2>A small tool with a visible evidence chain.</h2>
-        <div className="evidence-grid"><div><h3>From raw docs to passages</h3><p>Six official Markdown files pass through OpsVerse’s parser, chunker, quality filters, and security checks. The browser searches that generated corpus with term overlap.</p></div><div><h3>Bounded evaluation</h3><p>Development and held-out query cases compare term overlap against BM25. Results include failures and unsupported queries. These checks evaluate retrieval, not model answer quality.</p><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/reports/runbook-evaluation.json">Inspect evaluation ↗</a></div><div><h3>Serving research, separately</h3><p>The historical T4 experiments compare full serving configurations. GPU results are stored evidence; SFT improvement and completed DPO are not established.</p><a href="https://github.com/dilipna/OPsVerse/blob/main/docs/claims.md">Read the claims ledger ↗</a></div></div>
+        <div className="evidence-grid"><div><h3>From raw docs to passages</h3><p>Six official Markdown files pass through OpsVerse’s parser, chunker, quality filters, and security checks. The browser searches that generated corpus with term overlap.</p></div><div><h3>Bounded evaluation</h3><p>Development and held-out query cases compare term overlap against BM25. Results include failures and unsupported queries. These checks evaluate retrieval, not model answer quality.</p><a href={sourceFile("docs/reports/runbook-evaluation.json")}>Inspect evaluation ↗</a></div><div><h3>Serving research, separately</h3><p>The historical T4 experiments compare full serving configurations. GPU results are stored evidence; SFT improvement and completed DPO are not established.</p><a href={sourceFile("docs/claims.md")}>Read the claims ledger ↗</a></div></div>
         {corpus && <p className="provenance">Snapshot {corpus.manifest.retrieved_at} · <a href={`https://github.com/kubernetes/website/tree/${corpus.manifest.revision}`}>source {corpus.manifest.revision.slice(0,12)}</a> · {corpus.chunks.length} indexed passages · documentation © Kubernetes Authors, CC BY 4.0. Source passages retain upstream Markdown and may include template markers.</p>}
       </section>
-    </main><footer className="site-footer"><span>Built by Dilip Nallamasa · OpsVerse</span><a href="https://github.com/dilipna/OPsVerse#quickstart">Reproduce locally ↗</a><span>Public-data prototype · no adoption claim</span></footer>
+    </main><footer className="site-footer"><span>Built by Dilip Nallamasa · OpsVerse</span><a href={sourceTree+"#quickstart"}>Reproduce locally ↗</a><span>Public-data prototype · no adoption claim</span></footer>
   </div>;
 }

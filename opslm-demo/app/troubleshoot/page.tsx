@@ -1,5 +1,9 @@
 "use client";
 
+import {sourceFile} from "../../lib/source-links";
+import {EvidenceAtlas} from "./evidence-atlas";
+
+
 import {useEffect,useRef,useState} from "react";
 import {troubleshoot,redact,type Result} from "../../lib/troubleshoot.mjs";
 import type {Corpus} from "../../lib/runbooks.mjs";
@@ -15,6 +19,7 @@ export default function TroubleshootPage(){
   const [issue,setIssue]=useState(""),[diagnostics,setDiagnostics]=useState("");
   const [result,setResult]=useState<Result|null>(null),[error,setError]=useState("");
   const [busy,setBusy]=useState(false),[configured,setConfigured]=useState(false),[copied,setCopied]=useState("");
+  const [notes,setNotes]=useState("");
   const results=useRef<HTMLElement>(null);
   async function load(){
     setLoadError("");
@@ -22,7 +27,7 @@ export default function TroubleshootPage(){
     catch{setLoadError("The documentation snapshot could not load. Check your connection and retry.");}
   }
   useEffect(()=>{void load();fetch("/api/troubleshoot").then(r=>r.json()).then(d=>setConfigured(d.generation_configured===true)).catch(()=>setConfigured(false));},[]);
-  function edit(nextIssue:string,nextDiagnostics:string){setIssue(nextIssue);setDiagnostics(nextDiagnostics);setResult(null);setError("");setCopied("");}
+  function edit(nextIssue:string,nextDiagnostics:string){setIssue(nextIssue);setDiagnostics(nextDiagnostics);setResult(null);setNotes("");setError("");setCopied("");}
   async function analyze(generate=false){
     if(!corpus||busy)return;
     setBusy(true);setError("");setResult(null);setCopied("");
@@ -41,40 +46,51 @@ export default function TroubleshootPage(){
   }
   function exportBrief(){
     if(!result)return;
-    const brief={created_at:new Date().toISOString(),...result,boundary:"Observed signals and documentation support; not a confirmed root cause. No commands executed. Credential redaction is best-effort."};
+    const reviewNotes=redact(notes.slice(0,4000));
+    const brief={schema_version:1,created_at:new Date().toISOString(),...result,
+      review:{status:"unreviewed",notes:reviewNotes.text,notes_redactions:reviewNotes.redactions},
+      source_revision:corpus?.manifest.revision,
+      boundary:"Observed signals and documentation support; not a confirmed root cause. No commands executed. Credential redaction is best-effort."};
     const url=URL.createObjectURL(new Blob([JSON.stringify(brief,null,2)],{type:"application/json"}));
     const link=document.createElement("a");link.href=url;link.download="opsverse-incident-brief.json";link.click();URL.revokeObjectURL(url);
     setCopied("Incident brief downloaded. It contains the redacted input and displayed evidence.");
   }
-  return <div className="navigator incident">
+  return <div className="navigator incident flagship-workspace">
     <a className="skip" href="#incident-issue">Skip to incident input</a>
-    <header className="site-header"><a className="wordmark" href="/">OPS<span>VERSE</span><small> / engineering lab</small></a><nav aria-label="Main navigation"><a href="/runbooks">Runbooks</a><a href="/engineering">Engineering</a><a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a></nav></header>
-    <main><section className="intro"><div className="intro-topline"><p className="eyebrow">KUBERNETES / INCIDENT WORKSPACE</p><a href="/engineering">Built by Dilip Nallamasa ↗</a></div><h1>Investigate the symptom.<br/><span>Show the evidence.</span></h1><p className="intro-copy">Turn Pod events and status output into a reviewable investigation brief, with source passages from official Kubernetes documentation.</p><div className="mode">Browser-based analysis · pinned source links · exportable incident brief</div><div className="workflow-strip" aria-label="Investigation workflow"><span><b>01</b> Describe the symptom</span><span><b>02</b> Inspect the evidence</span><span><b>03</b> Keep the brief</span></div></section>
-    <div className="incident-layout"><section className="search-panel" aria-labelledby="intake-title"><h2 id="intake-title">Describe the incident</h2><p className="intake-note">Use sanitized diagnostic output. Recognized credential patterns are redacted locally, but detection is incomplete. Remove sensitive data before pasting.</p>
+    <header className="site-header"><a className="wordmark" href="/">OPS<span>VERSE</span><small> / investigation lab</small></a><nav aria-label="Main navigation"><a className="active-nav" href="/" aria-current="page">Workspace</a><a href="/runbooks">Runbooks</a><a href="/study">Evaluation</a><a href="/engineering">Engineering ↗</a></nav></header>
+    <main><section className="intro"><div className="intro-topline"><p className="eyebrow"><span className="status-dot"/> KUBERNETES INVESTIGATION ATLAS</p><a href="/engineering">An engineering project by Dilip Nallamasa ↗</a></div><div className="workspace-title"><div><h1>Follow the signal.<br/><span>Build the case.</span></h1><p className="intro-copy">A field guide for Kubernetes investigations. Connect the symptom to the source, see what is missing, and leave a brief someone else can follow.</p><div className="hero-facts"><span><b>06</b> pinned documents</span><span><b>180</b> source passages</span><span><b>Zero</b> commands executed</span></div></div><EvidenceAtlas/></div><div className="workflow-strip" aria-label="Investigation workflow"><span><b>01</b> Capture a symptom</span><span><b>02</b> Inspect the source</span><span><b>03</b> Keep a reviewable brief</span></div></section>
+    <div className="workspace-section-label"><span>INVESTIGATION WORKBENCH</span><span>LOCAL INPUT · PINNED SOURCES · HUMAN REVIEW</span></div>
+    <div className="incident-layout"><section className="search-panel" aria-labelledby="intake-title"><div className="panel-heading"><span className="panel-number">01</span><div><p className="eyebrow">INCIDENT INPUT</p><h2 id="intake-title">Start with what you observed.</h2></div></div><p className="intake-note">Use sanitized diagnostic output. Recognized credential patterns are redacted locally, but detection is incomplete. Remove sensitive data before pasting.</p>
       <div className="examples">Synthetic examples{EXAMPLES.map(e=><button key={e.title} onClick={()=>edit(e.issue,e.diagnostics)} disabled={busy}>{e.title}</button>)}</div>
       <form onSubmit={e=>{e.preventDefault();void analyze();}}>
         <label htmlFor="incident-issue">What are you investigating?</label><textarea id="incident-issue" disabled={busy} value={issue} maxLength={501} rows={3} onChange={e=>edit(e.target.value,diagnostics)} placeholder="What happened, and what do you need to understand?"/>
         <label htmlFor="diagnostics">Diagnostic output (optional)</label><textarea id="diagnostics" disabled={busy} value={diagnostics} maxLength={12001} rows={8} onChange={e=>edit(issue,e.target.value)} placeholder="Paste sanitized events, status, or describe output. No cluster connection is made." aria-describedby="diagnostics-help"/>
-        <p id="diagnostics-help" className="intake-note">Find evidence runs locally. Generation is offered only when a model endpoint has been configured.</p>
+        <p id="diagnostics-help" className="intake-note">A status or warning event helps narrow the search. Input is not saved across page reloads.</p>
         <div className="incident-actions"><button disabled={!corpus||busy} type="submit">{busy?"Working…":"Find incident evidence →"}</button>{configured&&<button disabled={!corpus||busy} type="button" onClick={()=>void analyze(true)}>Ask configured model</button>}</div>
       </form>
-      {configured?<p className="intake-note">Model availability is unverified. Asking the model sends the locally redacted issue and diagnostics to this app’s configured endpoint. A valid quote does not prove an explanation is correct.</p>:<p className="intake-note">This public deployment has no model endpoint configured. The evidence workflow is live; model examples, when available, are labeled recorded. <a href="https://github.com/dilipna/OPsVerse/blob/main/docs/troubleshooting.md">How this workflow works ↗</a></p>}
+      {configured?<p className="intake-note">Model availability is unverified. Asking the model sends the locally redacted issue and diagnostics to this app’s configured endpoint. A valid quote does not prove an explanation is correct.</p>:<p className="intake-note">This public deployment has no model endpoint configured. The evidence workflow is live; model examples, when available, are labeled recorded. <a href={sourceFile("docs/troubleshooting.md")}>How this workflow works ↗</a></p>}
       {!corpus&&!loadError&&<p role="status">Loading pinned runbooks…</p>}{loadError&&<div role="alert"><p>{loadError}</p><button onClick={()=>void load()}>Retry loading</button></div>}
     </section>
     <section className="incident-results results" ref={results} tabIndex={-1} aria-label="Incident analysis" aria-live="polite">
       {error&&<p role="alert" className="error">{error}</p>}
-      {!result&&!error&&<div className="before-search"><span>YOUR INVESTIGATION</span><h2>Start with one useful clue.</h2><p>Choose a synthetic example or describe your incident. We’ll match the symptom to a pinned runbook and keep the supporting passages visible.</p><div className="preview-observation"><span>EXAMPLE SIGNAL</span><code>ImagePullBackOff</code><p>Observed status → matching runbook → source evidence → investigation brief</p></div><p>The analysis uses the text you provide. Your cluster stays under your control.</p></div>}
+      {!result&&!error&&<div className="before-search"><span className="eyebrow">02 / EVIDENCE CANVAS</span><h2>A useful investigation<br/>leaves a visible trail.</h2><p>Choose an example on the left, or bring your own sanitized diagnostic text. The supporting passages will appear here.</p><div className="preview-observation"><span>EXAMPLE OBSERVATION</span><code><i/> ImagePullBackOff</code><div className="evidence-preview-path"><p><b>01</b> A status is observed</p><p><b>02</b> The image runbook is retrieved</p><p><b>03</b> You inspect what it supports</p></div></div><div className="empty-canvas-meta"><span>06 pinned documents</span><span>180 source passages</span><a href="/runbooks">Browse the library ↗</a></div></div>}
       {result&&<><div className="result-heading"><h2>{result.mode==="generated"?"Model draft with evidence":result.mode==="abstained"?"No supporting evidence":"Incident evidence"}</h2><button onClick={exportBrief}>Export brief ↓</button></div>
         <p className="intake-note">{result.note}</p>
         {result.redactions>0&&<p className="redaction" role="status">{result.redactions} recognized credential pattern(s) redacted. Review the input for anything the detector missed.</p>}
         {result.diagnostics_truncated&&<p className="redaction">Only the first 2,000 diagnostic characters are included in the model context and exported analysis. Signals can still be recognized across the full allowed input.</p>}
-        <div className="signal-row"><span>OBSERVED SIGNALS</span>{result.signals.length?result.signals.map(s=><b key={s}>{s}</b>):<p>Add a status such as ImagePullBackOff or a warning event to make the search more specific.</p>}</div>
+        <div className="signal-row"><span>RECOGNIZED STATUS TEXT</span>{result.signals.length?result.signals.map(s=><b key={s}>{s}</b>):<p>Add a status such as ImagePullBackOff or a warning event to make the search more specific.</p>}<p className="signal-meaning">Text matches can be historical, hypothetical or negated. They do not establish a current condition.</p></div>
+        {result.evidence_policy&&<div className="evidence-audit">
+          <div className="investigation-metrics"><div><strong>{result.sources.length}<small> / 3</small></strong><span>passages selected</span></div><div><strong>{result.evidence_policy.usage.characters.toLocaleString()}<small> / 6,000</small></strong><span>evidence characters</span></div><div><strong>{result.evidence_policy.usage.retrieval_attempts}<small> / 4</small></strong><span>retrieval attempts</span></div></div>
+          {!!result.evidence_policy.missing_signals.length&&<div className="evidence-gap" role="status"><strong>Documentation gap</strong><p>No selected passage from the expected documentation family for: {result.evidence_policy.missing_signals.join(", ")}. The source snapshot or passage budget may be insufficient. Do not treat the result as a complete investigation.</p></div>}
+          <details className="decision-trace"><summary>Why these passages? <span>Inspect retrieval decisions ↗</span></summary><p>{result.evidence_policy.scope}</p><ol>{result.evidence_policy.attempts.map((a,i)=><li key={i}><b>{a.kind==="initial"?"Initial search":`Retry within ${a.family}`}</b><code>{a.query}</code><span>{a.returned.length?a.returned.join(" · "):"No matching passages"}</span></li>)}</ol>{!!result.evidence_policy.omitted.length&&<p>{result.evidence_policy.omitted.length} passage(s) shortened to stay within the character budget. Open the original source for full context.</p>}</details>
+        </div>}
         {result.answer&&<article className="model-draft"><span className="eyebrow">{result.answer.status.replaceAll("_"," ")} · {result.model}</span><h3>{result.answer.summary}</h3>{result.answer.claims.map((c,i)=><div key={i} className="claim"><p>{c.text}</p><blockquote>{c.quote}</blockquote><a href={result.sources.find(s=>s.id===c.source_id)?.source} target="_blank" rel="noreferrer">Source {c.source_id} ↗</a></div>)}
           {!!result.answer.questions.length&&<><h3>Evidence still needed</h3><ul>{result.answer.questions.map(q=><li key={q}>{q}</li>)}</ul></>}
           {!!result.answer.commands.length&&<><h3>Read-only suggestions · not executed</h3>{result.answer.commands.map(c=><pre tabIndex={0} key={c.command}>{c.command}</pre>)}</>}
         </article>}
         {!result.sources.length&&<div className="empty"><p>This six-document snapshot does not support a result. Try a concrete Kubernetes status or use the broader official documentation.</p><a href="https://kubernetes.io/docs/">Open Kubernetes docs ↗</a></div>}
         {result.sources.map((s,i)=><details className="incident-source" key={s.id} open={i===0}><summary>{i+1}. {s.section} <small>{s.id}</small></summary><pre tabIndex={0} aria-label={`Incident source ${i+1}`}>{s.text}</pre><a href={s.source} target="_blank" rel="noreferrer">Pinned official source ↗</a><a href={s.canonical} target="_blank" rel="noreferrer">Current docs ↗</a></details>)}
+        <div className="review-notes"><label htmlFor="review-notes">Your investigation notes <span>Optional · included only in the exported brief</span></label><textarea id="review-notes" rows={3} maxLength={4000} value={notes} onChange={e=>{setNotes(e.target.value);setCopied("");}} placeholder="What does the evidence support? What is still missing?"/><p>Notes remain unreviewed. Editing the incident clears these notes and the previous result.</p></div>
         <p className="intake-note">Open the source for full context. Signals identify observed text patterns; confirming a cause requires your diagnostic evidence.</p><p role="status">{copied}</p>
       </>}
     </section></div>
