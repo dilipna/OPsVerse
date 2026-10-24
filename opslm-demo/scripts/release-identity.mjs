@@ -29,7 +29,7 @@ if(gitCommit){
   if(differences.length)throw Error("Build changed committed dependency lock semantics; release blocked");
 }
 const files=["lib/troubleshoot.mjs","lib/troubleshoot-http.mjs","lib/investigation-evidence.mjs","lib/runbooks.mjs","lib/source-links.ts",
-  "app/troubleshoot/page.tsx","app/runbooks/page.tsx","app/study/page.tsx","app/engineering/page.tsx",
+  "app/troubleshoot/page.tsx","app/troubleshoot/evidence-atlas.tsx","app/layout.tsx","app/runbooks/page.tsx","app/study/page.tsx","app/engineering/page.tsx",
   "app/globals.css","app/workspace.css","public/runbooks.json","public/study.json",
   "public/investigation-development.json","package-lock.json","package.json",
   "scripts/release-identity.mjs","scripts/lock-evidence.mjs"];

@@ -146,3 +146,18 @@ test("runbook search and explicit empty state",async({page})=>{
   await page.getByRole("button",{name:"Clear search",exact:true}).click();
   await expect(page.locator("#question")).toHaveValue("");
 });
+
+test("mobile evidence remains readable after a real investigation",async({page},info)=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/");
+  await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+  await expect(page.getByRole("img",{name:"A symptom becomes a traceable investigation"})).toBeVisible();
+  await page.getByRole("button",{name:"Image won't pull",exact:true}).click();
+  await page.getByRole("button",{name:"Find incident evidence →"}).click();
+  await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  await expect(page.getByRole("button",{name:"Export brief ↓"})).toBeVisible();
+  const screenshot=info.outputPath("mobile-evidence.png");
+  await page.screenshot({path:screenshot,fullPage:true});
+  await info.attach("actual-mobile-evidence",{path:screenshot,contentType:"image/png"});
+});
