@@ -1,5 +1,7 @@
 # Evidence Atlas visual direction
 
+Historical design, superseded by [Signal Studio](signal-studio-design.md).
+
 OpsVerse uses an editorial field-guide identity to distinguish it from the other
 portfolio projects: warm ivory, dark ink, cobalt wayfinding and copper observation
 markers. Georgia display type contrasts with clear sans-serif UI text and compact

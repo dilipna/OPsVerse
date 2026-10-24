@@ -1,5 +1,6 @@
 import {test,expect} from "@playwright/test";
 import fs from "node:fs/promises";
+import {createHash} from "node:crypto";
 import corpus from "../../public/runbooks.json" with {type:"json"};
 
 test.beforeEach(async({page})=>{
@@ -17,6 +18,7 @@ for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runb
     const response=await page.goto(route);expect(response.status()).toBe(200);
     if(route==="/"||route==="/troubleshoot")await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
     if(route==="/runbooks")await expect(page.getByRole("button",{name:"Find passages →"})).toBeEnabled();
+    await page.evaluate(()=>document.fonts.ready);
     await expect(page.locator("main")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
@@ -34,6 +36,22 @@ test("public identity and model-free operating mode",async({request})=>{
   expect(identity.dirty_source).toBe(false);
   expect((await (await request.get("/api/troubleshoot")).json()).generation_configured).toBe(false);
   expect((await (await request.get("/api/chat")).json()).live).toBe(false);
+});
+
+test("custom fonts load from this release rather than a fallback or font service",async({page,request})=>{
+  const fontRequests=[];page.on("request",r=>{if(r.resourceType()==="font")fontRequests.push(r.url());});
+  await page.goto("/");await page.evaluate(()=>document.fonts.ready);
+  const identity=await (await request.get("/release.json")).json();
+  for(const [file,family] of [["SpaceGrotesk","Space Grotesk"],["IBMPlexSans","IBM Plex Sans"],["IBMPlexMono","IBM Plex Mono"]]){
+    expect(fontRequests.some(url=>new URL(url).pathname===`/fonts/${file}.woff2`)).toBe(true);
+    const response=await request.get(`/fonts/${file}.woff2`);expect(response.status()).toBe(200);
+    expect(createHash("sha256").update(await response.body()).digest("hex")).toBe(identity.source_files[`public/fonts/${file}.woff2`]);
+    expect(await page.evaluate(name=>Array.from(document.fonts).some(f=>f.family.replaceAll('"',"")===name&&f.status==="loaded"),family)).toBe(true);
+  }
+  for(const url of fontRequests)expect(new URL(url).origin).toBe(new URL(page.url()).origin);
+  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Space Grotesk");
+  expect(await page.locator(".intro-copy").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("IBM Plex Sans");
+  expect(await page.locator("textarea").first().evaluate(e=>getComputedStyle(e).fontFamily)).toContain("IBM Plex Mono");
 });
 
 for(const route of ["/","/runbooks"]){
@@ -150,6 +168,7 @@ test("runbook search and explicit empty state",async({page})=>{
 test("mobile evidence remains readable after a real investigation",async({page},info)=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto("/");
+  await page.evaluate(()=>document.fonts.ready);
   await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
   await expect(page.getByRole("img",{name:"A symptom becomes a traceable investigation"})).toBeVisible();
   await page.getByRole("button",{name:"Image won't pull",exact:true}).click();
