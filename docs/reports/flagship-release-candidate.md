@@ -20,6 +20,12 @@ completion and deployment; production remains unchanged until the release gates 
   accounting still lacks in-flight reservation and complete retry billing; do not
   describe it as a hard spending cap.
 - Build identity and normalized source hashes are served at `/release.json`.
+  The identity includes dependency declarations, lockfile and identity scripts.
+  A build compares every parsed lockfile field with the committed file and blocks
+  dependency drift. An initial production fingerprint mismatch was rolled back;
+  diagnostics isolated four removed `peer` flags. Removing those four flags
+  reproduced the deployed lockfile byte hash exactly, with no version, integrity
+  or resolved-URL changes. The corrected committed lock retains strict checks.
 
 ## Verification
 

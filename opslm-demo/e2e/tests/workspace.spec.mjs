@@ -28,6 +28,8 @@ test("public identity and model-free operating mode",async({request})=>{
   expect(identity.source_commit).toMatch(/^[a-f0-9]{40}$/);
   if(process.env.OPSVERSE_EXPECTED_COMMIT)expect(identity.source_commit).toBe(process.env.OPSVERSE_EXPECTED_COMMIT);
   expect(identity.source_files["lib/troubleshoot.mjs"]).toMatch(/^[a-f0-9]{64}$/);
+  expect(identity.source_files["package.json"]).toMatch(/^[a-f0-9]{64}$/);
+  expect(identity.dirty_source).toBe(false);
   expect((await (await request.get("/api/troubleshoot")).json()).generation_configured).toBe(false);
   expect((await (await request.get("/api/chat")).json()).live).toBe(false);
 });
@@ -83,6 +85,9 @@ test("keyboard investigation and invalid-input recovery",async({page})=>{
   await page.goto("/");await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
   await page.getByRole("button",{name:"Find incident evidence →"}).click();
   await expect(page.getByText("Describe the issue first.",{exact:true})).toBeVisible();
+  // Analysis deliberately moves focus on the next animation frame. Wait for
+  // that completed transition before testing the independent skip-link action.
+  await expect(page.getByRole("region",{name:"Incident analysis",exact:true})).toBeFocused();
   await page.getByRole("link",{name:"Skip to incident input",exact:true}).focus();
   await page.keyboard.press("Enter");await expect(page.locator("#incident-issue")).toBeFocused();
   await page.locator("#incident-issue").fill("Investigate this Pod");

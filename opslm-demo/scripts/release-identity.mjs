@@ -27,7 +27,8 @@ if(gitCommit){
 const files=["lib/troubleshoot.mjs","lib/troubleshoot-http.mjs","lib/investigation-evidence.mjs","lib/runbooks.mjs",
   "app/troubleshoot/page.tsx","app/runbooks/page.tsx","app/study/page.tsx","app/engineering/page.tsx",
   "app/globals.css","app/workspace.css","public/runbooks.json","public/study.json",
-  "public/investigation-development.json","package-lock.json"];
+  "public/investigation-development.json","package-lock.json","package.json",
+  "scripts/release-identity.mjs","scripts/lock-evidence.mjs"];
 const hash=value=>crypto.createHash("sha256").update(value).digest("hex");
 const sources=Object.fromEntries(files.sort().map(file=>[file,hash(fs.readFileSync(path.join(web,file),"utf8").replace(/\r\n/g,"\n"))]));
 const data={schema:1,source_commit:sourceCommit,git_commit:gitCommit,dirty_source:dirty,
