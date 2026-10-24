@@ -1,4 +1,5 @@
 import {defineConfig} from "@playwright/test";
+import {fileURLToPath} from "node:url";
 
 // Browser execution is restricted to GitHub's ephemeral runner. Do not launch
 // or install a browser on the user's workstation to run this suite.
@@ -12,6 +13,7 @@ export default defineConfig({
   use:{baseURL:origin,browserName:"chromium",headless:true,viewport:{width:1440,height:1000},
     trace:"retain-on-failure",screenshot:"only-on-failure"},
   webServer:origin.startsWith("http://127.0.0.1")?{
+    cwd:fileURLToPath(new URL("../",import.meta.url)),
     command:"node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3229",
     url:origin+"/api/troubleshoot",reuseExistingServer:false,timeout:30000,
     env:{OPSLM_ENDPOINT:"",OPSVERSE_TROUBLESHOOT_ENDPOINT:"",NEXT_TELEMETRY_DISABLED:"1"}
