@@ -5,6 +5,7 @@ body::before,body::after{display:none;}
 ::selection{background:#c8d7fc;color:#162d61;}
 .flagship-workspace{--workspace-line:var(--atlas-line);--workspace-muted:#596873;--workspace-paper:#21323f;max-width:1440px;padding:0 48px;background:transparent;color:var(--ink);font-family:Arial,Helvetica,sans-serif;}
 .flagship-workspace a{color:var(--atlas-blue);text-underline-offset:4px;}
+.flagship-workspace section{border-bottom:0;}
 .flagship-workspace button,.flagship-workspace textarea{transition:border-color .16s,background-color .16s,box-shadow .16s;}
 .flagship-workspace :is(a,button,summary,textarea):focus-visible{outline:3px solid #244fb8;outline-offset:4px;}
 .flagship-workspace .skip{background:#fffefa;color:#183b92;border:1px solid #244fb8;border-radius:6px;}
@@ -26,7 +27,7 @@ body::before,body::after{display:none;}
 .flagship-workspace .intro h1{font:400 clamp(46px,5.6vw,82px)/1.02 var(--atlas-serif);letter-spacing:-3.3px;margin:0;color:#21323f;}
 .flagship-workspace .intro h1 span{color:#244fb8;font-style:italic;}
 .flagship-workspace .intro-copy{font-size:16px;line-height:1.8;color:#5a6873;max-width:530px;margin:25px 0 0;}
-.flagship-workspace .hero-facts{display:flex;gap:24px;margin-top:28px;flex-wrap:wrap;}
+.flagship-workspace .hero-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px;max-width:420px;}
 .flagship-workspace .hero-facts>span{font:10px/1.5 var(--mono);color:#586873;border-left:1px solid #bfc9cb;padding-left:13px;}
 .flagship-workspace .hero-facts b{display:block;font:400 27px/1.2 var(--atlas-serif);color:#273e50;margin-bottom:5px;}
 .evidence-atlas{color:#244fb8;background:#e7ecf0;border:1px solid #c8d3de;border-radius:20px 75px 20px 20px;padding:24px 22px 20px;min-width:0;box-shadow:0 12px 34px #293e5810;transform:rotate(-1deg);}
@@ -39,6 +40,7 @@ body::before,body::after{display:none;}
 .atlas-node circle{fill:#a94f30;}
 .atlas-node-primary rect{fill:#244fb8;stroke:#244fb8;}
 .atlas-node-primary text{fill:#fffefa;}
+.atlas-node-primary .atlas-node-title{fill:#fffefa;}
 .atlas-node-primary path{stroke:#dfe8ff;}
 .atlas-coordinate{fill:#617c9a;font:7.5px var(--mono);letter-spacing:.6px;}
 .atlas-marker{fill:#e7ecf0;stroke:#a94f30;stroke-width:1;}
