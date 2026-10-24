@@ -47,3 +47,16 @@ test("a genuine abstention and a cited clarification remain valid",()=>{
   const clarification={...answer,status:"needs_details",questions:["What warning events are present?"]};
   assert.deepEqual(validateAnswer(JSON.stringify(clarification),sources),clarification);
 });
+
+test("oversized streamed bodies are cancelled before reading the entire input",async()=>{
+  let pulls=0,cancelled=false,calls=0;
+  const body=new ReadableStream({pull(controller){pulls++;controller.enqueue(new Uint8Array(8192));
+    if(pulls===20)controller.close();},cancel(){cancelled=true;}});
+  const response=await handleRequest(new Request("http://localhost/api/troubleshoot",{
+    method:"POST",body,duplex:"half"
+  }),{corpus,endpoint:"http://localhost/v1",fetcher:async()=>{calls++;throw Error("must not call");}});
+  assert.equal(response.status,413);
+  assert.equal(cancelled,true);
+  assert.ok(pulls<20);
+  assert.equal(calls,0);
+});

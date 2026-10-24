@@ -8,6 +8,8 @@ on:
 jobs:
   runbook-product:
     runs-on: ubuntu-latest
+    env:
+      OPSVERSE_RELEASE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -43,6 +45,14 @@ jobs:
       - name: Verify real production HTTP modes and rejected model output
         run: npm run test:server
         working-directory: opslm-demo
+      - name: Install browser on the GitHub runner only
+        run: npx playwright install --with-deps chromium
+        working-directory: opslm-demo
+      - name: Verify browser layouts, keyboard, evidence and real exports
+        run: npm run test:browser:ci
+        working-directory: opslm-demo
+        env:
+          OPSVERSE_EXPECTED_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -51,6 +61,7 @@ jobs:
             docs/reports/runbook-ci.json
             docs/reports/troubleshooting-ci.json
             docs/reports/investigation-ci.json
+            opslm-demo/e2e-results/
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -86,12 +97,10 @@ jobs:
         with:
           enable-cache: true
 
-      # Python dependency CVEs. Advisory (report-only) on purpose: the current
-      # findings are transitive dev-tooling (dvc's gitpython/diskcache), so this
-      # surfaces them in the log rather than blocking on a vuln we don't ship at
-      # runtime. Remove `|| true` to turn it into a hard gate.
+      # Audit the installed default environment. Historical optional data-tools
+      # are not installed and their unresolved diskcache advisories are documented.
       - name: pip-audit (dependency CVEs)
-        run: uv run --with pip-audit pip-audit || true
+        run: uv run --with pip-audit pip-audit
 
       # Filesystem scan: known-vuln packages, leaked secrets, and IaC misconfig
       # across the repo (Dockerfile, k8s, compose). Advisory here too (exit-code 0);

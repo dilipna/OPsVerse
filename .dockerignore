@@ -1,0 +1,13 @@
+.git
+.venv
+.uv-cache
+**/node_modules
+**/.next
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.env
+.env.*
+!.env.example
+*.gguf
+*.safetensors
