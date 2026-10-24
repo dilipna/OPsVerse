@@ -8,10 +8,11 @@
     "start": "next start",
     "test": "node --test scripts/*.test.mjs",
     "typecheck": "tsc --noEmit",
-    "eval": "node scripts/evaluate-runbooks.mjs"
+    "eval": "node scripts/evaluate-runbooks.mjs",
+    "test:server": "node scripts/server-smoke.mjs"
   },
   "dependencies": {
-    "next": "^16.2.11",
+    "next": "16.4.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

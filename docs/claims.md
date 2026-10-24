@@ -1,5 +1,25 @@
 # Claims ledger — 19 October 2026
 
+## Flagship candidate — October 23, 2026 (local, not released)
+
+The isolated candidate adds bounded signal-family retrieval, per-request evidence
+gaps/context accounting, stricter output-state validation and an updated workspace.
+On a frozen 14-case synthetic development set, document-family presence changes
+from 14/20 to 19/20, with no per-case family regression in the final candidate.
+This is development coverage, not diagnosis accuracy or held-out model quality.
+The first aggregate-improving candidate swapped one family's coverage and was
+corrected after per-case review. Raw observations and limitations are retained in
+`docs/reports/investigation-development-*-v1.json`.
+
+The research gateway now refuses budgeted calls when its counter is absent,
+unavailable or invalid. Its accounting is still post-call, without in-flight
+reservation or complete fallback-attempt billing; a hard spend cap is unproved.
+No provider call, model load, DPO run, source publication or production update was
+performed for this candidate. Visual/browser release verification remains pending.
+See `docs/reports/flagship-foundation-v1.md` for local checks and remaining work.
+
+## Historical released baseline
+
 This ledger and the regenerated capacity report supersede conflicting historical wording.
 Old findings were revalidated against unchanged HEAD `548308ae70b35f14608f6d8177f46b6017f36910`.
 

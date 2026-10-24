@@ -87,8 +87,8 @@ async def test_budget_kill_switch_blocks_when_exceeded():
 
 async def test_pass_through_when_redis_none():
     llm = FakeLLM()
-    gw = LLMGateway(llm, None, model_id="fake/model", daily_budget_usd=0.01)
-    # no redis: no cache, no budget enforcement, never raises
+    gw = LLMGateway(llm, None, model_id="fake/model", daily_budget_usd=0)
+    # Explicitly disabled spend guard permits operation without a counter.
     r1 = await gw.complete(MSGS)
     r2 = await gw.complete(MSGS)
     assert llm.complete_calls == 2

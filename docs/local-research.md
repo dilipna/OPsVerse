@@ -16,3 +16,11 @@ include Postgres, Redis, Qdrant and MinIO. MCP setup: [README](../apps/mcp-serve
 Full Docker/database/model deployment was not rehearsed here. CI builds the API, runs
 existing tests and a real Qdrant retrieval smoke test. Inference needs a separate endpoint.
 No paid jobs or model downloads are needed for the navigator verification chain.
+
+The flagship candidate changes the research gateway's failure policy: with a
+positive daily spend threshold, unavailable Redis or an invalid spend counter
+refuses new provider calls. Cache failure alone is a normal miss. A zero threshold
+explicitly disables the spend guard; it is not an authorization to use paid services.
+The threshold still accounts after calls and does not reserve in-flight spend, so it
+must not be treated as a hard billing ceiling. Public browser retrieval is independent
+of this gateway and needs neither Redis nor provider credentials.

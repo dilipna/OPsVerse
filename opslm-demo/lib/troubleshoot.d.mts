@@ -1,8 +1,9 @@
 import type {Corpus,Chunk} from "./runbooks.mjs";
+import type {EvidencePolicy} from "./investigation-evidence.mjs";
 export type Input={issue:string;diagnostics:string};
 export type Claim={text:string;source_id:string;quote:string};
 export type Answer={status:"answered"|"needs_details"|"abstained";summary:string;claims:Claim[];questions:string[];commands:{command:string;source_id:string}[]};
-export type Prepared=Input & {signals:string[];redactions:number;diagnostics_truncated:boolean;retrieval_query:string;sources:Chunk[]};
+export type Prepared=Input & {signals:string[];redactions:number;diagnostics_truncated:boolean;retrieval_query:string;sources:Chunk[];evidence_policy:EvidencePolicy};
 export type Result=Prepared & {mode:"excerpts"|"generated"|"abstained";answer:Answer|null;note:string;model?:string;latency_ms?:number;usage?:unknown};
 export const SYSTEM:string;
 export function redact(text:string):{text:string;redactions:number};
@@ -10,4 +11,5 @@ export function prepare(corpus:Corpus,input:Input):Prepared;
 export function messages(prepared:Prepared):{role:string;content:string}[];
 export function readOnlyCommand(command:string):boolean;
 export function validateAnswer(raw:string,sources:Chunk[]):Answer;
+export function completeInvestigation(prepared:Prepared,generate?:(messages:{role:string;content:string}[])=>Promise<{text:string;finish_reason:string;model?:string;usage?:unknown}>):Promise<Result>;
 export function troubleshoot(corpus:Corpus,input:Input,generate?:(messages:{role:string;content:string}[])=>Promise<{text:string;finish_reason:string;model?:string;usage?:unknown}>):Promise<Result>;
