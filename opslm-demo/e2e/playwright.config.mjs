@@ -9,7 +9,7 @@ if(!["http://127.0.0.1:3229","https://ops-verse.vercel.app"].includes(origin))th
 export default defineConfig({
   testDir:"./tests",outputDir:"../e2e-results/artifacts",workers:1,retries:0,
   timeout:30000,globalTimeout:10*60*1000,
-  reporter:[["list"],["json",{outputFile:"e2e-results/results.json"}]],
+  reporter:[["list"],["json",{outputFile:fileURLToPath(new URL("../e2e-results/results.json",import.meta.url))}]],
   use:{baseURL:origin,browserName:"chromium",headless:true,viewport:{width:1440,height:1000},
     trace:"retain-on-failure",screenshot:"only-on-failure"},
   webServer:origin.startsWith("http://127.0.0.1")?{
