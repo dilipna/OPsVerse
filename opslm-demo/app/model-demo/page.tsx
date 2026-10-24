@@ -1,5 +1,8 @@
 "use client";
 
+import {sourceTree} from "../../lib/source-links";
+
+
 import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "user" | "assistant" | "system"; content: string };
@@ -87,7 +90,7 @@ export default function Page() {
             benchmarks ↗
           </a>
           <a
-            href="https://github.com/dilipna/OPsVerse"
+            href={sourceTree}
             target="_blank"
             rel="noreferrer"
           >

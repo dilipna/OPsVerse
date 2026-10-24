@@ -1,5 +1,8 @@
 "use client";
 
+import {sourceFile} from "../../lib/source-links";
+
+
 import {useEffect,useRef,useState} from "react";
 import {troubleshoot,redact,type Result} from "../../lib/troubleshoot.mjs";
 import type {Corpus} from "../../lib/runbooks.mjs";
@@ -64,7 +67,7 @@ export default function TroubleshootPage(){
         <p id="diagnostics-help" className="intake-note">A status or warning event helps narrow the search. Input is not saved across page reloads.</p>
         <div className="incident-actions"><button disabled={!corpus||busy} type="submit">{busy?"Working…":"Find incident evidence →"}</button>{configured&&<button disabled={!corpus||busy} type="button" onClick={()=>void analyze(true)}>Ask configured model</button>}</div>
       </form>
-      {configured?<p className="intake-note">Model availability is unverified. Asking the model sends the locally redacted issue and diagnostics to this app’s configured endpoint. A valid quote does not prove an explanation is correct.</p>:<p className="intake-note">This public deployment has no model endpoint configured. The evidence workflow is live; model examples, when available, are labeled recorded. <a href="https://github.com/dilipna/OPsVerse/blob/main/docs/troubleshooting.md">How this workflow works ↗</a></p>}
+      {configured?<p className="intake-note">Model availability is unverified. Asking the model sends the locally redacted issue and diagnostics to this app’s configured endpoint. A valid quote does not prove an explanation is correct.</p>:<p className="intake-note">This public deployment has no model endpoint configured. The evidence workflow is live; model examples, when available, are labeled recorded. <a href={sourceFile("docs/troubleshooting.md")}>How this workflow works ↗</a></p>}
       {!corpus&&!loadError&&<p role="status">Loading pinned runbooks…</p>}{loadError&&<div role="alert"><p>{loadError}</p><button onClick={()=>void load()}>Retry loading</button></div>}
     </section>
     <section className="incident-results results" ref={results} tabIndex={-1} aria-label="Incident analysis" aria-live="polite">
