@@ -13,6 +13,8 @@ website; its exact deployed commit and source hashes are at
 
 RYPE returns covered Kubernetes guidance from its pinned documentation library without model inference. Other questions use explicit everyday, coding or reasoning profiles and can route to eligible free OpenRouter models when a server-side key is configured. Paid models and paid fallbacks are disabled. Each response shows its route, model actually used, reported inference charge and explicitly estimated comparison against a named baseline. No claim is made about a model's training-data membership or measured quality-matched savings.
 
+The knowledge workspace adds an inference-free Pod definition, inspectable BM25/character-rank retrieval, an optional private browser document library with backups, and discussion-aware study PDF / code ZIP downloads. See [implementation and storage limits](docs/rype-knowledge-workspace.md).
+
 The existing Night Orbit UI, source library, portable JSON/Markdown notes, device reading list and research evidence remain. Covered questions stay in the browser; cloud-routed questions and redacted logs are sent to OpenRouter. No cluster connection or command execution. Credential redaction is best-effort: remove secrets first. See [routing, setup and cost methodology](docs/rype-routing.md) for server-only key configuration, free-only enforcement, billing limits and verification scope.
 Explore [all runbooks](https://ops-verse.vercel.app/runbooks),
 [architecture and decisions](https://ops-verse.vercel.app/engineering), or

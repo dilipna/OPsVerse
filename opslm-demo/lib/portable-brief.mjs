@@ -32,6 +32,8 @@ export function markdownBrief(brief){
   const sections=["# RYPE investigation notes",`Created: ${brief.created_at}`,"Status: Unreviewed. Documentation support is not a confirmed root cause.","## Question",block(brief.issue),"## Logs / error details",block(brief.diagnostics||"None provided."),"## Your notes",block(brief.review.notes||"None added.")];
   if(brief.diagnostics_truncated)sections.push("Only the first 2,000 log characters are included. The original search may have used additional status text.");
   if(brief.cloud_answer)sections.push("## OpenRouter answer — requires review",block(brief.cloud_answer));
+  if(brief.library_answer)sections.push("## Library extracts — check the cited sources",block(brief.library_answer));
+  if(brief.knowledge)sections.push("## Retrieval tool observations",block(JSON.stringify(brief.knowledge,null,2)));
   if(brief.routing)sections.push("## Routing and cost receipt",block(JSON.stringify(brief.routing,null,2)));
   if(brief.answer)sections.push("## AI draft — requires review",block(JSON.stringify(brief.answer,null,2)));
   sections.push("## Source passages");

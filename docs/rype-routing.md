@@ -41,3 +41,7 @@ This directly adapts the original triage-router idea (#4) as a rules-based, retr
 ## Activation compatibility findings
 
 Live zero-price probes found that the original Liquid and NVIDIA endpoints require free-model training permission under this account, while some other free endpoints were rate-limited or restricted to agentic harnesses. The user explicitly chose to keep privacy restrictions. No account privacy setting or per-request deny-training policy was relaxed. Current default free profiles were updated to Flint, Cohere and Dots after each answered a synthetic probe with a reported charge of zero. This is transport/compatibility evidence, not a comparative quality benchmark; final end-to-end app verification is recorded separately in the release report. Free provider availability can still change.
+
+## Knowledge workspace update
+
+Basic Pod definitions now use a separate editorial concept guide and a bounded hybrid search controller. The optional private IndexedDB library persists within a browser and has export/import/delete controls. Discussion-aware PDF/code-ZIP downloads use the actual accepted answers, without extra inference. See [the workspace implementation and limits](rype-knowledge-workspace.md). The frozen research corpus and its metrics are unchanged.

@@ -132,7 +132,7 @@ test("real evidence, notes, redaction and actual JSON download",async({page},inf
   await page.locator(".chat-notes > summary").click();
   await page.locator("#review-notes").fill("CI QA: root cause unconfirmed. token=synthetic-private-value");
   const downloaded=page.waitForEvent("download");
-  await page.getByRole("button",{name:"Download notes ↓"}).click();
+  await page.getByRole("button",{name:"Download JSON ↓"}).click();
   const download=await downloaded,file=info.outputPath("incident-brief.json");await download.saveAs(file);
   const brief=JSON.parse(await fs.readFile(file,"utf8"));
   expect(brief.mode).toBe("excerpts");expect(brief.answer).toBeNull();
@@ -212,7 +212,7 @@ test("mobile evidence remains readable after a real investigation",async({page},
   await page.getByRole("button",{name:"Send question"}).click();
   await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
-  await expect(page.getByRole("button",{name:"Download notes ↓"})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Download JSON ↓"})).toBeVisible();
   const screenshot=info.outputPath("mobile-evidence.png");
   await page.screenshot({path:screenshot,fullPage:true});
   await info.attach("actual-mobile-evidence",{path:screenshot,contentType:"image/png"});
@@ -257,7 +257,7 @@ test("portable JSON resumes trusted retrieval and Markdown saves readable redact
   const mdDownload=await mdEvent,mdPath=info.outputPath("investigation.md");await mdDownload.saveAs(mdPath);
   const markdown=await fs.readFile(mdPath,"utf8");expect(markdown).toContain("# RYPE investigation notes");expect(markdown).toContain("[REDACTED]");expect(markdown).not.toContain("portable-secret");expect(markdown).toContain("ImagePullBackOff");
   await info.attach("actual-markdown-download",{path:mdPath,contentType:"text/markdown"});
-  const jsonEvent=page.waitForEvent("download");await page.getByRole("button",{name:"Download notes ↓",exact:true}).click();
+  const jsonEvent=page.waitForEvent("download");await page.getByRole("button",{name:"Download JSON ↓",exact:true}).click();
   const jsonDownload=await jsonEvent,jsonPath=info.outputPath("portable-notes.json");await jsonDownload.saveAs(jsonPath);
   const brief=JSON.parse(await fs.readFile(jsonPath,"utf8"));
   brief.answer={summary:"UNTRUSTED_IMPORTED_AUTHORITY"};brief.sources=[{source:"javascript:untrusted",text:"UNTRUSTED_IMPORTED_AUTHORITY"}];
