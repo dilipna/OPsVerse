@@ -76,7 +76,7 @@ test("custom fonts load from this release rather than a fallback or font service
     expect(await page.evaluate(name=>Array.from(document.fonts).some(f=>f.family.replaceAll('"',"")===name&&f.status==="loaded"),family)).toBe(true);
   }
   for(const url of fontRequests)expect(new URL(url).origin).toBe(new URL(page.url()).origin);
-  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Plus Jakarta Sans");
+  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Georgia");
   expect(await page.locator(".intro-copy").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
   expect(await page.locator("textarea").first().evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
 });

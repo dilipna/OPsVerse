@@ -13,3 +13,8 @@ The user clarified that the workbench still looked too technical and requested t
 Existing retrieval, redaction, truncation, abstention, validation and exported JSON semantics are preserved. Exports remain unreviewed notes with exact source provenance. Full-evidence gap notices stay visible rather than being hidden with implementation detail.
 
 Browser tests run only on GitHub. Responsive coverage includes the simplified empty state, actual documentation response, optional controls, Enter/Shift+Enter, exact-source preview grounding, reset, error/retry, note redaction and actual downloads. No desktop control or local browser install, paid calls, hosted model, main merge or hosting-setting changes.
+## Current visual theme: Field Notes
+
+Following the user's request to try a different theme, the current appearance uses ivory paper, a dark charcoal navigation rail, copper/orange controls and Georgia/Times serif editorial headings. Inter remains the interface font; Plus Jakarta Sans remains the wordmark and IBM Plex Mono supports diagnostic details. Serif headings use available platform fonts rather than installing a font or adding a network service. All existing licensed self-hosted files remain unchanged.
+
+The chat interaction is unchanged. Guides, engineering pages and hosted research archives share the warm palette and serif heading treatment. The archive's explicit dark toggle uses a warm charcoal variant and retains distinct chart series. Historical scripts/data/claim text are unchanged. Browser checks retain existing user journeys and verify the new computed heading family.

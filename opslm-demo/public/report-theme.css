@@ -27,3 +27,9 @@ html:root[data-report-theme="studio"][data-theme="dark"],html:root[data-report-t
 
 html:root[data-report-theme="studio"] a{color:var(--accent)}
 .research-nav{border:0;border-bottom:1px solid var(--border);border-radius:0;padding-inline:0}
+
+/* Field Notes archive appearance. Chart data and semantic series stay intact. */
+html:root[data-report-theme="studio"][data-theme="light"],html:root[data-report-theme="studio"][data-theme="light"] .dash{--plane:#faf6ef;--surface:#fffcf7;--surface-2:#f1e6d5;--ink:#3b3027;--secondary:#7a6551;--muted:#8a755e;--grid:#e9ddcc;--axis:#ceb89c;--border:#dfcdb4;--accent:#ad542c;--vllm:#ad542c;--vllm-soft:#f2ddc8;--ollama:#416fa5;--ollama-soft:#eaf1f9}
+html:root[data-report-theme="studio"][data-theme="dark"],html:root[data-report-theme="studio"][data-theme="dark"] .dash{--plane:#282723;--surface:#333029;--surface-2:#403a30;--ink:#f4e7d3;--secondary:#d8c7ae;--muted:#bca98e;--grid:#544a3c;--axis:#847259;--border:#6b5c47;--accent:#e2a36c;--vllm:#e2a36c;--vllm-soft:#59422d;--ollama:#91b9ec;--ollama-soft:#2b415c}
+html:root[data-report-theme="studio"] :is(h1,h2,h3,.brand-title,.thesis-lead){font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.025em}
+html:root[data-report-theme="studio"] .research-notice{border-radius:3px}.research-nav .research-brand{color:var(--accent)}
