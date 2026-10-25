@@ -21,6 +21,13 @@ for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runb
     await page.evaluate(()=>document.fonts.ready);
     await expect(page.locator("main")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
+    if(route==="/"&&width===1440){
+      const rail=await page.locator(".site-header").boundingBox(),main=await page.locator("main").boundingBox();
+      const intake=await page.locator(".incident-layout .search-panel").boundingBox(),review=await page.locator(".incident-results").boundingBox();
+      expect(rail.x+rail.width).toBeLessThan(main.x);
+      expect(intake.y+intake.height).toBeLessThanOrEqual(review.y);
+      expect(review.width).toBeGreaterThan(intake.width*.95);
+    }
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
     const screenshot=info.outputPath("layout.png");await page.screenshot({path:screenshot,fullPage:true});
     await info.attach("layout",{path:screenshot,contentType:"image/png"});
@@ -116,6 +123,8 @@ test("real evidence, notes, redaction and actual JSON download",async({page},inf
   await expect(page.getByRole("heading",{name:"Incident evidence",exact:true})).toBeVisible();
   await expect(page.locator(".incident-source")).toHaveCount(3);
   await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
+  const evidenceScreenshot=info.outputPath("desktop-evidence.png");await page.screenshot({path:evidenceScreenshot,fullPage:true});
+  await info.attach("actual-desktop-evidence",{path:evidenceScreenshot,contentType:"image/png"});
   await page.locator("#review-notes").fill("CI QA: root cause unconfirmed. token=synthetic-private-value");
   const downloaded=page.waitForEvent("download");
   await page.getByRole("button",{name:"Export brief ↓"}).click();
@@ -188,7 +197,7 @@ test("mobile evidence remains readable after a real investigation",async({page},
   await page.goto("/");
   await page.evaluate(()=>document.fonts.ready);
   await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
-  await expect(page.getByRole("img",{name:"A symptom becomes a traceable investigation"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Incident workbench",exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Image won't pull",exact:true}).click();
   await page.getByRole("button",{name:"Find incident evidence →"}).click();
   await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
