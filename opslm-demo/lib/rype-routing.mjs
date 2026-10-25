@@ -25,7 +25,7 @@ export function previewSource(text){
 
 export function decideRoute(prepared){
   const question=prepared.issue.toLowerCase(),text=question+"\n"+prepared.diagnostics;
-  const category=/\b(prove|proof|derive|trade[- ]?offs?|multi[- ]step|complex|reasoning|architecture)\b/.test(question)?"reasoning":/\b(code|implement|function|program|algorithm|python|javascript|typescript|sql|debug|refactor|write.*script)\b/.test(question)?"code":"general";
+  const category=/\b(prove|proof|derive|trade[- ]?offs?|multi[- ]step|complex|reasoning|architecture)\b/.test(question)?"reasoning":/\b(code|implement|function|program|algorithm|python|javascript|typescript|sql|dockerfile|yaml|bash|golang|rust|java|debug|refactor|write.*script)\b/.test(question)?"code":"general";
   const custom=/\b(write|generate|implement|prove|derive|refactor|algorithm|compare|versus|vs|redis|postgres|terraform|dockerfile|javascript|python|quantum|poem|email)\b/.test(question);
   const matched=RULES.filter(([,pattern])=>pattern.test(text));
   const stem=t=>t.replace(/(?:ing|ed|s)$/,"");

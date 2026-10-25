@@ -19,6 +19,7 @@ test("coverage gate accepts source-covered guidance and rejects tangential and m
   assert.equal(decideRoute(prepare(corpus,input)).kind,"retrieval");
   for(const issue of ["Explain Redis connection pooling","What does ImagePullBackOff mean and what is the capital of France?","Write a Python Kubernetes operator"]){assert.equal(decideRoute(prepare(corpus,{issue,diagnostics:""})).kind,"model",issue);}
   assert.equal(decideRoute(prepare(corpus,{issue:"Write a Python function",diagnostics:""})).category,"code");
+  assert.equal(decideRoute(prepare(corpus,{issue:"Write a Dockerfile",diagnostics:""})).category,"code");
   assert.equal(decideRoute(prepare(corpus,{issue:"Prove a theorem",diagnostics:""})).category,"reasoning");
 });
 test("library response makes zero inference requests and separates estimated comparison from actual zero charge",async()=>{
