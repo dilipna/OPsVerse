@@ -16,17 +16,19 @@ for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runb
   test(`layout ${width} ${route}`,async({page},info)=>{
     await page.setViewportSize({width,height:1000});
     const response=await page.goto(route);expect(response.status()).toBe(200);
-    if(route==="/"||route==="/troubleshoot")await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+    if(route==="/"||route==="/troubleshoot")await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
     if(route==="/runbooks")await expect(page.getByRole("button",{name:"Find passages →"})).toBeEnabled();
     await page.evaluate(()=>document.fonts.ready);
     await expect(page.locator("main")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
     if(route==="/"&&width===1440){
-      const rail=await page.locator(".site-header").boundingBox(),main=await page.locator("main").boundingBox();
-      const intake=await page.locator(".incident-layout .search-panel").boundingBox(),review=await page.locator(".incident-results").boundingBox();
-      expect(rail.x+rail.width).toBeLessThan(main.x);
-      expect(intake.y+intake.height).toBeLessThanOrEqual(review.y);
-      expect(review.width).toBeGreaterThan(intake.width*.95);
+      const rail=await page.locator(".chat-sidebar").boundingBox(),main=await page.locator("main").boundingBox();
+      const composer=await page.locator(".chat-composer").boundingBox();
+      expect(rail.x+rail.width).toBeLessThanOrEqual(main.x);
+      expect(Math.abs(composer.x+composer.width/2-(main.x+main.width/2))).toBeLessThan(2);
+      expect(composer.width).toBeLessThanOrEqual(820);
+      await expect(page.locator(".chat-response")).toBeHidden();
+      await expect(page.locator("#diagnostics")).toBeHidden();
     }
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
     const screenshot=info.outputPath("layout.png");await page.screenshot({path:screenshot,fullPage:true});
@@ -46,7 +48,7 @@ test("research archive navigation, chart rendering and theme toggle",async({page
   await page.getByRole("button",{name:"Toggle light and dark theme"}).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme","light");
   await page.getByRole("navigation",{name:"Research navigation"}).getByRole("link",{name:"Workspace",exact:true}).click();
-  await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+  await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
   await page.goto("/overturns.html");await page.evaluate(()=>document.fonts.ready);
   await expect(page.locator("article.card")).toHaveCount(8);
   await expect(page.getByRole("link",{name:"Read current corrections and limitations ↗"})).toHaveAttribute("href",/improve\/flagship-investigation\/docs\/claims.md$/);
@@ -76,7 +78,7 @@ test("custom fonts load from this release rather than a fallback or font service
   for(const url of fontRequests)expect(new URL(url).origin).toBe(new URL(page.url()).origin);
   expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Plus Jakarta Sans");
   expect(await page.locator(".intro-copy").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
-  expect(await page.locator("textarea").first().evaluate(e=>getComputedStyle(e).fontFamily)).toContain("IBM Plex Mono");
+  expect(await page.locator("textarea").first().evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
 });
 
 for(const route of ["/","/runbooks"]){
@@ -88,7 +90,7 @@ for(const route of ["/","/runbooks"]){
       else await request.continue();
     });
     await page.goto(route);
-    const submit=page.getByRole("button",{name:route==="/"?"Find incident evidence →":"Find passages →"});
+    const submit=page.getByRole("button",{name:route==="/"?"Send question":"Find passages →"});
     const loadAlert=page.locator("main").getByRole("alert");
     await expect(loadAlert).toContainText("could not load");
     await expect(submit).toBeDisabled();
@@ -116,18 +118,19 @@ test("reviewer links and reproduction select the released branch",async({page})=
 test("real evidence, notes, redaction and actual JSON download",async({page},info)=>{
   let modelPosts=0;page.on("request",r=>{if(r.method()==="POST"&&r.url().includes("/api/troubleshoot"))modelPosts++;});
   await page.goto("/");
-  await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+  await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
   await page.getByRole("button",{name:"Image won't pull",exact:true}).click();
   await expect(page.locator("#diagnostics")).toHaveValue(/ImagePullBackOff/);
-  await page.getByRole("button",{name:"Find incident evidence →"}).click();
-  await expect(page.getByRole("heading",{name:"Incident evidence",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Send question"}).click();
+  await expect(page.getByRole("heading",{name:"What I found",exact:true})).toBeVisible();
   await expect(page.locator(".incident-source")).toHaveCount(3);
   await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
   const evidenceScreenshot=info.outputPath("desktop-evidence.png");await page.screenshot({path:evidenceScreenshot,fullPage:true});
   await info.attach("actual-desktop-evidence",{path:evidenceScreenshot,contentType:"image/png"});
+  await page.locator(".chat-notes > summary").click();
   await page.locator("#review-notes").fill("CI QA: root cause unconfirmed. token=synthetic-private-value");
   const downloaded=page.waitForEvent("download");
-  await page.getByRole("button",{name:"Export brief ↓"}).click();
+  await page.getByRole("button",{name:"Download notes ↓"}).click();
   const download=await downloaded,file=info.outputPath("incident-brief.json");await download.saveAs(file);
   const brief=JSON.parse(await fs.readFile(file,"utf8"));
   expect(brief.mode).toBe("excerpts");expect(brief.answer).toBeNull();
@@ -144,39 +147,42 @@ test("real evidence, notes, redaction and actual JSON download",async({page},inf
   await info.attach("actual-download",{path:file,contentType:"application/json"});
   await page.locator("#incident-issue").fill("A changed incident");
   await expect(page.locator("#review-notes")).toHaveCount(0);
-  await expect(page.getByRole("heading",{name:"Incident evidence",exact:true})).toHaveCount(0);
+  await expect(page.getByRole("heading",{name:"What I found",exact:true})).toHaveCount(0);
 });
 
 test("multiple families expose budget gaps and unsupported input abstains",async({page})=>{
-  await page.goto("/");await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
   await page.locator("#incident-issue").fill("What should I inspect next?");
+  await page.locator(".chat-logs > summary").click();
   await page.locator("#diagnostics").fill("ImagePullBackOff\nOOMKilled\nReadiness probe failed\nProgressDeadlineExceeded");
-  await page.getByRole("button",{name:"Find incident evidence →"}).click();
-  await expect(page.getByText("Documentation gap",{exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Send question"}).click();
+  await expect(page.getByText("Some details are missing",{exact:true})).toBeVisible();
   await expect(page.locator(".incident-source")).toHaveCount(3);
+  await page.locator(".chat-method > summary").click();
   await page.locator(".decision-trace summary").click();
   await expect(page.locator(".decision-trace")).toContainText("Document-family presence only");
   await page.locator("#incident-issue").fill("quasar marmalade");await page.locator("#diagnostics").fill("");
-  await page.getByRole("button",{name:"Find incident evidence →"}).click();
-  await expect(page.getByRole("heading",{name:"No supporting evidence",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Send question"}).click();
+  await expect(page.getByRole("heading",{name:"No matches yet",exact:true})).toBeVisible();
   await expect(page.locator(".incident-source")).toHaveCount(0);
 });
 
 test("keyboard investigation and invalid-input recovery",async({page})=>{
-  await page.goto("/");await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
-  await page.getByRole("button",{name:"Find incident evidence →"}).click();
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await page.getByRole("button",{name:"Send question"}).click();
   await expect(page.getByText("Describe the issue first.",{exact:true})).toBeVisible();
   // Analysis deliberately moves focus on the next animation frame. Wait for
   // that completed transition before testing the independent skip-link action.
-  await expect(page.getByRole("region",{name:"Incident analysis",exact:true})).toBeFocused();
-  await page.getByRole("link",{name:"Skip to incident input",exact:true}).focus();
+  await expect(page.getByRole("region",{name:"Response",exact:true})).toBeFocused();
+  await page.getByRole("link",{name:"Skip to question",exact:true}).focus();
   await page.keyboard.press("Enter");await expect(page.locator("#incident-issue")).toBeFocused();
   await page.locator("#incident-issue").fill("Investigate this Pod");
+  await page.locator(".chat-logs > summary").click();
   await page.locator("#diagnostics").fill("OOMKilled");
   await page.locator("#diagnostics").press("Tab");
-  await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeFocused();
+  await expect(page.getByRole("button",{name:"Send question"})).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("region",{name:"Incident analysis",exact:true})).toBeFocused();
+  await expect(page.getByRole("region",{name:"Response",exact:true})).toBeFocused();
   await expect(page.locator(".incident-source").first()).toContainText("resources:");
 });
 
@@ -196,14 +202,44 @@ test("mobile evidence remains readable after a real investigation",async({page},
   await page.setViewportSize({width:390,height:844});
   await page.goto("/");
   await page.evaluate(()=>document.fonts.ready);
-  await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
-  await expect(page.getByRole("heading",{name:"Incident workbench",exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await expect(page.getByRole("heading",{name:"What can I help you understand?",exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Image won't pull",exact:true}).click();
-  await page.getByRole("button",{name:"Find incident evidence →"}).click();
+  await page.getByRole("button",{name:"Send question"}).click();
   await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
-  await expect(page.getByRole("button",{name:"Export brief ↓"})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Download notes ↓"})).toBeVisible();
   const screenshot=info.outputPath("mobile-evidence.png");
   await page.screenshot({path:screenshot,fullPage:true});
   await info.attach("actual-mobile-evidence",{path:screenshot,contentType:"image/png"});
+});
+
+test("simple question flow reveals detail only on request and resets cleanly",async({page})=>{
+  let modelPosts=0;page.on("request",r=>{if(r.method()==="POST"&&r.url().includes("/api/troubleshoot"))modelPosts++;});
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await expect(page.locator("#diagnostics")).toBeHidden();
+  await expect(page.locator(".chat-response")).toBeHidden();
+  await page.locator("#incident-issue").fill("What does ImagePullBackOff mean?");
+  await page.locator("#incident-issue").press("Shift+Enter");
+  await expect(page.locator("#incident-issue")).toHaveValue("What does ImagePullBackOff mean?\n");
+  await page.locator("#incident-issue").press("Enter");
+  await expect(page.getByRole("heading",{name:"What I found",exact:true})).toBeVisible();
+  await expect(page.locator(".chat-sources")).not.toHaveAttribute("open");
+  await expect(page.locator(".chat-method")).not.toHaveAttribute("open");
+  await expect(page.locator("#review-notes")).toBeHidden();
+  const normalize=t=>t.replace(/\[([^\]]+)\]\([^)]*\)/g,"$1").replace(/`([^`]+)`/g,"$1").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\s+/g," ").trim();
+  for(const card of await page.locator(".guide-preview").all()){
+    const id=await card.getAttribute("data-source-id"),source=corpus.chunks.find(c=>c.id===id);
+    expect(source).toBeTruthy();
+    const paragraph=card.locator("p");if(await paragraph.count())expect(normalize(source.text)).toContain(normalize(await paragraph.innerText()));
+  }
+  await page.locator(".chat-sources > summary").click();
+  await page.locator(".incident-source").first().locator("summary").click();
+  await expect(page.getByLabel("Incident source 1",{exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Ask another question",exact:true}).click();
+  await expect(page.locator("#incident-issue")).toHaveValue("");
+  await expect(page.locator("#diagnostics")).toHaveValue("");
+  await expect(page.locator(".chat-response")).toBeHidden();
+  await expect(page.locator("#incident-issue")).toBeFocused();
+  expect(modelPosts).toBe(0);
 });

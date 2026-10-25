@@ -13,6 +13,15 @@ const EXAMPLES=[
   {title:"Memory termination",issue:"How does Kubernetes enforce container memory limits?",diagnostics:"Name: worker\nNamespace: batch\nLast State: Terminated\nReason: OOMKilled\nExit Code: 137\nNo memory-usage profile provided"},
 ];
 
+// A reading preview, not a generated answer. Skip code, frontmatter and template
+// fragments; retain the source paragraph's words, removing inline Markdown only.
+function preview(text:string){
+  const paragraphs=text.replace(/^---\n[\s\S]*?\n---\n/,"").replace(/```[\s\S]*?```/g,"").split(/\n\s*\n/);
+  const prose=paragraphs.filter(p=>/^[A-Z]/.test(p)&&p.length>=60&&p.length<=900&&!/[{}<>]|^\s*[-*#|]/m.test(p));
+  const selected=prose.find(p=>/\bmeans\b|\bindicates\b/.test(p))||prose[0];
+  return selected?.replace(/\[([^\]]+)\]\([^)]*\)/g,"$1").replace(/`([^`]+)`/g,"$1").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/\s+/g," ").trim();
+}
+
 export default function TroubleshootPage(){
   const [corpus,setCorpus]=useState<Corpus|null>(null),[loadError,setLoadError]=useState("");
   const [issue,setIssue]=useState(""),[diagnostics,setDiagnostics]=useState("");
@@ -20,6 +29,8 @@ export default function TroubleshootPage(){
   const [busy,setBusy]=useState(false),[configured,setConfigured]=useState(false),[copied,setCopied]=useState("");
   const [notes,setNotes]=useState("");
   const results=useRef<HTMLElement>(null);
+  const prompt=useRef<HTMLTextAreaElement>(null),logs=useRef<HTMLDetailsElement>(null);
+  function reset(){if(busy)return;edit("","");if(logs.current)logs.current.open=false;requestAnimationFrame(()=>prompt.current?.focus());}
   async function load(){
     setLoadError("");
     try{const r=await fetch("/runbooks.json");if(!r.ok)throw new Error();const c=await r.json();if(c.schema!==1||!Array.isArray(c.chunks))throw new Error();setCorpus(c);}
@@ -41,7 +52,7 @@ export default function TroubleshootPage(){
         setResult({...data,redactions:local.redactions});
       }
     }catch(e){setError(e instanceof Error?e.message:"The request failed. Please retry.");}
-    finally{setBusy(false);requestAnimationFrame(()=>{results.current?.focus();results.current?.scrollIntoView({block:"start",behavior:"smooth"});});}
+    finally{setBusy(false);requestAnimationFrame(()=>{results.current?.focus();results.current?.scrollIntoView({block:"start",behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});});}
   }
   function exportBrief(){
     if(!result)return;
@@ -54,45 +65,52 @@ export default function TroubleshootPage(){
     const link=document.createElement("a");link.href=url;link.download="opsverse-incident-brief.json";link.click();URL.revokeObjectURL(url);
     setCopied("Incident brief downloaded. It contains the redacted input and displayed evidence.");
   }
-  return <div className="navigator incident flagship-workspace">
-    <a className="skip" href="#incident-issue">Skip to incident input</a>
-    <header className="site-header"><a className="wordmark" href="/">OPS<span>VERSE</span><small> / engineering workspace</small></a><nav aria-label="Main navigation"><a className="active-nav" href="/" aria-current="page">Workspace</a><a href="/runbooks">Runbooks</a><a href="/study">Evaluation</a><a href="/engineering">Engineering ↗</a></nav><div className="rail-context"><span>WORKSPACE BOUNDARY</span><strong>Evidence, not execution.</strong><p>Pinned sources. Human review. No cluster commands.</p><a href="/engineering">System architecture ↗</a></div></header>
-    <main><section className="case-header"><div><p className="eyebrow">OPSVERSE / WORKSPACE</p><h1>Incident workbench</h1><p className="intro-copy">Capture a symptom, inspect its sources, and build a reviewable case.</p></div><div className="case-mode"><span><i/> Local evidence search</span><a href="/runbooks">Open source library ↗</a></div></section><div className="case-context"><span><b>01</b> Diagnostic intake</span><span><b>02</b> Evidence review</span><span><b>03</b> Annotated brief</span><small>6 pinned documents · 180 passages</small></div>
-    <div className="incident-layout"><section className="search-panel" aria-labelledby="intake-title"><div className="panel-heading"><span className="panel-number">01</span><div><p className="eyebrow">INCIDENT INPUT</p><h2 id="intake-title">Start with what you observed.</h2></div></div><p className="intake-note">Use sanitized diagnostic output. Recognized credential patterns are redacted locally, but detection is incomplete. Remove sensitive data before pasting.</p>
-      <div className="examples">Synthetic examples{EXAMPLES.map(e=><button key={e.title} onClick={()=>edit(e.issue,e.diagnostics)} disabled={busy}>{e.title}</button>)}</div>
-      <form onSubmit={e=>{e.preventDefault();void analyze();}}>
-        <div className="intake-field"><label htmlFor="incident-issue">What are you investigating?</label><textarea id="incident-issue" disabled={busy} value={issue} maxLength={501} rows={3} onChange={e=>edit(e.target.value,diagnostics)} placeholder="What happened, and what do you need to understand?"/>
-        </div><div className="intake-field"><label htmlFor="diagnostics">Diagnostic output (optional)</label><textarea id="diagnostics" disabled={busy} value={diagnostics} maxLength={12001} rows={8} onChange={e=>edit(issue,e.target.value)} placeholder="Paste sanitized events, status, or describe output. No cluster connection is made." aria-describedby="diagnostics-help"/></div>
-        <p id="diagnostics-help" className="intake-note">A status or warning event helps narrow the search. Input is not saved across page reloads.</p>
-        <div className="incident-actions"><button disabled={!corpus||busy} type="submit">{busy?"Working…":"Find incident evidence →"}</button>{configured&&<button disabled={!corpus||busy} type="button" onClick={()=>void analyze(true)}>Ask configured model</button>}</div>
-      </form>
-      {configured?<p className="intake-note">Model availability is unverified. Asking the model sends the locally redacted issue and diagnostics to this app’s configured endpoint. A valid quote does not prove an explanation is correct.</p>:<p className="intake-note">This public deployment has no model endpoint configured. The evidence workflow is live; model examples, when available, are labeled recorded. <a href={sourceFile("docs/troubleshooting.md")}>How this workflow works ↗</a></p>}
-      {!corpus&&!loadError&&<p role="status">Loading pinned runbooks…</p>}{loadError&&<div role="alert"><p>{loadError}</p><button onClick={()=>void load()}>Retry loading</button></div>}
-    </section>
-    <section className="incident-results results" ref={results} tabIndex={-1} aria-label="Incident analysis" aria-live="polite">
-      {error&&<p role="alert" className="error">{error}</p>}
-      {!result&&!error&&<div className="before-search"><div className="empty-review-symbol" aria-hidden="true">⌕</div><div><span className="eyebrow">EVIDENCE REVIEW</span><h2>Your investigation starts above.</h2><p>Run an example or enter sanitized diagnostics. Source passages, evidence gaps and review notes will appear here.</p></div><a href="/runbooks">Browse the source library ↗</a></div>}
-      {result&&<><div className="result-heading"><h2>{result.mode==="generated"?"Model draft with evidence":result.mode==="abstained"?"No supporting evidence":"Incident evidence"}</h2><button onClick={exportBrief}>Export brief ↓</button></div>
-        <p className="intake-note">{result.note}</p>
-        {result.redactions>0&&<p className="redaction" role="status">{result.redactions} recognized credential pattern(s) redacted. Review the input for anything the detector missed.</p>}
-        {result.diagnostics_truncated&&<p className="redaction">Only the first 2,000 diagnostic characters are included in the model context and exported analysis. Signals can still be recognized across the full allowed input.</p>}
-        <div className="signal-row"><span>RECOGNIZED STATUS TEXT</span>{result.signals.length?result.signals.map(s=><b key={s}>{s}</b>):<p>Add a status such as ImagePullBackOff or a warning event to make the search more specific.</p>}<p className="signal-meaning">Text matches can be historical, hypothetical or negated. They do not establish a current condition.</p></div>
-        {result.evidence_policy&&<div className="evidence-audit">
-          <div className="investigation-metrics"><div><strong>{result.sources.length}<small> / 3</small></strong><span>passages selected</span></div><div><strong>{result.evidence_policy.usage.characters.toLocaleString()}<small> / 6,000</small></strong><span>evidence characters</span></div><div><strong>{result.evidence_policy.usage.retrieval_attempts}<small> / 4</small></strong><span>retrieval attempts</span></div></div>
-          {!!result.evidence_policy.missing_signals.length&&<div className="evidence-gap" role="status"><strong>Documentation gap</strong><p>No selected passage from the expected documentation family for: {result.evidence_policy.missing_signals.join(", ")}. The source snapshot or passage budget may be insufficient. Do not treat the result as a complete investigation.</p></div>}
-          <details className="decision-trace"><summary>Why these passages? <span>Inspect retrieval decisions ↗</span></summary><p>{result.evidence_policy.scope}</p><ol>{result.evidence_policy.attempts.map((a,i)=><li key={i}><b>{a.kind==="initial"?"Initial search":`Retry within ${a.family}`}</b><code>{a.query}</code><span>{a.returned.length?a.returned.join(" · "):"No matching passages"}</span></li>)}</ol>{!!result.evidence_policy.omitted.length&&<p>{result.evidence_policy.omitted.length} passage(s) shortened to stay within the character budget. Open the original source for full context.</p>}</details>
-        </div>}
-        {result.answer&&<article className="model-draft"><span className="eyebrow">{result.answer.status.replaceAll("_"," ")} · {result.model}</span><h3>{result.answer.summary}</h3>{result.answer.claims.map((c,i)=><div key={i} className="claim"><p>{c.text}</p><blockquote>{c.quote}</blockquote><a href={result.sources.find(s=>s.id===c.source_id)?.source} target="_blank" rel="noreferrer">Source {c.source_id} ↗</a></div>)}
-          {!!result.answer.questions.length&&<><h3>Evidence still needed</h3><ul>{result.answer.questions.map(q=><li key={q}>{q}</li>)}</ul></>}
-          {!!result.answer.commands.length&&<><h3>Read-only suggestions · not executed</h3>{result.answer.commands.map(c=><pre tabIndex={0} key={c.command}>{c.command}</pre>)}</>}
-        </article>}
-        {!result.sources.length&&<div className="empty"><p>This six-document snapshot does not support a result. Try a concrete Kubernetes status or use the broader official documentation.</p><a href="https://kubernetes.io/docs/">Open Kubernetes docs ↗</a></div>}
-        {result.sources.map((s,i)=><details className="incident-source" key={s.id} open={i===0}><summary>{i+1}. {s.section} <small>{s.id}</small></summary><pre tabIndex={0} aria-label={`Incident source ${i+1}`}>{s.text}</pre><a href={s.source} target="_blank" rel="noreferrer">Pinned official source ↗</a><a href={s.canonical} target="_blank" rel="noreferrer">Current docs ↗</a></details>)}
-        <div className="review-notes"><label htmlFor="review-notes">Your investigation notes <span>Optional · included only in the exported brief</span></label><textarea id="review-notes" rows={3} maxLength={4000} value={notes} onChange={e=>{setNotes(e.target.value);setCopied("");}} placeholder="What does the evidence support? What is still missing?"/><p>Notes remain unreviewed. Editing the incident clears these notes and the previous result.</p></div>
-        <p className="intake-note">Open the source for full context. Signals identify observed text patterns; confirming a cause requires your diagnostic evidence.</p><p role="status">{copied}</p>
-      </>}
-    </section></div>
-    <section className="evidence"><p className="eyebrow">02 / A VISIBLE DECISION PATH</p><div className="evidence-grid"><div><h3>Input → signals → evidence</h3><p>Known status strings expand the retrieval query. The same pinned passages remain inspectable, whether or not a model is configured.</p></div><div><h3>Model outputs must pass checks</h3><p>The optional answer path requires valid JSON, supplied source IDs, matching quotes, and supported read-only command forms. Failed or truncated responses are rejected.</p></div><div><h3>Measure before claiming a win</h3><p>A frozen protocol defines a future comparison of excerpt-only retrieval and base/SFT served artifacts. Model inference is deferred. Completion, evidence validity, phrase coverage and abstention are separate measurements.</p><a href="/study">Inspect the study →</a></div></div></section>
-    </main><footer className="site-footer"><span>OpsVerse · built by Dilip Nallamasa</span><a href="/runbooks">Search all runbook passages</a><a href="/engineering">Architecture & engineering decisions →</a></footer>
+  return <div className={`chat-app${result?" has-response":""}`}>
+    <a className="skip" href="#incident-issue">Skip to question</a>
+    <aside className="chat-sidebar" aria-label="Workspace navigation">
+      <a className="chat-brand" href="/" aria-label="OpsVerse home"><span aria-hidden="true">↗</span>OpsVerse</a>
+      <button className="new-question" onClick={reset} disabled={busy}><span aria-hidden="true">＋</span> New question</button>
+      <nav aria-label="Main navigation"><a href="/runbooks"><span aria-hidden="true">▤</span> Browse guides</a></nav>
+      <div className="sidebar-bottom"><p>A little clarity<br/>for your cluster.</p><nav aria-label="About OpsVerse"><a href="/engineering">Behind OpsVerse ↗</a><a href="/study">Research & evaluation</a></nav><small>Built by Dilip Nallamasa</small></div>
+    </aside>
+    <main className="chat-main">
+      <header className="chat-topbar"><span>Kubernetes help</span><a href="/runbooks">Explore guides ↗</a></header>
+      <div className="chat-stage">
+        <section className="chat-welcome"><div className="welcome-mark" aria-hidden="true">↗</div><h1>{result?"Let’s work through it.":"What can I help you understand?"}</h1><p className="intro-copy">Describe a Kubernetes problem. Find a clearer way forward.</p></section>
+        <section className="incident-results chat-response" hidden={!result&&!error} ref={results} tabIndex={-1} aria-label="Response" aria-live="polite" aria-busy={busy}>
+          {error&&<p role="alert" className="chat-error">{error}</p>}
+          {result&&<>
+            <div className="question-bubble"><span className="sr-only">Your question</span>{result.issue}</div>
+            <div className="answer-brand"><span aria-hidden="true">↗</span> OpsVerse <small>{result.mode==="generated"?"AI draft":"Documentation search"}</small></div>
+            <h2>{result.mode==="generated"?"A draft to review":result.sources.length?"What I found":"No matches yet"}</h2>
+            {result.mode!=="generated"&&<p>{result.sources.length?"These guides from Kubernetes documentation may help. They explain the topic; they don’t confirm what caused your issue.":"I couldn’t find supporting information in this small documentation library. Try a Kubernetes status or error message, or check the full documentation."}</p>}
+            {result.redactions>0&&<p className="chat-notice" role="status">Some text that looked like credentials was removed. Check that no other sensitive information remains.</p>}
+            {result.diagnostics_truncated&&<p className="chat-notice">Saved notes include only the first 2,000 log characters. Matching status text can still use your full input.</p>}
+            {!!result.evidence_policy?.missing_signals.length&&<div className="chat-notice" role="status"><strong>Some details are missing</strong><p>The selected guides don’t cover every status in your question: {result.evidence_policy.missing_signals.join(", ")}. This is a starting point, not a complete investigation.</p></div>}
+            {result.answer&&<article className="model-draft"><p className="chat-notice">AI-generated draft. Matching source quotes do not guarantee a correct explanation.</p><h3>{result.answer.summary}</h3>{result.answer.claims.map((c,i)=><div key={i}><p>{c.text}</p><blockquote>{c.quote}</blockquote><a href={result.sources.find(s=>s.id===c.source_id)?.source} target="_blank" rel="noreferrer">View supporting source ↗</a></div>)}
+              {!!result.answer.questions.length&&<><h3>More information would help</h3><ul>{result.answer.questions.map(q=><li key={q}>{q}</li>)}</ul></>}
+              {!!result.answer.commands.length&&<><h3>Suggested checks</h3><p>These commands have not been run.</p>{result.answer.commands.map(c=><pre tabIndex={0} key={c.command}>{c.command}</pre>)}</>}
+            </article>}
+            {result.mode!=="generated"&&result.sources.map((s,i)=><article className="guide-preview" key={s.id} data-source-id={s.id}><div className="guide-number" aria-hidden="true">{i+1}</div><div><h3><a href={s.canonical} target="_blank" rel="noreferrer">{s.section.replace(/\s*\{#[^}]+\}/g,"")} ↗</a></h3>{preview(s.text)&&<p>{preview(s.text)}</p>}<small>Excerpt from Kubernetes documentation · not an AI-generated answer</small></div></article>)}
+            {!result.sources.length&&<a href="https://kubernetes.io/docs/" target="_blank" rel="noreferrer">Search the full Kubernetes docs ↗</a>}
+            {!!result.sources.length&&<details className="chat-sources"><summary>View {result.sources.length} source passages</summary>{result.sources.map((s,i)=><details className="incident-source" key={s.id}><summary>{i+1}. {s.section} <small>{s.id}</small></summary><pre tabIndex={0} aria-label={`Incident source ${i+1}`}>{s.text}</pre><a href={s.source} target="_blank" rel="noreferrer">Pinned official source ↗</a> · <a href={s.canonical} target="_blank" rel="noreferrer">Current docs ↗</a></details>)}</details>}
+            {result.evidence_policy&&<details className="chat-method"><summary>How this search worked</summary><p>{result.note}</p><p>Matched status text: {result.signals.join(", ")||"None"}. Text can refer to past or hypothetical events; a match is not a confirmed condition.</p><p>{result.sources.length} passages · {result.evidence_policy.usage.characters.toLocaleString()} / 6,000 characters · {result.evidence_policy.usage.retrieval_attempts} / 4 search attempts</p><details className="decision-trace"><summary>Search details</summary><p>{result.evidence_policy.scope}</p><ol>{result.evidence_policy.attempts.map((a,i)=><li key={i}><b>{a.kind==="initial"?"Initial search":`Retry within ${a.family}`}</b><code>{a.query}</code><span>{a.returned.length?a.returned.join(" · "):"No matching passages"}</span></li>)}</ol>{!!result.evidence_policy.omitted.length&&<p>Some passages were shortened. Open the original for full context.</p>}</details></details>}
+            <details className="chat-notes"><summary>Add your own notes</summary><label htmlFor="review-notes">Your notes</label><textarea id="review-notes" rows={3} maxLength={4000} value={notes} onChange={e=>{setNotes(e.target.value);setCopied("");}} placeholder="What did you learn? What would you check next?"/><p>Included in your download as unreviewed notes. Starting a new question clears them.</p></details>
+            <div className="response-actions"><button onClick={exportBrief}>Download notes ↓</button><button onClick={reset} disabled={busy}>Ask another question</button></div><p className="download-status" role="status">{copied}</p>
+          </>}
+        </section>
+        <section className="chat-composer" aria-label="Ask a question">
+          <form onSubmit={e=>{e.preventDefault();void analyze();}}>
+            <label className="sr-only" htmlFor="incident-issue">Your Kubernetes question</label><textarea ref={prompt} id="incident-issue" disabled={busy} value={issue} maxLength={501} rows={3} onChange={e=>edit(e.target.value,diagnostics)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask about a Kubernetes problem…" aria-describedby="question-help"/>
+            <details className="chat-logs" ref={logs}><summary>Add logs or error details {diagnostics&&<span>Added</span>}</summary><label htmlFor="diagnostics">Logs or error details (optional)</label><textarea id="diagnostics" disabled={busy} value={diagnostics} maxLength={12001} rows={5} onChange={e=>edit(issue,e.target.value)} placeholder="Paste the relevant error or status. Remove passwords, tokens and other sensitive information first." aria-describedby="diagnostics-help"/><p id="diagnostics-help">Never include secrets. Automatic redaction can miss them.</p></details>
+            <div className="composer-bottom"><span>Documentation search</span><div>{configured&&<button className="model-button" disabled={!corpus||busy} type="button" onClick={()=>void analyze(true)}>Ask AI model</button>}<button className="send-question" aria-label="Send question" disabled={!corpus||busy} type="submit"><span>{busy?"Searching…":"Send"}</span><span aria-hidden="true">↑</span></button></div></div>
+          </form>
+          <p id="question-help" className="composer-help">{configured?"Search stays in your browser. “Ask AI model” sends redacted text to the configured endpoint.":"Searches a limited Kubernetes library. No AI model is connected."}</p>
+          {!corpus&&!loadError&&<p role="status" className="composer-help">Loading documentation…</p>}{loadError&&<div role="alert" className="chat-error"><p>{loadError}</p><button onClick={()=>void load()}>Retry loading</button></div>}
+        </section>
+        {!result&&<div className="chat-starters"><span>Not sure where to start? Try an example.</span><div>{EXAMPLES.map(e=><button key={e.title} onClick={()=>{edit(e.issue,e.diagnostics);prompt.current?.focus();}} disabled={busy}>{e.title}<span aria-hidden="true">↗</span></button>)}</div></div>}
+      </div>
+      <footer className="chat-footer"><span>Nothing connects to your cluster. Questions aren’t saved after a reload.</span><details><summary>About this assistant</summary><p>OpsVerse finds passages from six pinned Kubernetes documents. It doesn’t run commands or confirm a root cause. Preview paragraphs retain the source’s words with inline formatting removed. Each question is a separate search; earlier questions are not used as context. <a href={sourceFile("docs/troubleshooting.md")}>Read how it works ↗</a></p><nav aria-label="Product details"><a href="/engineering">Behind OpsVerse</a><a href="/study">Research & evaluation</a></nav></details></footer>
+    </main>
   </div>;
 }

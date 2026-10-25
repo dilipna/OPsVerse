@@ -3,9 +3,9 @@ import "./globals.css";
 import "./workspace.css";
 
 export const metadata: Metadata = {
-  title: "OpsVerse — Kubernetes investigation workspace",
+  title: "OpsVerse — a little clarity for your Kubernetes cluster",
   description:
-    "Turn Kubernetes symptoms into an inspectable incident brief. Find official source passages, review evidence, and explore the engineering behind OpsVerse.",
+    "Ask about a Kubernetes problem, explore relevant documentation, and save what you find. Simple questions, inspectable sources, and no cluster connection.",
   icons: {
     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23087f73'/%3E%3Cpath d='M10 23L23 10M10 10H23V23' fill='none' stroke='%23ffffff' stroke-width='2.5'/%3E%3C/svg%3E",
   },
