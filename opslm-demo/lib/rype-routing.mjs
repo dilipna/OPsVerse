@@ -3,9 +3,9 @@ import {terms} from "./runbooks.mjs";
 
 export const BASELINE_MODEL="anthropic/claude-sonnet-4.6";
 export const PROFILES={
-  general:{label:"Everyday question",free:["liquid/lfm-2.5-2.6b:free","google/gemma-4-26b-a4b-it:free"],paid:["google/gemini-2.5-flash-lite","openai/gpt-oss-120b"]},
-  code:{label:"Coding question",free:["cohere/north-mini-code:free","poolside/laguna-xs-2.1:free"],paid:["qwen/qwen3-coder-30b-a3b-instruct","qwen/qwen3-coder-next"]},
-  reasoning:{label:"Reasoning question",free:["nvidia/nemotron-3-super-120b-a12b:free","google/gemma-4-31b-it:free"],paid:["openai/gpt-oss-120b","qwen/qwen3-coder-next"]},
+  general:{label:"Everyday question",free:["recursive/flint-v1.0:free","cohere/north-mini-code:free"],paid:["google/gemini-2.5-flash-lite","openai/gpt-oss-120b"]},
+  code:{label:"Coding question",free:["cohere/north-mini-code:free","recursive/flint-v1.0:free"],paid:["qwen/qwen3-coder-30b-a3b-instruct","qwen/qwen3-coder-next"]},
+  reasoning:{label:"Reasoning question",free:["dots-studio/dots-3-note-preview:free","cohere/north-mini-code:free"],paid:["openai/gpt-oss-120b","qwen/qwen3-coder-next"]},
 };
 const RULES=[
   ["Image pull guidance",/ImagePullBackOff|ErrImagePull|image pull policy|imagepullpolicy/i,"images",/ImagePullBackOff|imagePullPolicy/],

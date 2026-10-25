@@ -6,9 +6,9 @@ import {decideRoute,catalogueModels,costComparison,localRoutingResult} from "../
 import {routingMetadata,handleRypeRequest} from "../lib/rype-http.mjs";
 const corpus=JSON.parse(fs.readFileSync(new URL("../public/runbooks.json",import.meta.url)));
 const raw={data:[
-  {id:"liquid/lfm-2.5-2.6b:free",pricing:{prompt:"0",completion:"0"}},
+  {id:"recursive/flint-v1.0:free",pricing:{prompt:"0",completion:"0"}},
   {id:"cohere/north-mini-code:free",pricing:{prompt:"0",completion:"0"}},
-  {id:"nvidia/nemotron-3-super-120b-a12b:free",pricing:{prompt:"0",completion:"0"}},
+  {id:"dots-studio/dots-3-note-preview:free",pricing:{prompt:"0",completion:"0"}},
   {id:"anthropic/claude-sonnet-4.6",pricing:{prompt:"0.000003",completion:"0.000015"}},
 ].map(m=>({...m,context_length:131072,architecture:{input_modalities:["text"],output_modalities:["text"]}}))};
 const metadata=await routingMetadata({apiKey:"synthetic",fetcher:async()=>Response.json(raw),cache:false,now:0});
@@ -57,4 +57,13 @@ test("restored unsupported notes do not trigger inference or preserve imported m
 test("route HTTP bounds bodies and rejects client attempts to select paid models",async()=>{
   for(const body of [JSON.stringify({...input,model:"paid/model"}),"{broken",JSON.stringify({issue:"",diagnostics:""})]){const r=await handleRypeRequest(new Request("http://rype.test",{method:"POST",body}),{corpus,metadata});assert.equal(r.status,400);}
   const r=await handleRypeRequest(new Request("http://rype.test",{method:"POST",body:"x".repeat(24001)}),{corpus,metadata});assert.equal(r.status,413);
+});
+
+test("account-filtered catalogue can exclude public free models without weakening privacy or selecting paid models",async()=>{
+  const requests=[];
+  const m=await routingMetadata({apiKey:"synthetic-account-key",cache:false,fetcher:async(url,options)=>{
+    requests.push(url);if(url.endsWith("/models/user")){assert.equal(options.headers.authorization,"Bearer synthetic-account-key");return Response.json({data:raw.data.filter(x=>x.id==="cohere/north-mini-code:free")});}
+    assert.equal(options.headers.authorization,undefined);return Response.json(raw);
+  }});
+  assert.equal(requests.length,2);assert.equal(m.profiles.general.id,"cohere/north-mini-code:free");assert.equal(m.profiles.reasoning.id,"cohere/north-mini-code:free");assert.equal(m.profiles.code.id,"cohere/north-mini-code:free");assert.equal(m.baseline.id,"anthropic/claude-sonnet-4.6");assert.ok(!JSON.stringify(m).includes("synthetic-account-key"));
 });
