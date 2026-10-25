@@ -37,7 +37,7 @@ async function start(endpoint=""){
   const port=reserve.address().port;await new Promise(resolve=>reserve.close(resolve));
   const child=spawn(process.execPath,["node_modules/next/dist/bin/next","start","--hostname","127.0.0.1","--port",String(port)],{
     cwd:web,windowsHide:true,stdio:["ignore","pipe","pipe"],
-    env:{...process.env,NEXT_TELEMETRY_DISABLED:"1",OPSLM_ENDPOINT:"",OPSLM_API_KEY:"",
+    env:{...process.env,NEXT_TELEMETRY_DISABLED:"1",OPSLM_ENDPOINT:"",OPSLM_API_KEY:"",OPENROUTER_API_KEY:"",RYPE_OPENROUTER_API_KEY:"",
       OPSVERSE_TROUBLESHOOT_ENDPOINT:endpoint,OPSVERSE_TROUBLESHOOT_API_KEY:"",OPSVERSE_TROUBLESHOOT_MODEL:"synthetic-contract-fixture"}
   });
   children.push(child);let output="";
@@ -67,6 +67,9 @@ try{
   assert.equal(calls,0);
   assert.equal((await post(local,{issue:"",diagnostics:""})).status,400);
   assert.equal((await post(local,{issue:"x".repeat(25000),diagnostics:""})).status,413);
+  const routeMeta=await (await fetch(local+"/api/route")).json();assert.equal(routeMeta.free_only,true);assert.equal(routeMeta.cloud_configured,false);
+  const routedLibrary=await (await fetch(local+"/api/route",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({issue:"What does ImagePullBackOff mean?",diagnostics:"ImagePullBackOff"})})).json();
+  assert.equal(routedLibrary.routing.kind,"retrieval");assert.equal(routedLibrary.routing.model_calls,0);assert.equal(routedLibrary.routing.actual_cost_usd,0);
   const connected=await start(upstreamOrigin);
   assert.equal((await (await fetch(connected+"/api/troubleshoot")).json()).generation_configured,true);
   const generated=await (await post(connected,input)).json();

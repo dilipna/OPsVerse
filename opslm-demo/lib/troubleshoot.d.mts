@@ -1,10 +1,11 @@
 import type {Corpus,Chunk} from "./runbooks.mjs";
 import type {EvidencePolicy} from "./investigation-evidence.mjs";
+import type {RoutingReceipt} from "./rype-routing.mjs";
 export type Input={issue:string;diagnostics:string};
 export type Claim={text:string;source_id:string;quote:string};
 export type Answer={status:"answered"|"needs_details"|"abstained";summary:string;claims:Claim[];questions:string[];commands:{command:string;source_id:string}[]};
 export type Prepared=Input & {signals:string[];redactions:number;diagnostics_truncated:boolean;retrieval_query:string;sources:Chunk[];evidence_policy:EvidencePolicy};
-export type Result=Prepared & {mode:"excerpts"|"generated"|"abstained";answer:Answer|null;note:string;model?:string;latency_ms?:number;usage?:unknown};
+export type Result=Prepared & {mode:"excerpts"|"generated"|"abstained"|"routed";answer:Answer|null;note:string;model?:string;latency_ms?:number;usage?:unknown;cloud_answer?:string;routing?:RoutingReceipt};
 export const SYSTEM:string;
 export function redact(text:string):{text:string;redactions:number};
 export function prepare(corpus:Corpus,input:Input):Prepared;

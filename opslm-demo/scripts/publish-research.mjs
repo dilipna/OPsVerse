@@ -10,7 +10,7 @@ export function publishResearch(html){
   if(html.includes('data-report-theme="studio"'))throw Error("Publish from the canonical offline source, not an already themed copy");
   if(!html.includes('<html lang="en">')||!html.includes('</head>')||!html.includes('<body>')||!html.includes('</body>'))throw Error("Unexpected research document structure");
   const hasMain=/<main[\s>]/i.test(html);
-  const nav='<nav class="research-nav" aria-label="Research navigation"><a class="research-brand" href="/">↗ OPSVERSE</a><div><a href="/">Workspace</a><a href="/runbooks">Runbooks</a><a href="/study">Evaluation</a><a href="/engineering">Engineering ↗</a></div><span>RESEARCH ARCHIVE</span></nav>';
+  const nav='<nav class="research-nav" aria-label="Research navigation"><a class="research-brand" href="/">↗ RYPE</a><div><a href="/">Workspace</a><a href="/runbooks">Runbooks</a><a href="/study">Evaluation</a><a href="/engineering">Engineering ↗</a></div><span>RESEARCH ARCHIVE</span></nav>';
   const notice='<aside class="research-notice" aria-label="Historical research scope"><strong>Historical research snapshot.</strong> Original measurements and conclusions retain their recorded scope. The current workspace uses live evidence retrieval; its separate model console uses labeled samples. <a href="https://github.com/dilipna/OPsVerse/blob/improve/flagship-investigation/docs/claims.md">Read current corrections and limitations ↗</a></aside>';
   return html.replace('<html lang="en">','<html lang="en" data-report-theme="studio" data-theme="light">')
     .replace('</head>','<link rel="stylesheet" href="/report-theme.css">\n</head>')

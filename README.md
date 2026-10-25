@@ -1,6 +1,6 @@
-# OpsVerse
+# RYPE — Route Your Prompt Efficiently
 
-**Turn Kubernetes symptoms into an inspectable investigation brief.**
+**Retrieve covered guidance first. Route other tasks to eligible free models. Inspect the route and cost.**
 
 [Open the workspace](https://ops-verse.vercel.app/) | [Engineering case study](https://ops-verse.vercel.app/engineering) | [Evaluation](https://ops-verse.vercel.app/study) | [Resume evidence](docs/resume-and-interview.md)
 
@@ -11,18 +11,9 @@ approved without a `main` merge. Select that branch when reproducing the public
 website; its exact deployed commit and source hashes are at
 [`/release.json`](https://ops-verse.vercel.app/release.json).
 
-Describe a symptom, paste sanitized Pod events, and inspect pinned official source
-passages alongside recognized status signals. Export the redacted investigation as
-JSON. Three synthetic examples make the workflow usable immediately. No account,
-model download, paid API, or cluster access is needed for the public workflow.
+RYPE returns covered Kubernetes guidance from its pinned documentation library without model inference. Other questions use explicit everyday, coding or reasoning profiles and can route to eligible free OpenRouter models when a server-side key is configured. Paid models and paid fallbacks are disabled. Each response shows its route, model actually used, reported inference charge and explicitly estimated comparison against a named baseline. No claim is made about a model's training-data membership or measured quality-matched savings.
 
-The default analysis runs in the browser over six official documents / 180 passages.
-It does not upload your diagnostic text or execute commands; normal hosting access
-logs still apply. Credential-pattern redaction is best-effort: sanitize input first.
-A separate optional model path validates JSON, source IDs, exact quotes, output
-completion, and permitted read-only command forms. Those checks do not prove factual
-support. No model endpoint is configured on the public deployment.
-
+The existing Night Orbit UI, source library, portable JSON/Markdown notes, device reading list and research evidence remain. Covered questions stay in the browser; cloud-routed questions and redacted logs are sent to OpenRouter. No cluster connection or command execution. Credential redaction is best-effort: remove secrets first. See [routing, setup and cost methodology](docs/rype-routing.md) for server-only key configuration, free-only enforcement, billing limits and verification scope.
 Explore [all runbooks](https://ops-verse.vercel.app/runbooks),
 [architecture and decisions](https://ops-verse.vercel.app/engineering), or
 [the implementation contract](docs/troubleshooting.md). The original sample model

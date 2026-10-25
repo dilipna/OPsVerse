@@ -4,6 +4,8 @@ import {createHash} from "node:crypto";
 import corpus from "../../public/runbooks.json" with {type:"json"};
 
 test.beforeEach(async({page})=>{
+  // Browser contracts never spend provider quota. Live free inference is checked separately.
+  await page.route("**/api/route",async route=>{if(route.request().method()==="POST")await route.fulfill({status:503,json:{error:"External inference disabled in this browser contract."}});else await route.continue();});
   page.__applicationErrors=[];
   page.on("pageerror",e=>page.__applicationErrors.push(e.message));
 });
@@ -253,7 +255,7 @@ test("portable JSON resumes trusted retrieval and Markdown saves readable redact
   await page.locator(".chat-notes > summary").click();await page.locator("#review-notes").fill("Check registry. token=portable-secret");
   const mdEvent=page.waitForEvent("download");await page.getByRole("button",{name:"Download Markdown ↓",exact:true}).click();
   const mdDownload=await mdEvent,mdPath=info.outputPath("investigation.md");await mdDownload.saveAs(mdPath);
-  const markdown=await fs.readFile(mdPath,"utf8");expect(markdown).toContain("# OpsVerse investigation notes");expect(markdown).toContain("[REDACTED]");expect(markdown).not.toContain("portable-secret");expect(markdown).toContain("ImagePullBackOff");
+  const markdown=await fs.readFile(mdPath,"utf8");expect(markdown).toContain("# RYPE investigation notes");expect(markdown).toContain("[REDACTED]");expect(markdown).not.toContain("portable-secret");expect(markdown).toContain("ImagePullBackOff");
   await info.attach("actual-markdown-download",{path:mdPath,contentType:"text/markdown"});
   const jsonEvent=page.waitForEvent("download");await page.getByRole("button",{name:"Download notes ↓",exact:true}).click();
   const jsonDownload=await jsonEvent,jsonPath=info.outputPath("portable-notes.json");await jsonDownload.saveAs(jsonPath);
@@ -305,4 +307,23 @@ test("unavailable storage keeps saved guides usable in the active tab",async({pa
   await page.getByRole("button",{name:"Save guide 1",exact:true}).click();
   await expect(page.locator(".chat-response").getByRole("status").filter({hasText:"Device storage is unavailable"})).toBeVisible();
   await page.locator(".saved-guides-button").click();const dialog=page.getByRole("dialog",{name:"Your reading list"});await expect(dialog.locator("li")).toHaveCount(1);await expect(dialog).toContainText("this tab only");
+});
+
+test("RYPE explains retrieval-first routing and a covered question makes no cloud POST",async({page})=>{
+  let calls=0;page.on("request",r=>{if(r.method()==="POST"&&new URL(r.url()).pathname==="/api/route")calls++;});
+  await page.goto("/");await expect(page.getByRole("link",{name:"RYPE home",exact:true})).toBeVisible();
+  await expect(page.locator(".intro-copy")).toContainText("Route Your Prompt Efficiently");await expect(page.locator(".routing-intro")).toContainText("No inference");
+  await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await page.getByRole("button",{name:"Send question"}).click();
+  const receipt=page.getByRole("complementary",{name:"Routing and cost"});await expect(receipt).toContainText("Library route · no inference");await expect(receipt).toContainText("0 model calls");await expect(receipt.locator("dd").first()).toHaveText("None");await expect(receipt.locator("dd").nth(1)).toHaveText("$0");expect(calls).toBe(0);
+});
+
+test("routed answer shows the returned model and explicitly estimated comparison",async({page},info)=>{
+  await page.route("**/api/route",async route=>{
+    if(route.request().method()==="GET")return route.fulfill({json:{cloud_configured:true,free_only:true,checked_at:"2026-10-25T00:00:00Z",profiles:{},baseline:null,catalogue_available:true}});
+    const body=route.request().postDataJSON();expect(Object.keys(body).sort()).toEqual(["diagnostics","issue"]);expect(JSON.stringify(body)).not.toContain("browser-private-value");
+    return route.fulfill({json:{issue:body.issue,diagnostics:body.diagnostics,mode:"routed",answer:null,sources:[],signals:[],redactions:1,cloud_answer:"Synthetic browser transport fixture, not live inference. <img src=x onerror=alert(1)>",note:"Fixture",routing:{kind:"model",category:"code",status:"completed",reason:"Coding task",model_used:"fixture/free-code",model_selected:"fixture/free-code",model_calls:1,actual_cost_usd:0,baseline_model:"fixture/baseline",baseline_estimated_usd:0.001,estimated_difference_usd:0.001,estimated_reduction_percent:100,input_tokens:100,output_tokens:25,token_basis:"Fixture tokens",comparison_scope:"Estimated comparison; baseline not run.",note:"Synthetic fixture",price_checked_at:"2026-10-25T00:00:00Z"}}});
+  });
+  await page.goto("/");await expect(page.locator("#question-help")).toContainText("go to OpenRouter");await page.locator("#incident-issue").fill("Write a Python function");await page.locator(".chat-logs > summary").click();await page.locator("#diagnostics").fill("token=browser-private-value");await page.getByRole("button",{name:"Send question"}).click();
+  await expect(page.getByRole("heading",{name:"Your answer",exact:true})).toBeVisible();const receipt=page.getByRole("complementary",{name:"Routing and cost"});await expect(receipt).toContainText("fixture/free-code");await expect(receipt).toContainText("Estimated charge reduction");await expect(receipt).toContainText("Baseline not run");await expect(receipt).toContainText("1 model call");await expect(page.locator(".cloud-answer")).toContainText("<img");expect(await page.locator(".cloud-answer img").count()).toBe(0);
+  const screenshot=info.outputPath("routing-receipt-fixture.png");await page.screenshot({path:screenshot,fullPage:true});await info.attach("synthetic-browser-contract-not-live-inference",{path:screenshot,contentType:"image/png"});
 });
