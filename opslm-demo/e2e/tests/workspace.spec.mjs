@@ -280,7 +280,7 @@ test("unsupported and oversized note files preserve the active question",async({
   await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
 });
 
-test("reading list survives reload without saving questions or logs",async({page})=>{
+test("reading list survives reload without saving questions or logs",async({page},info)=>{
   await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
   await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await page.getByRole("button",{name:"Send question"}).click();
   await page.getByRole("button",{name:"Save guide 1",exact:true}).click();
@@ -289,6 +289,10 @@ test("reading list survives reload without saving questions or logs",async({page
   expect(Object.keys(JSON.parse(stored)).sort()).toEqual(["ids","revision","schema"]);expect(stored).not.toContain("registry.example");expect(stored).not.toContain("Why has this container");
   await page.reload();await expect(page.locator(".saved-guides-button")).toContainText("1");await page.locator(".saved-guides-button").click();
   const dialog=page.getByRole("dialog",{name:"Your reading list"});await expect(dialog).toBeVisible();await expect(dialog.locator("li")).toHaveCount(1);await expect(dialog).toContainText("ImagePullBackOff");
+  const desktopList=info.outputPath("reading-list-desktop.png");await page.screenshot({path:desktopList,fullPage:true});await info.attach("saved-guides-desktop",{path:desktopList,contentType:"image/png"});
+  await page.setViewportSize({width:390,height:844});
+  const bounds=await dialog.boundingBox();expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(390);
+  const mobileList=info.outputPath("reading-list-mobile.png");await page.screenshot({path:mobileList,fullPage:true});await info.attach("saved-guides-mobile",{path:mobileList,contentType:"image/png"});
   await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(page.locator(".saved-guides-button")).toBeFocused();
   await page.locator(".saved-guides-button").click();await dialog.getByRole("button",{name:"Clear saved guides",exact:true}).click();await expect(dialog.locator("li")).toHaveCount(0);
   await dialog.getByRole("button",{name:"Close",exact:true}).click();await page.reload();await expect(page.locator(".saved-guides-button")).toContainText("0");
