@@ -262,7 +262,7 @@ test("portable JSON resumes trusted retrieval and Markdown saves readable redact
   const brief=JSON.parse(await fs.readFile(jsonPath,"utf8"));
   brief.answer={summary:"UNTRUSTED_IMPORTED_AUTHORITY"};brief.sources=[{source:"javascript:untrusted",text:"UNTRUSTED_IMPORTED_AUTHORITY"}];
   await page.getByRole("button",{name:"Ask another question",exact:true}).click();
-  await page.locator('input[type="file"]').setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(brief))});
+  await page.getByLabel("Reopen notes file",{exact:true}).setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(brief))});
   await expect(page.getByRole("heading",{name:"What I found",exact:true})).toBeVisible();
   await expect(page.locator(".chat-response")).not.toContainText("UNTRUSTED_IMPORTED_AUTHORITY");
   await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
@@ -274,7 +274,7 @@ test("portable JSON resumes trusted retrieval and Markdown saves readable redact
 test("unsupported and oversized note files preserve the active question",async({page})=>{
   await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
   await page.locator("#incident-issue").fill("Keep this question");
-  const upload=(text)=>page.locator('input[type="file"]').setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(text)});
+  const upload=(text)=>page.getByLabel("Reopen notes file",{exact:true}).setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(text)});
   await upload(JSON.stringify({schema_version:1,review:{status:"unreviewed",notes:""},source_revision:"foreign",issue:"overwrite",diagnostics:""}));
   await expect(page.locator(".chat-response").getByRole("alert")).toContainText("different documentation snapshot");await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
   await upload("x".repeat(262145));await expect(page.locator(".chat-response").getByRole("alert")).toContainText("too large");

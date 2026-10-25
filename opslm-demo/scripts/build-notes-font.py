@@ -3,6 +3,7 @@
 Requires fonttools[woff]; run from opslm-demo. The OFL remains in
 public/fonts/Inter-OFL.txt. No font download or runtime conversion is used.
 """
+
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
 
