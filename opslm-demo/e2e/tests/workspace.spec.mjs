@@ -274,9 +274,9 @@ test("unsupported and oversized note files preserve the active question",async({
   await page.locator("#incident-issue").fill("Keep this question");
   const upload=(text)=>page.locator('input[type="file"]').setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(text)});
   await upload(JSON.stringify({schema_version:1,review:{status:"unreviewed",notes:""},source_revision:"foreign",issue:"overwrite",diagnostics:""}));
-  await expect(page.getByRole("alert")).toContainText("different documentation snapshot");await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
-  await upload("x".repeat(262145));await expect(page.getByRole("alert")).toContainText("too large");
-  await upload("{broken");await expect(page.getByRole("alert")).toContainText("not valid JSON");
+  await expect(page.locator(".chat-response").getByRole("alert")).toContainText("different documentation snapshot");await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
+  await upload("x".repeat(262145));await expect(page.locator(".chat-response").getByRole("alert")).toContainText("too large");
+  await upload("{broken");await expect(page.locator(".chat-response").getByRole("alert")).toContainText("not valid JSON");
   await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
 });
 
