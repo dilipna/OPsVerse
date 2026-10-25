@@ -31,7 +31,7 @@ if(gitCommit){
 const files=["lib/knowledge.mjs","lib/private-library.mjs","lib/workspace-routing.mjs","lib/discussion-downloads.mjs","app/troubleshoot/private-library.tsx","app/troubleshoot/download-discussion.tsx","lib/rype-routing.mjs","lib/rype-http.mjs","app/api/route/route.ts","lib/portable-brief.mjs","lib/troubleshoot.mjs","lib/troubleshoot-http.mjs","lib/investigation-evidence.mjs","lib/runbooks.mjs","lib/source-links.ts",
   "app/troubleshoot/page.tsx","app/troubleshoot/evidence-atlas.tsx","app/layout.tsx","app/runbooks/page.tsx","app/study/page.tsx","app/engineering/page.tsx",
   "app/globals.css","app/workspace.css","public/runbooks.json","public/study.json",
-  "public/investigation-development.json","package-lock.json","package.json",
+  "public/investigation-development.json","package-lock.json","package.json","vercel.json",
   "scripts/release-identity.mjs","scripts/lock-evidence.mjs","scripts/publish-research.mjs",
   "public/report-theme.css","public/dashboard.html","public/overturns.html",
   "public/fonts/Inter-Notes.ttf","public/fonts/SpaceGrotesk.woff2","public/fonts/SpaceGrotesk-OFL.txt","public/fonts/PlusJakartaSans.woff2","public/fonts/Inter.woff2","public/fonts/IBMPlexMono.woff2",
