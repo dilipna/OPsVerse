@@ -60,15 +60,15 @@ test("custom fonts load from this release rather than a fallback or font service
   const fontRequests=[];page.on("request",r=>{if(r.resourceType()==="font")fontRequests.push(r.url());});
   await page.goto("/");await page.evaluate(()=>document.fonts.ready);
   const identity=await (await request.get("/release.json")).json();
-  for(const [file,family] of [["SpaceGrotesk","Space Grotesk"],["IBMPlexSans","IBM Plex Sans"],["IBMPlexMono","IBM Plex Mono"]]){
+  for(const [file,family] of [["PlusJakartaSans","Plus Jakarta Sans"],["Inter","Inter"],["IBMPlexMono","IBM Plex Mono"]]){
     expect(fontRequests.some(url=>new URL(url).pathname===`/fonts/${file}.woff2`)).toBe(true);
     const response=await request.get(`/fonts/${file}.woff2`);expect(response.status()).toBe(200);
     expect(createHash("sha256").update(await response.body()).digest("hex")).toBe(identity.source_files[`public/fonts/${file}.woff2`]);
     expect(await page.evaluate(name=>Array.from(document.fonts).some(f=>f.family.replaceAll('"',"")===name&&f.status==="loaded"),family)).toBe(true);
   }
   for(const url of fontRequests)expect(new URL(url).origin).toBe(new URL(page.url()).origin);
-  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Space Grotesk");
-  expect(await page.locator(".intro-copy").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("IBM Plex Sans");
+  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Plus Jakarta Sans");
+  expect(await page.locator(".intro-copy").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
   expect(await page.locator("textarea").first().evaluate(e=>getComputedStyle(e).fontFamily)).toContain("IBM Plex Mono");
 });
 

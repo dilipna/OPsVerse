@@ -1,14 +1,11 @@
 export function EvidenceAtlas(){
-  return <aside className="evidence-atlas signal-board" aria-label="Illustrated evidence pipeline">
-    <div className="atlas-caption"><span>SIGNAL PATH / 001</span><span>SCHEMATIC</span></div>
-    <div className="signal-diagram" role="img" aria-label="A symptom becomes a traceable investigation" aria-describedby="signal-description">
-      <div className="signal-guide" aria-hidden="true"><i/><i/><i/><i/><i/></div>
-      <div className="signal-card signal-input"><span className="signal-index">01</span><div><span className="signal-kicker">CAPTURE THE SIGNAL</span><strong>Something isn't right.</strong><code>ImagePullBackOff</code></div><span className="signal-glyph" aria-hidden="true">↗</span></div>
-      <div className="signal-connector" aria-hidden="true"><span>↓</span><b>TRACE IT TO THE SOURCE</b></div>
-      <div className="signal-card signal-source"><span className="signal-index">02</span><div><span className="signal-kicker">PINNED DOCUMENTATION</span><strong>Find what supports it.</strong><span className="signal-source-line"><i/><i/><i/></span></div><span className="signal-glyph" aria-hidden="true">⌕</span></div>
-      <div className="signal-connector" aria-hidden="true"><span>↓</span><b>KEEP WHAT YOU CAN VERIFY</b></div>
-      <div className="signal-card signal-brief"><span className="signal-index">03</span><div><span className="signal-kicker">HUMAN REVIEW</span><strong>Leave a useful trail.</strong><span className="signal-tags"><span>Evidence</span><span>Gaps</span><span>Notes</span></span></div><span className="signal-glyph" aria-hidden="true">↳</span></div>
+  return <aside className="evidence-workflow" aria-label="Illustrated evidence pipeline">
+    <div className="workflow-caption"><span>THE INVESTIGATION WORKFLOW</span><span>HUMAN REVIEW</span></div>
+    <div className="workflow-steps" role="img" aria-label="A symptom becomes a traceable investigation" aria-describedby="workflow-description">
+      <div className="workflow-step"><span>01</span><div><strong>Capture a symptom</strong><p>Use sanitized diagnostic text.</p></div></div>
+      <div className="workflow-step"><span>02</span><div><strong>Inspect the evidence</strong><p>Follow pinned official sources.</p></div></div>
+      <div className="workflow-step"><span>03</span><div><strong>Keep a clear brief</strong><p>Review, annotate and export.</p></div></div>
     </div>
-    <p id="signal-description" className="signal-description">Illustrated workflow using an example status. No live cluster connection.</p>
+    <p id="workflow-description" className="workflow-footnote">Workflow illustration. No cluster connection or commands executed.</p>
   </aside>;
 }

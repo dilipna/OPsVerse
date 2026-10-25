@@ -1,5 +1,8 @@
 # Signal Studio
 
+Historical design, superseded by the user's explicit
+[white-and-teal engineering workspace](engineering-workspace-design.md) selection.
+
 Current visual direction, replacing the earlier Evidence Atlas design after the
 user requested different background, fonts and components throughout the product.
 
