@@ -33,3 +33,9 @@ html:root[data-report-theme="studio"][data-theme="light"],html:root[data-report-
 html:root[data-report-theme="studio"][data-theme="dark"],html:root[data-report-theme="studio"][data-theme="dark"] .dash{--plane:#282723;--surface:#333029;--surface-2:#403a30;--ink:#f4e7d3;--secondary:#d8c7ae;--muted:#bca98e;--grid:#544a3c;--axis:#847259;--border:#6b5c47;--accent:#e2a36c;--vllm:#e2a36c;--vllm-soft:#59422d;--ollama:#91b9ec;--ollama-soft:#2b415c}
 html:root[data-report-theme="studio"] :is(h1,h2,h3,.brand-title,.thesis-lead){font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.025em}
 html:root[data-report-theme="studio"] .research-notice{border-radius:3px}.research-nav .research-brand{color:var(--accent)}
+
+/* Night Orbit archive: blue daylight view and matching indigo night mode. */
+html:root[data-report-theme="studio"][data-theme="light"],html:root[data-report-theme="studio"][data-theme="light"] .dash{--plane:#f1f5ff;--surface:#fff;--surface-2:#e5edff;--ink:#142444;--secondary:#405775;--muted:#526b8b;--grid:#d5def0;--axis:#acbdd8;--border:#bdcde6;--accent:#405c90;--vllm:#66782c;--vllm-soft:#e8efc9;--ollama:#416fa5;--ollama-soft:#e4edfc}
+html:root[data-report-theme="studio"][data-theme="dark"],html:root[data-report-theme="studio"][data-theme="dark"] .dash{--plane:#10172b;--surface:#18243e;--surface-2:#223253;--ink:#eef4ff;--secondary:#becfeb;--muted:#a4bbdc;--grid:#354665;--axis:#526e94;--border:#425a7d;--accent:#e8ff74;--vllm:#e8ff74;--vllm-soft:#35452e;--ollama:#a5caff;--ollama-soft:#273f62}
+@font-face{font-family:'Space Grotesk';src:url('/fonts/SpaceGrotesk.woff2') format('woff2');font-weight:300 700;font-display:swap}
+html:root[data-report-theme="studio"] :is(h1,h2,h3,.brand-title,.thesis-lead){font-family:'Space Grotesk',sans-serif;font-weight:500;letter-spacing:-.03em}

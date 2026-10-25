@@ -28,13 +28,13 @@ if(gitCommit){
   console.log(JSON.stringify({lock_source_sha256:semanticHash(committedLock),lock_build_sha256:semanticHash(installedLock),lock_changed_paths:differences}));
   if(differences.length)throw Error("Build changed committed dependency lock semantics; release blocked");
 }
-const files=["lib/troubleshoot.mjs","lib/troubleshoot-http.mjs","lib/investigation-evidence.mjs","lib/runbooks.mjs","lib/source-links.ts",
+const files=["lib/portable-brief.mjs","lib/troubleshoot.mjs","lib/troubleshoot-http.mjs","lib/investigation-evidence.mjs","lib/runbooks.mjs","lib/source-links.ts",
   "app/troubleshoot/page.tsx","app/troubleshoot/evidence-atlas.tsx","app/layout.tsx","app/runbooks/page.tsx","app/study/page.tsx","app/engineering/page.tsx",
   "app/globals.css","app/workspace.css","public/runbooks.json","public/study.json",
   "public/investigation-development.json","package-lock.json","package.json",
   "scripts/release-identity.mjs","scripts/lock-evidence.mjs","scripts/publish-research.mjs",
   "public/report-theme.css","public/dashboard.html","public/overturns.html",
-  "public/fonts/PlusJakartaSans.woff2","public/fonts/Inter.woff2","public/fonts/IBMPlexMono.woff2",
+  "public/fonts/SpaceGrotesk.woff2","public/fonts/SpaceGrotesk-OFL.txt","public/fonts/PlusJakartaSans.woff2","public/fonts/Inter.woff2","public/fonts/IBMPlexMono.woff2",
   "public/fonts/PlusJakartaSans-OFL.txt","public/fonts/Inter-OFL.txt","public/fonts/IBMPlexMono-OFL.txt"];
 const hash=value=>crypto.createHash("sha256").update(value).digest("hex");
 const sources=Object.fromEntries(files.sort().map(file=>[file,hash(/\.woff2$/.test(file)?fs.readFileSync(path.join(web,file)):fs.readFileSync(path.join(web,file),"utf8").replace(/\r\n/g,"\n"))]));

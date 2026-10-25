@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Ask about a Kubernetes problem, explore relevant documentation, and save what you find. Simple questions, inspectable sources, and no cluster connection.",
   icons: {
-    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ad542c'/%3E%3Cpath d='M10 23L23 10M10 10H23V23' fill='none' stroke='%23ffffff' stroke-width='2.5'/%3E%3C/svg%3E",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e8ff74'/%3E%3Cpath d='M10 23L23 10M10 10H23V23' fill='none' stroke='%2310172b' stroke-width='2.5'/%3E%3C/svg%3E",
   },
 };
 
@@ -19,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preload" href="/fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
         <link rel="preload" href="/fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
         <link rel="preload" href="/fonts/Inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
         <link rel="preload" href="/fonts/IBMPlexMono.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>

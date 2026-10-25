@@ -69,14 +69,14 @@ test("custom fonts load from this release rather than a fallback or font service
   const fontRequests=[];page.on("request",r=>{if(r.resourceType()==="font")fontRequests.push(r.url());});
   await page.goto("/");await page.evaluate(()=>document.fonts.ready);
   const identity=await (await request.get("/release.json")).json();
-  for(const [file,family] of [["PlusJakartaSans","Plus Jakarta Sans"],["Inter","Inter"],["IBMPlexMono","IBM Plex Mono"]]){
+  for(const [file,family] of [["SpaceGrotesk","Space Grotesk"],["PlusJakartaSans","Plus Jakarta Sans"],["Inter","Inter"],["IBMPlexMono","IBM Plex Mono"]]){
     expect(fontRequests.some(url=>new URL(url).pathname===`/fonts/${file}.woff2`)).toBe(true);
     const response=await request.get(`/fonts/${file}.woff2`);expect(response.status()).toBe(200);
     expect(createHash("sha256").update(await response.body()).digest("hex")).toBe(identity.source_files[`public/fonts/${file}.woff2`]);
     expect(await page.evaluate(name=>Array.from(document.fonts).some(f=>f.family.replaceAll('"',"")===name&&f.status==="loaded"),family)).toBe(true);
   }
   for(const url of fontRequests)expect(new URL(url).origin).toBe(new URL(page.url()).origin);
-  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Georgia");
+  expect(await page.locator("h1").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Space Grotesk");
   expect(await page.locator(".intro-copy").evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
   expect(await page.locator("textarea").first().evaluate(e=>getComputedStyle(e).fontFamily)).toContain("Inter");
 });
@@ -180,6 +180,8 @@ test("keyboard investigation and invalid-input recovery",async({page})=>{
   await page.locator(".chat-logs > summary").click();
   await page.locator("#diagnostics").fill("OOMKilled");
   await page.locator("#diagnostics").press("Tab");
+  await expect(page.getByRole("button",{name:"Reopen notes ↗",exact:true})).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(page.getByRole("button",{name:"Send question"})).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("region",{name:"Response",exact:true})).toBeFocused();
@@ -242,4 +244,61 @@ test("simple question flow reveals detail only on request and resets cleanly",as
   await expect(page.locator(".chat-response")).toBeHidden();
   await expect(page.locator("#incident-issue")).toBeFocused();
   expect(modelPosts).toBe(0);
+});
+
+test("portable JSON resumes trusted retrieval and Markdown saves readable redacted notes",async({page},info)=>{
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await page.getByRole("button",{name:"Send question"}).click();
+  await expect(page.getByRole("heading",{name:"What I found",exact:true})).toBeVisible();
+  await page.locator(".chat-notes > summary").click();await page.locator("#review-notes").fill("Check registry. token=portable-secret");
+  const mdEvent=page.waitForEvent("download");await page.getByRole("button",{name:"Download Markdown ↓",exact:true}).click();
+  const mdDownload=await mdEvent,mdPath=info.outputPath("investigation.md");await mdDownload.saveAs(mdPath);
+  const markdown=await fs.readFile(mdPath,"utf8");expect(markdown).toContain("# OpsVerse investigation notes");expect(markdown).toContain("[REDACTED]");expect(markdown).not.toContain("portable-secret");expect(markdown).toContain("ImagePullBackOff");
+  await info.attach("actual-markdown-download",{path:mdPath,contentType:"text/markdown"});
+  const jsonEvent=page.waitForEvent("download");await page.getByRole("button",{name:"Download notes ↓",exact:true}).click();
+  const jsonDownload=await jsonEvent,jsonPath=info.outputPath("portable-notes.json");await jsonDownload.saveAs(jsonPath);
+  const brief=JSON.parse(await fs.readFile(jsonPath,"utf8"));
+  brief.answer={summary:"UNTRUSTED_IMPORTED_AUTHORITY"};brief.sources=[{source:"javascript:untrusted",text:"UNTRUSTED_IMPORTED_AUTHORITY"}];
+  await page.getByRole("button",{name:"Ask another question",exact:true}).click();
+  await page.locator('input[type="file"]').setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(brief))});
+  await expect(page.getByRole("heading",{name:"What I found",exact:true})).toBeVisible();
+  await expect(page.locator(".chat-response")).not.toContainText("UNTRUSTED_IMPORTED_AUTHORITY");
+  await expect(page.locator(".incident-source").first()).toContainText("ImagePullBackOff");
+  await expect(page.locator("#incident-issue")).toHaveValue(brief.issue);
+  await page.locator(".chat-notes > summary").click();await expect(page.locator("#review-notes")).toHaveValue(brief.review.notes);
+  expect(await page.locator('a[href^="javascript:"]').count()).toBe(0);
+});
+
+test("unsupported and oversized note files preserve the active question",async({page})=>{
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await page.locator("#incident-issue").fill("Keep this question");
+  const upload=(text)=>page.locator('input[type="file"]').setInputFiles({name:"notes.json",mimeType:"application/json",buffer:Buffer.from(text)});
+  await upload(JSON.stringify({schema_version:1,review:{status:"unreviewed",notes:""},source_revision:"foreign",issue:"overwrite",diagnostics:""}));
+  await expect(page.getByRole("alert")).toContainText("different documentation snapshot");await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
+  await upload("x".repeat(262145));await expect(page.getByRole("alert")).toContainText("too large");
+  await upload("{broken");await expect(page.getByRole("alert")).toContainText("not valid JSON");
+  await expect(page.locator("#incident-issue")).toHaveValue("Keep this question");
+});
+
+test("reading list survives reload without saving questions or logs",async({page})=>{
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await page.getByRole("button",{name:"Send question"}).click();
+  await page.getByRole("button",{name:"Save guide 1",exact:true}).click();
+  await expect(page.getByRole("button",{name:"Unsave guide 1",exact:true})).toBeVisible();
+  const stored=await page.evaluate(()=>localStorage.getItem("opsverse.saved-guides.v1"));
+  expect(Object.keys(JSON.parse(stored)).sort()).toEqual(["ids","revision","schema"]);expect(stored).not.toContain("registry.example");expect(stored).not.toContain("Why has this container");
+  await page.reload();await expect(page.locator(".saved-guides-button")).toContainText("1");await page.locator(".saved-guides-button").click();
+  const dialog=page.getByRole("dialog",{name:"Your reading list"});await expect(dialog).toBeVisible();await expect(dialog.locator("li")).toHaveCount(1);await expect(dialog).toContainText("ImagePullBackOff");
+  await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();await expect(page.locator(".saved-guides-button")).toBeFocused();
+  await page.locator(".saved-guides-button").click();await dialog.getByRole("button",{name:"Clear saved guides",exact:true}).click();await expect(dialog.locator("li")).toHaveCount(0);
+  await dialog.getByRole("button",{name:"Close",exact:true}).click();await page.reload();await expect(page.locator(".saved-guides-button")).toContainText("0");
+});
+
+test("unavailable storage keeps saved guides usable in the active tab",async({page})=>{
+  await page.addInitScript(()=>{Storage.prototype.setItem=function(){throw new DOMException("Synthetic quota failure","QuotaExceededError");};});
+  await page.goto("/");await expect(page.getByRole("button",{name:"Send question"})).toBeEnabled();
+  await page.getByRole("button",{name:"Image won't pull",exact:true}).click();await page.getByRole("button",{name:"Send question"}).click();
+  await page.getByRole("button",{name:"Save guide 1",exact:true}).click();
+  await expect(page.locator(".chat-response").getByRole("status").filter({hasText:"Device storage is unavailable"})).toBeVisible();
+  await page.locator(".saved-guides-button").click();const dialog=page.getByRole("dialog",{name:"Your reading list"});await expect(dialog.locator("li")).toHaveCount(1);await expect(dialog).toContainText("this tab only");
 });
