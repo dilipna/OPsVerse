@@ -32,7 +32,8 @@ const files=["lib/troubleshoot.mjs","lib/troubleshoot-http.mjs","lib/investigati
   "app/troubleshoot/page.tsx","app/troubleshoot/evidence-atlas.tsx","app/layout.tsx","app/runbooks/page.tsx","app/study/page.tsx","app/engineering/page.tsx",
   "app/globals.css","app/workspace.css","public/runbooks.json","public/study.json",
   "public/investigation-development.json","package-lock.json","package.json",
-  "scripts/release-identity.mjs","scripts/lock-evidence.mjs",
+  "scripts/release-identity.mjs","scripts/lock-evidence.mjs","scripts/publish-research.mjs",
+  "public/report-theme.css","public/dashboard.html","public/overturns.html",
   "public/fonts/SpaceGrotesk.woff2","public/fonts/IBMPlexSans.woff2","public/fonts/IBMPlexMono.woff2",
   "public/fonts/SpaceGrotesk-OFL.txt","public/fonts/IBMPlexSans-OFL.txt","public/fonts/IBMPlexMono-OFL.txt"];
 const hash=value=>crypto.createHash("sha256").update(value).digest("hex");

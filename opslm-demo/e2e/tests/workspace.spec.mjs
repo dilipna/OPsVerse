@@ -12,7 +12,7 @@ test.afterEach(async({page},info)=>{
   expect(page.__applicationErrors).toEqual([]);
 });
 
-for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runbooks","/study","/engineering","/model-demo"]){
+for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runbooks","/study","/engineering","/model-demo","/dashboard.html","/overturns.html"]){
   test(`layout ${width} ${route}`,async({page},info)=>{
     await page.setViewportSize({width,height:1000});
     const response=await page.goto(route);expect(response.status()).toBe(200);
@@ -26,6 +26,24 @@ for(const width of [360,768,1440])for(const route of ["/","/troubleshoot","/runb
     await info.attach("layout",{path:screenshot,contentType:"image/png"});
   });
 }
+
+test("research archive navigation, chart rendering and theme toggle",async({page})=>{
+  await page.emulateMedia({colorScheme:"light"});
+  await page.goto("/dashboard.html");await page.evaluate(()=>document.fonts.ready);
+  await expect(page.getByRole("navigation",{name:"Research navigation"})).toBeVisible();
+  await expect(page.getByRole("complementary",{name:"Historical research scope"})).toContainText("Historical research snapshot");
+  expect(await page.locator("svg").count()).toBeGreaterThan(0);
+  await page.getByRole("button",{name:"Toggle light and dark theme"}).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","dark");
+  expect(await page.locator("svg").count()).toBeGreaterThan(0);
+  await page.getByRole("button",{name:"Toggle light and dark theme"}).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","light");
+  await page.getByRole("navigation",{name:"Research navigation"}).getByRole("link",{name:"Workspace",exact:true}).click();
+  await expect(page.getByRole("button",{name:"Find incident evidence →"})).toBeEnabled();
+  await page.goto("/overturns.html");await page.evaluate(()=>document.fonts.ready);
+  await expect(page.locator("article.card")).toHaveCount(8);
+  await expect(page.getByRole("link",{name:"Read current corrections and limitations ↗"})).toHaveAttribute("href",/improve\/flagship-investigation\/docs\/claims.md$/);
+});
 
 test("public identity and model-free operating mode",async({request})=>{
   const identity=await (await request.get("/release.json")).json();

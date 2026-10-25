@@ -18,3 +18,9 @@ Browser checks wait for font readiness before screenshot capture and verify actu
 font requests, loaded font faces, computed families and binary hashes against the
 deployed release identity. Existing retrieval/export/keyboard/retry checks remain.
 No desktop/browser control on the owner's computer is permitted.
+
+The hosted benchmark/claim archive uses `public/report-theme.css` and shared
+research navigation. `scripts/publish-research.mjs` decorates the canonical offline
+exports during builds; those original files remain self-contained and unchanged.
+Research scripts and claim paragraphs are checked for byte-preserving publication.
+Historical scope and the current claims ledger are visible before the old reports.

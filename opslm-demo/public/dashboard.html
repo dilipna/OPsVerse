@@ -1,13 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-report-theme="studio">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpsLM · Inference Benchmark Dashboard</title>
 <meta name="description" content="Measured vLLM vs Ollama serving comparison for OpsLM-v1 (Qwen3-4B) on a Tesla T4.">
 <style>*{margin:0;padding:0;box-sizing:border-box}html,body{background:#f6f7f9}@media(prefers-color-scheme:dark){html,body{background:#0a0c0f}}:root[data-theme="dark"] html,:root[data-theme="dark"] body{background:#0a0c0f}:root[data-theme="light"] html,:root[data-theme="light"] body{background:#f6f7f9}</style>
+<link rel="stylesheet" href="/report-theme.css">
 </head>
-<body><aside style="padding:20px;background:#fff1d6;color:#352609;font:16px/1.6 system-ui">Historical stored T4 measurements, not a fresh GPU run. FP16 vs Q4 does not isolate scheduling. Token-counting provenance is incomplete; ratios may inherit bias. Capacity means throughput at an admissible configuration, not per-request goodput. Historical repeatability is not measured. <a href="https://github.com/dilipna/OPsVerse/blob/main/docs/claims.md">Read corrections and evidence</a></aside>
+<body><nav class="research-nav" aria-label="Research navigation"><a class="research-brand" href="/">↗ OPSVERSE</a><div><a href="/">Workspace</a><a href="/runbooks">Runbooks</a><a href="/study">Evaluation</a><a href="/engineering">Engineering ↗</a></div><span>RESEARCH ARCHIVE</span></nav><aside class="research-notice" aria-label="Historical research scope"><strong>Historical research snapshot.</strong> Original measurements and conclusions retain their recorded scope. The current workspace uses live evidence retrieval; its separate model console uses labeled samples. <a href="https://github.com/dilipna/OPsVerse/blob/improve/flagship-investigation/docs/claims.md">Read current corrections and limitations ↗</a></aside><main class="research-content"><aside style="padding:20px;background:#fff1d6;color:#352609;font:16px/1.6 system-ui">Historical stored T4 measurements, not a fresh GPU run. FP16 vs Q4 does not isolate scheduling. Token-counting provenance is incomplete; ratios may inherit bias. Capacity means throughput at an admissible configuration, not per-request goodput. Historical repeatability is not measured. <a href="https://github.com/dilipna/OPsVerse/blob/improve/flagship-investigation/docs/claims.md">Read corrections and evidence</a></aside>
 <style>
   .dash {
     /* light (default) */
@@ -452,5 +453,5 @@
 })();
 </script>
 
-</body>
+</main></body>
 </html>

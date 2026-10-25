@@ -197,6 +197,7 @@ body::after{display:none;}
 .studio-actions .studio-primary{display:flex;align-items:center;justify-content:space-between;gap:27px;padding:15px 18px;border:1px solid #e5ff8a;border-radius:10px;background:#e5ff8a;color:#30223f;font-weight:600;box-shadow:0 5px 18px #16111b18;}
 .studio-actions .studio-primary:hover{background:#f0ffb5;text-decoration:none;}
 .studio-primary span{font-size:18px;}
+.archive-links{display:flex;flex-wrap:wrap;gap:12px 25px;margin-top:24px;font:500 13px var(--ui);}
 .flagship-workspace .hero-facts{margin-top:30px;max-width:450px;gap:20px;}
 .flagship-workspace .hero-facts>span{font:10px/1.6 var(--ui);color:#beacd0;border-color:#665075;}
 .flagship-workspace .hero-facts b{font:500 24px/1.25 var(--display);color:#f0e8f8;margin-bottom:4px;}
