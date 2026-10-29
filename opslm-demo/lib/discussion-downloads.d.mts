@@ -1,0 +1,10 @@
+import type {Result} from "./troubleshoot.mjs";
+export type Turn={id:string;result:Result;notes:string};
+export type CodeFile={name:string;language:string;text:string;question:string};
+export const MAX_TURNS:number;
+export function answerText(result:Result):string;
+export function codeFiles(turns:Turn[]):CodeFile[];
+export function downloadPlan(turns:Turn[]):{recommended:string;files:CodeFile[];reason:string};
+export function discussionMarkdown(turns:Turn[]):string;
+export function codeBundle(turns:Turn[]):Promise<Uint8Array>;
+export function studyPdf(turns:Turn[],fontBytes:ArrayBuffer|Uint8Array):Promise<Uint8Array>;
