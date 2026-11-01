@@ -1,5 +1,8 @@
 "use client";
 
+import {sourceTree} from "../../lib/source-links";
+
+
 import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "user" | "assistant" | "system"; content: string };
@@ -73,7 +76,7 @@ export default function Page() {
   }
 
   return (
-    <div className="wrap"><p><a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded</p>
+    <main className="wrap"><p><a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded</p>
       <div className="topbar">
         <div className="brand">
           <b>OpsLM · sample console</b>
@@ -87,7 +90,7 @@ export default function Page() {
             benchmarks ↗
           </a>
           <a
-            href="https://github.com/dilipna/OPsVerse"
+            href={sourceTree}
             target="_blank"
             rel="noreferrer"
           >
@@ -287,6 +290,6 @@ export default function Page() {
           </a>
         </span>
       </footer>
-    </div>
+    </main>
   );
 }

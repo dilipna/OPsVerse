@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "purpose": "Development-only document-family coverage. Not held-out answer quality, diagnosis correctness, or calibrated answerability.",
+  "authorship": "Synthetic cases authored during the flagship redevelopment after source inspection; labels reflect the six-document corpus scope.",
+  "frozen_before": "signal-scoped evidence repair implementation",
+  "cases": [
+    {"id":"image", "issue":"What should I inspect next?", "diagnostics":"Reason: ImagePullBackOff", "documents":["images"]},
+    {"id":"memory", "issue":"What should I inspect next?", "diagnostics":"Reason: OOMKilled", "documents":["resources"]},
+    {"id":"readiness", "issue":"What should I inspect next?", "diagnostics":"Readiness probe failed: HTTP 503", "documents":["probes"]},
+    {"id":"liveness", "issue":"What should I inspect next?", "diagnostics":"Liveness probe failed: connection refused", "documents":["probes"]},
+    {"id":"startup", "issue":"What should I inspect next?", "diagnostics":"Startup probe failed: timeout", "documents":["probes"]},
+    {"id":"scheduling", "issue":"What should I inspect next?", "diagnostics":"FailedScheduling: Insufficient cpu", "documents":["resources"]},
+    {"id":"rollout", "issue":"What should I inspect next?", "diagnostics":"ProgressDeadlineExceeded", "documents":["deployments"]},
+    {"id":"memory-readiness", "issue":"What should I inspect next?", "diagnostics":"Reason: OOMKilled\nReadiness probe failed: HTTP 503", "documents":["resources","probes"]},
+    {"id":"image-scheduling", "issue":"What should I inspect next?", "diagnostics":"ImagePullBackOff\nFailedScheduling\nInsufficient cpu", "documents":["images","resources"]},
+    {"id":"rollout-readiness", "issue":"What should I inspect next?", "diagnostics":"ProgressDeadlineExceeded\nReadiness probe failed", "documents":["deployments","probes"]},
+    {"id":"three-families", "issue":"What should I inspect next?", "diagnostics":"ImagePullBackOff\nOOMKilled\nReadiness probe failed", "documents":["images","resources","probes"]},
+    {"id":"four-families-budget", "issue":"What should I inspect next?", "diagnostics":"ImagePullBackOff\nOOMKilled\nReadiness probe failed\nProgressDeadlineExceeded", "documents":["images","resources","probes","deployments"]},
+    {"id":"no-lexical-match", "issue":"quasar marmalade", "diagnostics":"", "documents":[], "expect_empty":true},
+    {"id":"stopwords", "issue":"what should I do", "diagnostics":"", "documents":[], "expect_empty":true}
+  ]
+}

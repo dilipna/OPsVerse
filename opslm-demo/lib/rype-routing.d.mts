@@ -1,0 +1,14 @@
+import type {Corpus} from "./runbooks.mjs";
+import type {Input,Prepared,Result} from "./troubleshoot.mjs";
+export type Model={id:string;prompt:number;completion:number;request:number;reasoning:number;context:number};
+export type RoutingReceipt={kind:string;category:string;reason:string;status:string;model_used:string|null;model_selected:string|null;model_calls:number;price_checked_at:string|null;actual_cost_usd:number|null;baseline_model:string|null;baseline_estimated_usd:number|null;estimated_difference_usd:number|null;estimated_reduction_percent:number|null;input_tokens:number|null;output_tokens:number|null;token_basis:string;comparison_scope:string;note:string};
+export type RoutingMetadata={cloud_configured:boolean;free_only:boolean;checked_at:string|null;baseline:Model|null;profiles:Record<string,Model|null>;catalogue_available:boolean};
+export const BASELINE_MODEL:string;
+export const PROFILES:Record<string,{label:string;free:string[];paid:string[]}>;
+export function previewSource(text:string):string|undefined;
+export function decideRoute(prepared:Prepared):{kind:string;category:string;reason:string};
+export function catalogueModels(raw:unknown):Model[];
+export function selectModel(category:string,models:Model[],options?:{freeOnly?:boolean;maxRequestUsd?:number;inputBytes?:number;maxTokens?:number}):Model|null;
+export function costComparison(input:{actualCost?:number|null;inputTokens?:number|null;outputTokens?:number|null;baseline?:Model|null;estimatedTokens?:boolean}):Pick<RoutingReceipt,"actual_cost_usd"|"baseline_model"|"baseline_estimated_usd"|"estimated_difference_usd"|"estimated_reduction_percent"|"input_tokens"|"output_tokens"|"token_basis"|"comparison_scope">;
+export function localRoutingResult(result:Result,metadata?:RoutingMetadata|null,options?:{restored?:boolean}):Result;
+export function prepareLocalRoute(corpus:Corpus,input:Input,metadata?:RoutingMetadata|null):Promise<Result>;

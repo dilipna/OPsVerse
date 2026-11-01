@@ -6,7 +6,13 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 # Install third-party deps first so they cache independently of source changes.
 COPY pyproject.toml uv.lock ./
 COPY libs/core/pyproject.toml libs/core/pyproject.toml
+COPY libs/ingestion/pyproject.toml libs/ingestion/pyproject.toml
+COPY libs/security/pyproject.toml libs/security/pyproject.toml
+COPY libs/rag/pyproject.toml libs/rag/pyproject.toml
+COPY libs/evals/pyproject.toml libs/evals/pyproject.toml
+COPY libs/training/pyproject.toml libs/training/pyproject.toml
 COPY apps/api/pyproject.toml apps/api/pyproject.toml
+COPY apps/mcp-server/pyproject.toml apps/mcp-server/pyproject.toml
 RUN uv sync --frozen --no-install-workspace --no-dev --package opsverse-api
 
 COPY libs libs

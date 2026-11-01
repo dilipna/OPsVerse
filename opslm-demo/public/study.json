@@ -2,6 +2,26 @@
   "documents": 6,
   "passages": 180,
   "source_revision": "3d8f3d7b579d7dfcef7b835fee8da2a37199012d",
+  "investigation": {
+    "baseline": {
+      "cases": 14,
+      "document_targets": 20,
+      "covered": 14,
+      "complete": 8,
+      "empty_correct": 2,
+      "budget_violations": 0
+    },
+    "candidate": {
+      "cases": 14,
+      "document_targets": 20,
+      "covered": 19,
+      "complete": 11,
+      "empty_correct": 2,
+      "budget_violations": 0
+    },
+    "limitations": "Development-only document-family coverage. Not held-out answer quality, diagnosis correctness, or calibrated answerability. Synthetic cases authored during the flagship redevelopment after source inspection; labels reflect the six-document corpus scope.",
+    "release_evidence": false
+  },
   "retrieval": {
     "cases": 16,
     "overlap": 0.9375,

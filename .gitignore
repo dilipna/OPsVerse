@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+.uv-cache/
 dist/
 build/
 *.egg-info/
@@ -16,6 +17,7 @@ build/
 # Node (apps/web, later phases)
 node_modules/
 .next/
+.vercel/
 
 # Data & artifacts: DVC-tracked content is ignored via data/.gitignore
 # (written by `dvc add`); the small .dvc pointer files DO belong in git.
@@ -40,3 +42,6 @@ evalsets/judge-validation-v1-human-labeler.html
 # Ephemeral CI reruns (release evidence remains tracked)
 docs/reports/runbook-ci.json
 docs/reports/troubleshooting-ci.json
+docs/reports/investigation-ci.json
+opslm-demo/public/release.json
+opslm-demo/e2e-results/

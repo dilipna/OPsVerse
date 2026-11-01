@@ -65,7 +65,7 @@ def _build_chat_service(app) -> ChatService:
             api_base=settings.chat_api_base,
         )
         # Gateway (Phase 6): Redis response cache + daily budget kill-switch,
-        # wrapping the client. Falls back to pass-through if Redis is down.
+        # wrapping the client. An enabled spend guard refuses calls if Redis is down.
         gateway = LLMGateway(
             llm,
             app.state.redis,

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./workspace.css";
 
 export const metadata: Metadata = {
-  title: "OpsVerse — Kubernetes investigation workspace",
+  title: "RYPE — Route Your Prompt Efficiently",
   description:
-    "Turn Kubernetes symptoms into an inspectable incident brief. Find official source passages, review evidence, and explore the engineering behind OpsVerse.",
+    "Route Your Prompt Efficiently: retrieve covered Kubernetes guidance without inference, route other questions to eligible free OpenRouter models, and inspect route and cost receipts.",
   icons: {
-    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080808'/%3E%3Ctext x='4' y='24' font-family='monospace' font-size='22' fill='%23ff2b2b'%3E%3E_%3C/text%3E%3C/svg%3E",
+    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e8ff74'/%3E%3Cpath d='M10 23L23 10M10 10H23V23' fill='none' stroke='%2310172b' stroke-width='2.5'/%3E%3C/svg%3E",
   },
 };
 
@@ -17,6 +18,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" href="/fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
+        <link rel="preload" href="/fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
+        <link rel="preload" href="/fonts/Inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
+        <link rel="preload" href="/fonts/IBMPlexMono.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/>
+      </head>
       <body>{children}</body>
     </html>
   );

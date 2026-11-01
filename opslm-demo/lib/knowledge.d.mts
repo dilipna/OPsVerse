@@ -1,0 +1,15 @@
+import type {Corpus,Chunk} from "./runbooks.mjs";
+import type {Input} from "./troubleshoot.mjs";
+export type PrivateDocument={id:string;name:string;text:string;created_at:string};
+export type KnowledgeTrace={version:number;strategy:string;attempts:number;steps:{action:string;observation:string;source_ids?:string[]}[]};
+export const LIBRARY_LIMITS:{documents:number;documentBytes:number;totalBytes:number;backupBytes:number};
+export const CONCEPTS:(Chunk & {origin:string})[];
+export function tokens(text:string):string[];
+export function validateDocument(name:string,text:string):{name:string;text:string};
+export function makeDocument(name:string,text:string):Promise<PrivateDocument>;
+export function validateLibrary(documents:PrivateDocument[]):PrivateDocument[];
+export function libraryBackup(documents:PrivateDocument[]):string;
+export function parseLibraryBackup(text:string):Promise<PrivateDocument[]>;
+export function documentChunks(documents:PrivateDocument[]):(Chunk & {origin:string})[];
+export function hybridSearch(chunks:Chunk[],query:string,limit?:number):(Chunk & {origin?:string;score:number;coverage:number;bm25:number;character_similarity:number})[];
+export function knowledgeLookup(corpus:Corpus,input:Input,documents?:PrivateDocument[]):{covered:boolean;answer:string|null;sources:(Chunk & {origin?:string})[];trace:KnowledgeTrace;private_candidates:number};

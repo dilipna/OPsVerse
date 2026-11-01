@@ -1,4 +1,6 @@
-# Incident investigation workspace
+# Legacy incident investigation contract
+
+The current public product is **RYPE — Route Your Prompt Efficiently**. See [RYPE routing and cost methodology](rype-routing.md) for `/api/route`, the retrieval-first/free-model policy and server-side OpenRouter setup. This document preserves the original `/api/troubleshoot` structured local-model research contract; it does not describe the new general-question route.
 
 The public homepage is an evidence workflow: sanitized symptom and optional diagnostic
 text -> recognized status signatures -> up to three pinned official passages ->

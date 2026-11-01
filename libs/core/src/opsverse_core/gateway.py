@@ -1,9 +1,10 @@
 """LLM gateway as a library layer over the LiteLLM client (Phase 6, ADR-0008).
 
 Adds the gateway concerns that matter under a free-tier budget — an
-exact-match response cache and a daily spend kill-switch — without running a
-separate proxy process. Both degrade to pass-through when Redis is
-unavailable, so the gateway can never take the chat path down.
+exact-match response cache and a daily spend threshold — without running a
+separate proxy process. Cache loss is a miss. An enabled spend guard refuses
+new provider calls if its counter cannot be verified. This post-call threshold
+does not reserve in-flight spend or guarantee a hard billing ceiling.
 
 The client interface (complete/stream) is unchanged, so ChatService and the
 eval harnesses use the gateway exactly where they used the raw client.
@@ -12,6 +13,7 @@ eval harnesses use the gateway exactly where they used the raw client.
 import contextlib
 import hashlib
 import json
+import math
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -65,6 +67,8 @@ class LLMGateway:
         cache_ttl_s: int = 24 * 3600,
         daily_budget_usd: float = 0.0,
     ) -> None:
+        if not math.isfinite(daily_budget_usd) or daily_budget_usd < 0:
+            raise ValueError("daily_budget_usd must be finite and non-negative")
         self._client = client
         self._redis = redis
         self._model_id = model_id  # identifies the model-chain for cache keying
@@ -75,17 +79,25 @@ class LLMGateway:
 
     async def _spent_today(self) -> float:
         if self._redis is None:
-            return 0.0
+            raise BudgetExceededError("spend counter unavailable; provider call refused")
         try:
             raw = await self._redis.get(_budget_key(datetime.now(UTC)))
-            return float(raw) if raw is not None else 0.0
-        except Exception:
-            return 0.0  # a broken budget counter must not block the platform
+            spent = float(raw) if raw is not None else 0.0
+        except Exception as exc:
+            raise BudgetExceededError("spend counter unavailable; provider call refused") from exc
+        if not math.isfinite(spent) or spent < 0:
+            raise BudgetExceededError("invalid spend counter; provider call refused")
+        return spent
 
     async def _check_budget(self) -> None:
         if self._daily_budget_usd <= 0:
             return
-        if await self._spent_today() >= self._daily_budget_usd:
+        try:
+            spent = await self._spent_today()
+        except BudgetExceededError:
+            self.stats.budget_blocks += 1
+            raise
+        if spent >= self._daily_budget_usd:
             self.stats.budget_blocks += 1
             raise BudgetExceededError(
                 f"daily budget ${self._daily_budget_usd:.2f} reached; call refused"
