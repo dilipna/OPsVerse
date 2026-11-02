@@ -102,3 +102,19 @@ def test_embedder_refuses_a_tampered_model_before_embedding(model_dir, monkeypat
     embedder = FastEmbedEmbedder(pin_mode="enforce")
     with pytest.raises(ModelIntegrityError, match=r"changed onnx/model\.onnx"):
         embedder.embed_dense(["pods"])
+
+
+def test_every_default_production_model_is_pinned():
+    # With RYPE_MODEL_PIN_MODE=enforce (the default), an unpinned default model
+    # would be refused at startup; catch that here instead of at deploy time.
+    from pathlib import Path
+
+    from rype_core.settings import Settings
+    from rype_rag.model_integrity import load_pins
+
+    root = Path(__file__).resolve().parents[3]
+    pins = load_pins(root / "registry" / "model-pins.json")
+    settings = Settings()
+    for model in (settings.embedding_model, settings.sparse_model, settings.reranker_model):
+        assert model in pins, f"{model} is a default but has no pinned hashes"
+        assert pins[model]["files"], model

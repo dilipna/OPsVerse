@@ -33,10 +33,10 @@ class Settings(BaseSettings):
     embedding_dim: int = 768
     sparse_model: str = "Qdrant/bm25"
     reranker_model: str = "BAAI/bge-reranker-base"
-    # Model file integrity (threat model T-09): verify downloaded model files
-    # against registry/model-pins.json. "warn" until pins are recorded;
-    # production runs "enforce", which also refuses unpinned models.
-    model_pin_mode: Literal["enforce", "warn", "off"] = "warn"
+    # Model file integrity (threat model T-09): downloaded model files must
+    # match registry/model-pins.json. "enforce" also refuses unpinned models;
+    # pin a new model with `python -m rype_rag.model_integrity record <name>`.
+    model_pin_mode: Literal["enforce", "warn", "off"] = "enforce"
 
     # LLM providers (free tiers). Keys use the vendors' canonical env names
     # (no RYPE_ prefix) so litellm and vendor tooling agree on them; the

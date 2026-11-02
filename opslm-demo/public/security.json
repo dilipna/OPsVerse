@@ -3,7 +3,40 @@
   "generated_from": [
     "docs/reports/security-robustness-v1-summary.json",
     "docs/reports/security-redteam-v1-summary.json",
-    "docs/security/threat-model.md"
+    "docs/security/threat-model.md",
+    "docs/reports/security-benchmark-regex-v1-summary.json"
+  ],
+  "external": [
+    {
+      "name": "deepset-test",
+      "attacks": 60,
+      "benign": 56,
+      "tpr": 0.1,
+      "tpr_ci95": [
+        0.0466,
+        0.2015
+      ],
+      "fpr": 0,
+      "fpr_ci95": [
+        0,
+        0.0642
+      ]
+    },
+    {
+      "name": "deepset-train",
+      "attacks": 203,
+      "benign": 343,
+      "tpr": 0.0739,
+      "tpr_ci95": [
+        0.0453,
+        0.1183
+      ],
+      "fpr": 0,
+      "fpr_ci95": [
+        0,
+        0.0111
+      ]
+    }
   ],
   "redteam": {
     "attacks": 15,

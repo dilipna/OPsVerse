@@ -55,3 +55,8 @@ jobs:
 
       - name: Live retrieval smoke on CI fixture
         run: uv run python -m rype_evals.ci_retrieval_smoke --qdrant http://localhost:6333
+
+      # The smoke test just downloaded these models; their bytes must match
+      # registry/model-pins.json (threat model T-09). Catches upstream drift.
+      - name: Model files match their pinned hashes
+        run: uv run python -m rype_rag.model_integrity verify BAAI/bge-base-en-v1.5 Qdrant/bm25

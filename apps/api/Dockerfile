@@ -19,6 +19,9 @@ WORKDIR /app
 # (infra/k8s sets runAsUser: 10001 to match).
 RUN groupadd -r -g 10001 rype && useradd -r -u 10001 -g rype rype
 COPY --from=builder --chown=rype:rype /app /app
+# Model file hashes checked at load (RYPE_MODEL_PIN_MODE=enforce); the path is
+# relative to the working directory, /app.
+COPY --chown=rype:rype registry/model-pins.json registry/model-pins.json
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1
 USER 10001

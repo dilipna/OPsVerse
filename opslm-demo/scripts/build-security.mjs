@@ -12,6 +12,7 @@ const json = (p) => JSON.parse(text(p));
 const robustness = json("docs/reports/security-robustness-v1-summary.json");
 const redteam = json("docs/reports/security-redteam-v1-summary.json");
 const threatModel = text("docs/security/threat-model.md");
+const external = json("docs/reports/security-benchmark-regex-v1-summary.json");
 
 const transforms = Object.keys(robustness.results)
   .filter((key) => key.startsWith("raw/"))
@@ -55,7 +56,19 @@ const data = {
     "docs/reports/security-robustness-v1-summary.json",
     "docs/reports/security-redteam-v1-summary.json",
     "docs/security/threat-model.md",
+    "docs/reports/security-benchmark-regex-v1-summary.json",
   ],
+  external: Object.entries(external.datasets)
+    .filter(([name]) => name.startsWith("deepset"))
+    .map(([name, block]) => ({
+      name,
+      attacks: block.meta.attacks,
+      benign: block.meta.benign,
+      tpr: block.results.regex.tpr,
+      tpr_ci95: block.results.regex.tpr_ci95,
+      fpr: block.results.regex.fpr,
+      fpr_ci95: block.results.regex.fpr_ci95,
+    })),
   redteam: {
     attacks: redteam.detail.attacks,
     benign: redteam.detail.benign,

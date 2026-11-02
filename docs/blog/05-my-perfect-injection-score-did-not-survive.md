@@ -52,6 +52,27 @@ tricks, not an independent robustness test. Second, rewording and translation ch
 words, not the characters. No pattern matcher catches those. That is the honest case for a
 learned classifier as the next layer, and the threat model now says so.
 
+## Then I tested it on someone else's data
+
+Fixing character tricks still left the detector scored only on cases I wrote. So I pinned
+an openly licensed external set, `deepset/prompt-injections`, to a commit and a file
+SHA-256 (the harness refuses a file that does not match), and scored the same detector on it.
+
+| Split | Attacks | Recall (95% CI) | False-positive rate (95% CI) |
+|---|---|---|---|
+| train | 203 | 0.074 [0.045, 0.118] | 0.000 [0.000, 0.011] |
+| test | 60 | 0.10 [0.05, 0.20] | 0.000 [0.000, 0.064] |
+
+Perfect on its own test set; under one attack in ten on someone else's. Zero false
+positives in 399 benign rows says the regexes are precise. The recall says they are a filter
+for the phrasings I thought of, not a detector of injection in general. No amount of
+normalization changes that, because most real injections are not phrased the way I guessed.
+
+That is the honest case for a learned layer, and also the case for measuring it before
+shipping it: the harness scores an LLM classifier on the same pinned rows, reports what
+layering *adds* (attacks gained and false alarms added, each with an exact McNemar test), and
+counts classifier errors separately instead of letting them pass as benign.
+
 ## The bigger hole was on the way out
 
 Re-testing inputs led to the question I had never asked about outputs. The research console

@@ -32,6 +32,8 @@ MCP server, a fine-tuned model, and a GPU serving benchmark.
 |---|---|---|
 | **AI security** | 13 threats mapped to the OWASP LLM Top 10 (2025), each with a control, a rerunnable test and an open-items list | [threat-model.md](docs/security/threat-model.md) |
 | | Simple character tricks drop the raw injection detector's recall from 1.00 to 0.00–0.07; scanning normalized text restores 1.00 with no new false positives | [security-robustness-v1](docs/reports/security-robustness-v1.md) |
+| | On an external, hash-pinned dataset the same detector catches only **7.4% [4.5, 11.8]** of 203 injections (zero false positives): a precise filter, not a general detector. An LLM classifier layer and its benchmark (Wilson CIs, McNemar tests) are built to close the gap | [security-benchmark-regex-v1](docs/reports/security-benchmark-regex-v1.md) |
+| | Model files hash-pinned and checked at load; unpinned or altered models are refused, and CI re-verifies the pins on every PR | [model-pins.json](registry/model-pins.json) |
 | | Streaming output guard blocks zero-click exfiltration through rendered Markdown; SSRF guard re-checks every redirect hop | [output_guard.py](libs/security/src/rype_security/output_guard.py), [netguard.py](libs/security/src/rype_security/netguard.py) |
 | **Evaluation rigor** | Pooled, graded golden set (1,914 judgements) with bootstrap CIs and paired permutation tests on every comparison | [retrieval-golden-v1](docs/reports/retrieval-golden-v1.md) |
 | | LLM relevance judge audited against human labels (n = 40): it finds about half the relevant material (TPR 0.556) | [judge-validation-v2](docs/reports/judge-validation-v2.md) |
