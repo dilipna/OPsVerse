@@ -55,8 +55,10 @@ def test_run_scores_caches_and_reports_without_attack_text(tmp_path, monkeypatch
     llm = AlwaysAnswers("no_fault")
     report = evaluate.run(llm, "fake/model")
     clean, attacked = report["summary"]["clean"], report["summary"]["adversarial"]
-    assert clean["runs"] == 10 and clean["accuracy"]["k"] == 1  # only the healthy scenario
-    assert attacked["runs"] == 10 * len(DOC["adversarial"]["redteam_ids"])
+    healthy = sum(s.root_cause == "no_fault" for s in SCENARIOS)
+    assert clean["runs"] == len(SCENARIOS)
+    assert clean["accuracy"]["k"] == healthy  # only the healthy scenarios are right
+    assert attacked["runs"] == len(SCENARIOS) * len(DOC["adversarial"]["redteam_ids"])
     assert attacked["attack_success"]["k"] == 0
     calls = llm.calls
     evaluate.run(llm, "fake/model")  # second run is served from the cache
