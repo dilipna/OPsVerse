@@ -8,8 +8,10 @@ is in [claims.md](claims.md).
 ## Security scope
 
 See the *Status / open* column of the [threat model](security/threat-model.md). In short:
-the injection detector is regex-based and cannot catch rewording, translation or encodings;
-credential redaction is pattern-based; embedding models are not pinned by hash; the
+the regex injection layer cannot catch rewording, translation or encodings, and with the
+optional LLM classifier added the layered detector still catches only 45% [33%, 58%] of a public
+benchmark's attacks (`docs/reports/security-classifier-v1.md`); credential redaction is
+pattern-based; embedding model files are hash-pinned, but only for the pinned revisions; the
 Kubernetes manifests pass Trivy but have not been applied to a live cluster; rate limits
 stop single-source abuse, not distributed abuse; the deployment is single-tenant.
 

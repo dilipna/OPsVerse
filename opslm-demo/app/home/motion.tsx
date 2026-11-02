@@ -31,10 +31,18 @@ export function useInView<T extends Element>(): [React.RefObject<T | null>, bool
 }
 
 /** Fades and lifts its children in the first time they scroll into view. */
-export function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Reveal({
+  children,
+  className = "",
+  id,
+}: {
+  children: ReactNode;
+  className?: string;
+  id?: string;
+}) {
   const [ref, seen] = useInView<HTMLDivElement>();
   return (
-    <div ref={ref} className={`reveal ${seen ? "in" : ""} ${className}`}>
+    <div ref={ref} id={id} className={`reveal ${seen ? "in" : ""} ${className}`}>
       {children}
     </div>
   );

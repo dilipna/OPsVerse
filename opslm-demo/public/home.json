@@ -10,7 +10,8 @@
     "docs/reports/generator-golden-v1-summary.json",
     "docs/reports/judge-validation-v2-summary.json",
     "opslm-demo/public/security.json",
-    "opslm-demo/scripts/lab-fixtures.json"
+    "opslm-demo/scripts/lab-fixtures.json",
+    "docs/evidence.md"
   ],
   "agent": {
     "model": "openai/gpt-4o-mini",
@@ -80,5 +81,6 @@
     "mitigated": 7,
     "accepted": 3
   },
+  "withdrawn_claims": 8,
   "parity_cases": 460
 }

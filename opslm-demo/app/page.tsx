@@ -3,7 +3,9 @@ import home from "../public/home.json";
 import security from "../public/security.json";
 import Architecture from "./home/Architecture";
 import BreakIt from "./home/BreakIt";
+import AskProject from "./home/AskProject";
 import HeroConsole from "./home/HeroConsole";
+import Tour, { TourButton } from "./home/Tour";
 import { Counter, RateBars, Reveal } from "./home/motion";
 
 const REPO = "https://github.com/dilipna/OPsVerse";
@@ -155,16 +157,20 @@ export default function Home() {
               threat, has a test, and is measured against attacks I didn&apos;t write.
             </p>
             <div className="hero-actions">
-              <a className="btn primary" href="#break">
+              <TourButton />
+              <a className="btn" href="#break">
                 Try to break it →
               </a>
-              <a className="btn" href="/agent">
-                Watch the agent
+              <a className="btn" href="/brief">
+                One-page brief
               </a>
               <a className="btn ghost" href={REPO}>
                 Source ↗
               </a>
             </div>
+            <p className="hero-hint">
+              Press <kbd>⌘</kbd> <kbd>K</kbd> anywhere to jump around.
+            </p>
           </div>
           <HeroConsole />
         </section>
@@ -270,7 +276,18 @@ export default function Home() {
           </Reveal>
         </section>
 
-        <Reveal className="section">
+        <Reveal className="section" id="ask">
+          <p className="eyebrow">ASK THE PROJECT</p>
+          <h2>A RAG system that answers questions about itself.</h2>
+          <p className="intro-copy">
+            Interviewer questions welcome. Retrieval runs over the repository&apos;s own README,
+            design records, threat model, evaluation reports and write-ups, in your browser, with a
+            citation for every passage and its own held-out evaluation.
+          </p>
+          <AskProject />
+        </Reveal>
+
+        <Reveal className="section" id="architecture">
           <p className="eyebrow">ARCHITECTURE</p>
           <h2>Where untrusted text enters, and what stops it.</h2>
           <p className="intro-copy">
@@ -339,12 +356,16 @@ export default function Home() {
             <a className="btn primary" href={REPO}>
               View the repository ↗
             </a>
-            <a className="btn" href="/engineering">
+            <a className="btn" href="/brief">
+              Get the one-page brief
+            </a>
+            <a className="btn ghost" href="/engineering">
               Read the case study
             </a>
           </div>
         </section>
       </main>
+      <Tour />
       <footer className="home-footer">
         <span>RYPE · built by Dilip Nallamasa</span>
         <span>

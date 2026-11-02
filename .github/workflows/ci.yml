@@ -42,6 +42,8 @@ jobs:
         run: node opslm-demo/scripts/build-security.mjs --check
       - name: Check landing page data matches committed reports
         run: node opslm-demo/scripts/build-home.mjs --check
+      - name: Check the Ask corpus and its retrieval evaluation are current
+        run: node opslm-demo/scripts/build-ask.mjs --check
       - name: Check the lab's JS ports against the Python controls (fixture current)
         run: uv run python -m rype_agent.lab_fixtures --check
       - name: Check agent replays rebuild from committed trajectories and scenarios

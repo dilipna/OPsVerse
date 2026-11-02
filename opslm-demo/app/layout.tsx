@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./palette.css";
+import CommandPalette from "./CommandPalette";
 
 const title = "RYPE: LLM systems, built to be attacked";
 const description =
@@ -19,7 +21,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <CommandPalette />
+      </body>
     </html>
   );
 }

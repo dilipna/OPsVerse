@@ -427,7 +427,7 @@ READING_PATH = (
     (
         "1. The overturns",
         "docs/evidence.md",
-        "This page. Seven claims the project tested and had to withdraw.",
+        "This page. {count} claims the project tested and had to withdraw.",
     ),
     (
         "2. The measured inference result",
@@ -540,6 +540,7 @@ def render_markdown(rows: list[dict[str, Any]], date: str) -> str:
 
     lines += ["---", "", "## Where everything else lives", ""]
     for title, path, what in READING_PATH:
+        what = what.replace("{count}", _spell(len(rows)).capitalize())
         lines += [f"**{title}** — `{path}`  ", f"{what}", ""]
 
     lines += [
@@ -658,6 +659,7 @@ def render_html(rows: list[dict[str, Any]], date: str, repo: str) -> str:
         f"      <li><b>{_inline_code(c)}</b> {_inline_code(w)}</li>" for c, w in NOT_CLAIMED
     )
     cards_html = "\n".join(cards)
+    count = _spell(len(rows)).capitalize()
 
     return f"""<!doctype html>
 <html lang="en">
@@ -665,7 +667,7 @@ def render_html(rows: list[dict[str, Any]], date: str, repo: str) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RYPE · What the measurements overturned</title>
-<meta name="description" content="Seven claims this project believed, tested, and
+<meta name="description" content="{count} claims this project believed, tested, and
  had to withdraw — each published with the statistic that overturned it.">
 <style>{_CSS}</style>
 </head>

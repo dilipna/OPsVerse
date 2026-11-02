@@ -21,6 +21,11 @@ const SOURCES = {
 };
 const src = Object.fromEntries(Object.entries(SOURCES).map(([k, p]) => [k, json(p)]));
 
+// The evidence index lists each withdrawn claim as "### N. ...".
+const withdrawnClaims = (
+  fs.readFileSync(path.join(root, "docs/evidence.md"), "utf8").match(/^### \d+\. /gm) ?? []
+).length;
+
 const { clean, clean_heldout: heldout, adversarial } = src.agent.summary;
 const secretsReason = "resource kind not allowed: secrets";
 const secretsRefused =
@@ -35,7 +40,7 @@ const threats = src.security.threats;
 const data = {
   schema: 1,
   generated_by: "node opslm-demo/scripts/build-home.mjs",
-  generated_from: Object.values(SOURCES),
+  generated_from: [...Object.values(SOURCES), "docs/evidence.md"],
   agent: {
     model: src.agent.model,
     scenarios: src.agent.scenarios,
@@ -89,6 +94,7 @@ const data = {
     mitigated: threats.filter((t) => /^Mitigated/.test(t.status)).length,
     accepted: threats.filter((t) => t.status === "Accepted").length,
   },
+  withdrawn_claims: withdrawnClaims,
   parity_cases:
     src.fixtures.scan.length +
     src.fixtures.redact.length +
