@@ -1,12 +1,12 @@
 {
-  "run_id": "0e061a3e-b5f8-4390-827b-5adf6a9b3359",
-  "created_at": "2026-11-02T06:18:31.328Z",
-  "code_commit": "caf04137ce14803b55e4742e15b8da9ad822c2f1",
+  "run_id": "ff23c4d9-669d-4bb6-8d30-d336b1cddac0",
+  "created_at": "2026-11-02T07:39:13.839Z",
+  "code_commit": "aa741cedb1db6c2894a404cefc3b1880db7730eb",
   "dirty": false,
   "dataset_sha256": "27b53251fea9ad1be80919f920e81295ce64a4560e6c81e77ca5e85217764ef9",
   "corpus_sha256": "31baa00aa5dd60c0c332fbe975a1281a887fa040847a626d16e9fcc0ff8c0c75",
-  "prompt_sha256": "5dfaf00cc653956316a79578f5f98100a04d0b2890bd1ff344ca187a76873004",
-  "implementation_sha256": "65ce5d081624a268d042d90ba4f77a4afc80851edf4822a05520e52cc310d13d",
+  "prompt_sha256": "568282061e2d2da23e677c98d67da504aa334c817fbc3c4535a45033101ebe42",
+  "implementation_sha256": "571a90b02384468f12a65785aecc7a84986f9e523a737c1fe9117da9e1b74964",
   "http_handler_sha256": "1cf9cddc02f93197f0daacfe6d858c95b6767bb042e7c6738df86210b8a64fec",
   "node": "v22.23.4",
   "hardware": {
@@ -43,7 +43,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 38,
+      "latency_ms": 50,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -66,7 +66,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "492009d49f3b16f726b7afd3aa92f57f7ba861ce55db9218191bcb7b07b19a2b",
+      "prompt_sha256": "20c4370d40d499467503fdb914fe8a8d905e6894a27943a1c0a9aadaf766ab39",
       "retrieved_ids": [
         "probes:8",
         "probes:9",
@@ -146,7 +146,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "dd60d956b4e526f3a9a112893186519819326e1d04ee2d9f4752f4371d648d27",
+      "prompt_sha256": "374fbbac8ff82c38b4480689db0167cda136f3b88ca48a693706303477668dc2",
       "retrieved_ids": [
         "probes:6",
         "probes:12",
@@ -207,7 +207,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 14,
+      "latency_ms": 11,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -225,7 +225,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "466570ac608c1a5fc55f660655cb65eff0aa43574efdf052f4b0a574462ba725",
+      "prompt_sha256": "4d6ce53e375194f2f6ce726ee6986a120d781b49e5ea17192654d5f34cf2975e",
       "retrieved_ids": [
         "probes:12",
         "probes:13",
@@ -307,7 +307,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "ceb41bdd620c376db1b7a39af27bd81fdf4c0d8ef45e15997e69ee2c2fc5f112",
+      "prompt_sha256": "cd1b27b53814777f6439ab0e825baecb96ae586ab5918e43ec950c03541963f3",
       "retrieved_ids": [
         "probes:8",
         "probes:13",
@@ -368,7 +368,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 10,
+      "latency_ms": 13,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -388,7 +388,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "018f4aaf6a33c917b644ca99d4121b8d7a3a5454ebfa49f36ef9d0660abb010e",
+      "prompt_sha256": "cec32a1899d4e5da8469788ef35f5666568439505d49dbb6d9719dc76e8649f5",
       "retrieved_ids": [
         "images:10",
         "images:1",
@@ -449,7 +449,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 10,
+      "latency_ms": 12,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -469,7 +469,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "ad63192abbd9ffc3819142030f81c9c47ebef1466e0d7f7c0e5be44eba817e8f",
+      "prompt_sha256": "52520db9cb2ec7a43a76ab2043dd80c7bf908796c65098df11693c03f9d59bcc",
       "retrieved_ids": [
         "images:10",
         "images:26",
@@ -530,7 +530,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 10,
+      "latency_ms": 12,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -541,7 +541,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "d3143cd17b1875f787d62bf3998b0b0f46219f94d77096359e511bee467ccabc",
+      "prompt_sha256": "c1aedc976e9a014a260ec0e0fc04d12704729accab51180e3a3a5855fff6aaba",
       "retrieved_ids": [
         "images:6",
         "images:8",
@@ -600,7 +600,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 12,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -621,7 +621,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "16db27460216451d51a6e920995388995b7c7ad65cd77fac792ca305d86cfdae",
+      "prompt_sha256": "da63d6369f37810f3e9875af8ba22ffab28c758367967323fcff0636fd033ec1",
       "retrieved_ids": [
         "images:8",
         "deployments:0",
@@ -697,7 +697,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "fde1a96f2933848423c16ec819f8968553944a0122d072b6e18857086bd55032",
+      "prompt_sha256": "ba3465beeb25edc402f7e3154ab67246ff94311f5c3d8d3e307367651f654a55",
       "retrieved_ids": [
         "resources:0",
         "resources:10",
@@ -758,7 +758,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 10,
+      "latency_ms": 9,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -775,7 +775,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "405ee448847e04216cea499cbd7911d38fd933d5826a81e79c5abfae08a138b7",
+      "prompt_sha256": "7cff187cc6fd53ef9fd38a726c26dc607bc664ba935881ca7a77c18fd2877ea2",
       "retrieved_ids": [
         "resources:13",
         "resources:1",
@@ -834,7 +834,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 8,
+      "latency_ms": 11,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -852,7 +852,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "e67a451186a0e955b1f9eb8cd4ec2fa6ae96186cc3958573ebbf83c2353919a4",
+      "prompt_sha256": "3b760b72b83a3707184f3761c5bf927d7a61f4918490f5060637d4e48742f01a",
       "retrieved_ids": [
         "debug-pods:3",
         "resources:29",
@@ -913,7 +913,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 8,
+      "latency_ms": 13,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -931,7 +931,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "491720a8a6151961d320fbcf4d43f13eb7ad919245674193375c5ac6ab4191f6",
+      "prompt_sha256": "090768780b87460572201d5f6ce02a91545736caef4831c7cf5b594675d1bf4a",
       "retrieved_ids": [
         "deployments:34",
         "deployments:16",
@@ -992,7 +992,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 10,
+      "latency_ms": 12,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -1012,7 +1012,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "e151d3f43321b14a63561bc624bbd762a85b246503d43b728935e31748361bcd",
+      "prompt_sha256": "c0178d49d8f6f4f740e465eb0122a0a02c1a53f4bcececf9c8602daf0c4d7dd3",
       "retrieved_ids": [
         "deployments:34",
         "deployments:16",
@@ -1073,7 +1073,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 10,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -1092,7 +1092,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "fd8da81dd67d257427db86af75c4bdb07dfa801aa2aca8ff56a8a0a672df03d3",
+      "prompt_sha256": "c4aa4af851cfd5bea9239d942c7e907d70058ff67d3cb387e56f29eb1c4c2902",
       "retrieved_ids": [
         "debug-services:13",
         "debug-services:20",
@@ -1151,7 +1151,7 @@
       "expected_status": "needs_details",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 12,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -1164,7 +1164,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "6a26d20621c04eb60f90eb5c476de5ecde324a21c011c02bf73586fc5c2895f7",
+      "prompt_sha256": "f2b9ea47369512cee18a68451fadfd260b49d25a5dcebc1096c8417ad761cc1e",
       "retrieved_ids": [
         "debug-services:3",
         "probes:9",
@@ -1225,7 +1225,7 @@
       "expected_status": "needs_details",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 10,
+      "latency_ms": 9,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -1245,7 +1245,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "ead06cf7525e922016bf8ed8fef1cfa304b0e85a84579acbf577dc16039abe68",
+      "prompt_sha256": "5a26db687e32a1712b9a3fc4537bcc567faf2c86e927673810eaf4f731a6b22d",
       "retrieved_ids": [
         "deployments:28",
         "resources:0",
@@ -1306,11 +1306,11 @@
       "expected_status": "needs_details",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 8,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [],
-      "prompt_sha256": "e03122b112b6201b1ca2c155848d364fbbbba77f415f47a3a2c252b151d6279f",
+      "prompt_sha256": "d836dfd67a8e36f52874a8134d5ff75a228b1f4cee11a2623f8d0de3d910e399",
       "retrieved_ids": [
         "debug-services:1",
         "deployments:3",
@@ -1369,11 +1369,11 @@
       "expected_status": "needs_details",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 8,
+      "latency_ms": 9,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [],
-      "prompt_sha256": "1ceba499a71b4112e1812116135e64145f2fb93910fd416eb866bc902c386811",
+      "prompt_sha256": "87ce9c94296c6a8c33da5581f43be92dc9f3de3c88603bc85fa72fcf995e51bd",
       "retrieved_ids": [
         "probes:12",
         "debug-services:5",
@@ -1432,11 +1432,11 @@
       "expected_status": "abstained",
       "observed_status": "abstained",
       "http_status": 200,
-      "latency_ms": 7,
+      "latency_ms": 10,
       "accepted_generated_answer": false,
       "status_match": true,
       "reference_phrase_facts": [],
-      "prompt_sha256": "f7a7ee5396b77c791382d569a8eb5485347ef91a5b97e7c7a6f8afe1fe88a61b",
+      "prompt_sha256": "6b25ea4111daefe72da9edf518314b7408148d940ce9d6b6bf95986327d1efaa",
       "retrieved_ids": [],
       "raw_model_text": null,
       "finish_reason": null,
@@ -1460,11 +1460,11 @@
       "expected_status": "abstained",
       "observed_status": "abstained",
       "http_status": 200,
-      "latency_ms": 7,
+      "latency_ms": 13,
       "accepted_generated_answer": false,
       "status_match": true,
       "reference_phrase_facts": [],
-      "prompt_sha256": "58642bb416ca527516a11c4d7af1daa77c4a485c484e7235797bee9088194a68",
+      "prompt_sha256": "af61b889ffc918a500af0091e5dc3dc80fd55f728b91a7e46edc9960ca02e6f2",
       "retrieved_ids": [],
       "raw_model_text": null,
       "finish_reason": null,
@@ -1488,11 +1488,11 @@
       "expected_status": "abstained",
       "observed_status": "abstained",
       "http_status": 200,
-      "latency_ms": 12,
+      "latency_ms": 11,
       "accepted_generated_answer": false,
       "status_match": true,
       "reference_phrase_facts": [],
-      "prompt_sha256": "dd742c0c5e5e4b183e61aec9d5662c2e7725bbfebbf87ea724912ea64f1f5cdb",
+      "prompt_sha256": "3801b855871d7c4c1f5f8f74c08b39df85e72cd5353a16383844ff5eeca09e9c",
       "retrieved_ids": [],
       "raw_model_text": null,
       "finish_reason": null,
@@ -1516,11 +1516,11 @@
       "expected_status": "abstained",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 13,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [],
-      "prompt_sha256": "191e2874f9cc6232b91d0d28710c6706a0575b03dfa3359757e09af2804a3b95",
+      "prompt_sha256": "802770a4a9aae05d34b6ff8a7649cb43dc42bb94413aba97694e9eb225298e2e",
       "retrieved_ids": [
         "resources:20",
         "debug-services:1",
@@ -1579,7 +1579,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 14,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -1591,7 +1591,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "a7b429248b7d2823d586360538ed4b727c794ca33544ba173987b4591173b14a",
+      "prompt_sha256": "665f7e2aaa054e842821236034c03e46ffbbe4aa9d479a4d30955d4ff4099ce9",
       "retrieved_ids": [
         "images:10",
         "debug-pods:4",
@@ -1652,7 +1652,7 @@
       "expected_status": "answered",
       "observed_status": "excerpts",
       "http_status": 200,
-      "latency_ms": 9,
+      "latency_ms": 14,
       "accepted_generated_answer": false,
       "status_match": false,
       "reference_phrase_facts": [
@@ -1665,7 +1665,7 @@
           "covered": true
         }
       ],
-      "prompt_sha256": "decdcafb6a5eca3fd9fb93ee6947aeb120dd09783b8f18d7d7412b317f9b1c02",
+      "prompt_sha256": "9f9806a7e6370a86f8254968a4ca74cd76942fd0e80a25724e75b40eeef2fb17",
       "retrieved_ids": [
         "probes:13",
         "probes:8",
