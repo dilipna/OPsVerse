@@ -95,6 +95,11 @@ class Settings(BaseSettings):
     # moves them into Postgres.
     reports_dir: str = "docs/reports"
 
+    # Write access (ingestion) requires this key as `Authorization: Bearer <key>`
+    # or `X-API-Key: <key>`. Unset is allowed only when environment == "dev";
+    # any other environment refuses ingestion rather than run it open.
+    admin_api_key: str | None = None
+
     # Browser origins allowed to call the API (the Next.js dev server).
     cors_origins: list[str] = ["http://localhost:3000"]
 

@@ -69,6 +69,7 @@ async def _write_ledger(
                         # this is read-only RAG and DevOps vocab makes blocking
                         # on heuristics an FPR trap. Surfaced for audit/alerting.
                         "injection_flags": scan_injection(body.query).matched,
+                        "output_guard": done.output_guard if done else {},
                     },
                 )
             )

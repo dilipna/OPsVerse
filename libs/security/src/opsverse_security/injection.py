@@ -15,6 +15,7 @@ eval says exactly how much.
 """
 
 import re
+import unicodedata
 
 from pydantic import BaseModel
 
@@ -94,6 +95,41 @@ _SIGNALS: list[tuple[str, float, re.Pattern[str]]] = [
 
 SUSPICION_THRESHOLD = 1.5
 
+# Latin look-alikes from Cyrillic and Greek. A single substituted letter is
+# enough to defeat a regex written against ASCII words, so text is folded to
+# Latin before matching. Deliberately small: the letters that render
+# identically to Latin in common fonts, not the full Unicode confusables table.
+_CONFUSABLES = str.maketrans(
+    "\u0430\u0435\u043e\u0440\u0441\u0443\u0445\u0456\u0458\u0455\u0501\u04cf"
+    "\u04bb\u051b\u051d\u0410\u0412\u0415\u041a\u041c\u041d\u041e\u0420\u0421"
+    "\u0422\u0425\u0406\u0408\u0405\u03bf\u03b1\u03b5\u03b9\u03ba\u03bd\u03c1"
+    "\u03c4\u03c5\u03c7\u039f\u0391\u0392\u0395\u0396\u0397\u0399\u039a\u039c"
+    "\u039d\u03a1\u03a4\u03a5\u03a7",
+    "aeopcyxijsdlhqwABEKMHOPCTXIJSoaeikvptuxOABEZHIKMNPTYX",
+)
+_LATIN = re.compile(r"[A-Za-z]")
+_LOOKALIKE = re.compile(r"[\u0370-\u03ff\u0400-\u04ff\u0500-\u052f]")
+_WORD = re.compile(r"\S+")
+_WHITESPACE = re.compile(r"\s+")
+
+
+def _strip_invisible(text: str) -> tuple[str, int]:
+    """Drop format characters (zero-width, bidi controls, soft hyphen...)."""
+    kept = [ch for ch in text if unicodedata.category(ch) != "Cf"]
+    return "".join(kept), len(text) - len(kept)
+
+
+def _mixed_script_words(text: str) -> int:
+    return sum(1 for w in _WORD.findall(text) if _LATIN.search(w) and _LOOKALIKE.search(w))
+
+
+def normalize_for_scan(text: str) -> str:
+    """The text a reader sees: compatibility forms folded (NFKC turns
+    full-width letters into ASCII), invisible characters removed, look-alike
+    letters mapped to Latin."""
+    text, _ = _strip_invisible(unicodedata.normalize("NFKC", text))
+    return text.translate(_CONFUSABLES)
+
 
 class InjectionVerdict(BaseModel):
     score: float
@@ -104,11 +140,34 @@ class InjectionVerdict(BaseModel):
         return self.score >= SUSPICION_THRESHOLD
 
 
-def scan_injection(text: str) -> InjectionVerdict:
+# Obfuscation on its own is weak evidence (non-English text mixes scripts;
+# copied terminal output can carry zero-width spaces), so it adds weight but
+# can never cross the threshold alone.
+OBFUSCATION_WEIGHT = 0.5
+
+
+def scan_injection(text: str, *, normalize: bool = True) -> InjectionVerdict:
+    """Score `text` for instructions aimed at the assistant.
+
+    With `normalize` (the default) every signal is matched against two views
+    of the normalized text: line structure kept (for line-anchored signals)
+    and all whitespace collapsed (so splitting a phrase across lines does not
+    hide it). `normalize=False` is the raw-regex baseline the robustness
+    report compares against.
+    """
     score = 0.0
     matched: list[str] = []
+    views = [text]
+    if normalize:
+        normalized = normalize_for_scan(text)
+        views = [normalized, _WHITESPACE.sub(" ", normalized)]
     for name, weight, pattern in _SIGNALS:
-        if pattern.search(text):
+        if any(pattern.search(view) for view in views):
             score += weight
             matched.append(name)
+    if normalize:
+        _, invisible = _strip_invisible(text)
+        if invisible or _mixed_script_words(unicodedata.normalize("NFKC", text)):
+            score += OBFUSCATION_WEIGHT
+            matched.append("obfuscation")
     return InjectionVerdict(score=score, matched=matched)

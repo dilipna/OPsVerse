@@ -19,6 +19,13 @@ from pydantic import BaseModel
 from opsverse_core.llm import LLMDelta, LLMResult, LLMStreamEvent, Message
 from opsverse_core.tracing import NullTracer, Tracer
 from opsverse_rag.schemas import RetrievedChunk, SearchFilters
+from opsverse_security import redact_secrets
+from opsverse_security.output_guard import (
+    DEFAULT_ALLOWED_HOSTS,
+    OutputGuard,
+    StreamingOutputGuard,
+    hosts_from_sources,
+)
 
 GROUNDED_SYSTEM_PROMPT = """\
 You are OpsVerse, an assistant for DevOps, MLOps, and platform engineering questions.
@@ -89,6 +96,9 @@ class ChatDone(BaseModel):
     latency_ms: float
     first_token_ms: float | None = None
     degraded: list[str] = []
+    # What the output guard rewrote: e.g. {"image_removed": 1}. Non-empty
+    # values are a signal worth alerting on (threat model T-03).
+    output_guard: dict[str, int] = {}
 
 
 class ChatError(BaseModel):
@@ -291,17 +301,28 @@ class ChatService:
 
         messages = build_messages(query, chunks, history or [], image_description)
         first_token_ms: float | None = None
+        # Answers are sanitized before they are rendered anywhere: links only
+        # to source/official-doc hosts, no images, secrets redacted.
+        guard = StreamingOutputGuard(
+            OutputGuard(DEFAULT_ALLOWED_HOSTS | hosts_from_sources(c.source for c in chunks))
+        )
         gen_span = trace.span("generation", input=messages, metadata={"grounded": bool(chunks)})
         try:
             async for event in self._llm.stream(messages):
                 if isinstance(event, LLMDelta):
                     if first_token_ms is None:
                         first_token_ms = (time.perf_counter() - started) * 1000
-                    yield ChatDelta(text=event.text)
+                    if safe := guard.feed(event.text):
+                        yield ChatDelta(text=safe)
                 elif isinstance(event, LLMResult):
+                    if tail := guard.flush():
+                        yield ChatDelta(text=tail)
                     cited = extract_citations(event.text, len(chunks))
+                    # Traces keep the raw answer (forensics on what the guard
+                    # caught) minus credentials.
+                    raw_answer = redact_secrets(event.text).text
                     gen_span.update(
-                        output=event.text,
+                        output=raw_answer,
                         metadata={
                             "model": event.model,
                             "prompt_tokens": event.prompt_tokens,
@@ -310,10 +331,11 @@ class ChatService:
                             "first_token_ms": first_token_ms,
                             "cited": cited,
                             "cached": "(cached)" in event.model,
+                            "output_guard": dict(guard.findings),
                         },
                     )
                     gen_span.end()
-                    trace.update(output=event.text)
+                    trace.update(output=raw_answer)
                     yield ChatDone(
                         model=event.model,
                         cited=cited,
@@ -323,6 +345,7 @@ class ChatService:
                         latency_ms=(time.perf_counter() - started) * 1000,
                         first_token_ms=first_token_ms,
                         degraded=degraded,
+                        output_guard=dict(guard.findings),
                     )
         except Exception as exc:  # step 4: the LLM itself failed
             gen_span.update(level="ERROR", status_message=str(exc))

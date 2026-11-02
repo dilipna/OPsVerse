@@ -1,3 +1,4 @@
+import hmac
 from collections.abc import AsyncIterator
 
 from arq import create_pool
@@ -8,9 +9,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from opsverse_core.gateway import LLMGateway
 from opsverse_core.llm import LiteLLMClient
 from opsverse_core.object_store import ObjectStore
+from opsverse_core.settings import get_settings
 from opsverse_rag import ChatService, QdrantStore, Retriever
 from opsverse_rag.embeddings import FastEmbedEmbedder
 from opsverse_rag.rerank import CrossEncoderReranker
+
+
+def require_admin(request: Request) -> None:
+    """Gate write routes behind the admin key (threat model T-06, corpus poisoning).
+
+    Fails closed: outside `dev`, a missing key disables the route instead of
+    leaving it open. The comparison is constant-time.
+    """
+    settings = get_settings()
+    expected = settings.admin_api_key
+    if not expected:
+        if settings.environment == "dev":
+            return
+        raise HTTPException(status_code=503, detail="ingestion disabled: no admin key configured")
+    supplied = request.headers.get("x-api-key", "")
+    auth = request.headers.get("authorization", "")
+    if auth.lower().startswith("bearer "):
+        supplied = auth[7:].strip()
+    if not supplied or not hmac.compare_digest(supplied.encode(), expected.encode()):
+        raise HTTPException(
+            status_code=401,
+            detail="missing or invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def get_session(request: Request) -> AsyncIterator[AsyncSession]:

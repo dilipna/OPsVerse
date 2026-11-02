@@ -1,18 +1,22 @@
 import hashlib
+import re
 import uuid
+from pathlib import PurePosixPath
 from typing import Annotated, Any, Literal
 
 import anyio.to_thread
 from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from opsverse_api.db.models import Document, IngestJob
-from opsverse_api.deps import get_arq_pool, get_object_store, get_session
+from opsverse_api.deps import get_arq_pool, get_object_store, get_session, require_admin
 from opsverse_core.object_store import ObjectStore
+from opsverse_security.netguard import UnsafeURLError, check_url_shape
 
-router = APIRouter(prefix="/ingest", tags=["ingest"])
+# Every ingest route writes to, or reports on, the shared corpus: admin only.
+router = APIRouter(prefix="/ingest", tags=["ingest"], dependencies=[Depends(require_admin)])
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
@@ -29,6 +33,28 @@ class IngestRequest(BaseModel):
     # e.g. "content/en/docs" for kubernetes/website. Large doc repos exceed
     # the per-repo file cap; the prefix targets the part worth indexing.
     path_prefix: str | None = None
+
+    @field_validator("uri")
+    @classmethod
+    def _url_must_be_public(cls, uri: str, info) -> str:
+        # Shape-only here (no DNS in the request path); the worker re-checks
+        # resolved addresses before every fetch and redirect hop.
+        if info.data.get("source_type") == "url":
+            try:
+                check_url_shape(uri)
+            except UnsafeURLError as exc:
+                raise ValueError(str(exc)) from exc
+        return uri
+
+
+_UNSAFE_FILENAME_CHARS = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def safe_filename(name: str | None) -> str:
+    """Basename only, conservative charset: no traversal or odd object keys."""
+    base = PurePosixPath((name or "").replace("\\", "/")).name
+    cleaned = _UNSAFE_FILENAME_CHARS.sub("_", base).strip("._")[:120]
+    return cleaned or "upload.txt"
 
 
 class JobOut(BaseModel):
@@ -59,7 +85,7 @@ async def upload(file: UploadFile, session: Session, queue: Queue, store: Store)
     if not raw:
         raise HTTPException(status_code=422, detail="empty file")
 
-    filename = file.filename or "upload.txt"
+    filename = safe_filename(file.filename)
     sha = hashlib.sha256(raw).hexdigest()
     key = f"raw/{sha}/{filename}"
     await anyio.to_thread.run_sync(store.put_bytes, key, raw)

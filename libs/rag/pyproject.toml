@@ -5,6 +5,7 @@ description = "OpsVerse retrieval: hybrid dense+sparse search over Qdrant, reran
 requires-python = ">=3.12"
 dependencies = [
     "opsverse-core",
+    "opsverse-security",
     "pydantic>=2.10",
     "qdrant-client>=1.12",
     "fastembed>=0.5",
@@ -13,6 +14,7 @@ dependencies = [
 
 [tool.uv.sources]
 opsverse-core = { workspace = true }
+opsverse-security = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

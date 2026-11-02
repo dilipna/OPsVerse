@@ -21,7 +21,7 @@ seriously — it does not yet **prove** it with measurements.
 | Target module | Current state | Action |
 |---|---|---|
 | **1. Inference engine** | `libs/core/llm.py` is an OpenAI-shaped async client over litellm with streaming, fallback, and an injectable `api_base` (ADR-0004, ADR-0008). `transformers.generate()` was never used. **No vLLM has ever been run.** | **Measure.** The client is correct; the engine underneath it is unproven. |
-| **2. Model registry** | Does not exist. Model identity is scattered across ADR-0009, the Hub repo, and `CONTINUE_SESSION.md`. | **Build.** Small, CPU-only, high narrative value. |
+| **2. Model registry** | Does not exist. Model identity is scattered across ADR-0009, the Hub repo, and local session notes. | **Build.** Small, CPU-only, high narrative value. |
 | **3. Optimization lab** | `techniques/frontier.py` computes a Pareto frontier + knee point; GGUF `Q4_K_M` published. No FP16/Q8/AWQ measurements exist to put on the frontier. | **Measure.** The analysis code is done and unit-tested; it has no inputs. |
 | **4. Benchmarking** | `benchmarks/harness.py` is engine-agnostic, measures TTFT/TPOT/throughput, math unit-tested. **Zero results committed.** | **Measure.** This is the #1 priority of the whole migration. |
 | **5. Evaluation** | 3 retrieval ablations, a paraphrase set that falsified the project's own v2 result, structured-output eval, 15-threshold regression gate wired into CI. | **Keep as-is.** Stronger than the RAGAS/DeepEval/Promptfoo stack originally requested. |
