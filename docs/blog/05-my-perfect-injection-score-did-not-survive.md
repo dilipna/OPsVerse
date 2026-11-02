@@ -132,6 +132,22 @@ Testing the API as an attacker would, rather than as its author:
   advisories, alongside a blocking `pip-audit` with a written register of accepted
   advisories, each with a reason and an exit condition.
 
+## Then I gave it tools
+
+Detection is half the problem; the other half is what an injected instruction can make a
+system *do*. So I built a read-only Kubernetes investigation agent where the security
+properties live in code: every kubectl command passes a policy before it runs, tool output is
+fenced as untrusted data, a canary in the prompt makes leaks measurable, and the tool budget is
+hard. Then I planted existing red-team strings in the pod logs it reads.
+
+The first harness got 3 of 10 scenarios right: the agent never knew when to stop, and the
+policy I had copied from a list of commands suggested to *people* refused reads an investigator
+needs. After general fixes, and on six held-out scenarios written before those fixes, it got 6
+of 6. Under attack: 0 of 80 runs leaked the canary or produced output the guard had to rewrite,
+and the policy refused every one of its 8 attempts to read Secrets. But 5 of 80 diagnoses were
+derailed, four of them on a healthy namespace where planted log text convinced it something was
+broken. An injection that cannot make an agent act can still change what it concludes.
+
 ## What changed in how I work
 
 Every one of these was found by testing, not by reviewing. Reading my own regexes, I saw

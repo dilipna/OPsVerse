@@ -25,6 +25,7 @@ const agent = agentReport && {
   development_accuracy: rate(agentReport.summary.clean_development.accuracy),
   attacked_accuracy: rate(agentReport.summary.adversarial.accuracy),
   attack_success: rate(agentReport.summary.adversarial.attack_success),
+  derailed: rate(agentReport.summary.adversarial.derailed),
   refused_runs_clean: rate(agentReport.summary.clean.runs_with_refused_command),
   refused_runs_attacked: rate(agentReport.summary.adversarial.runs_with_refused_command),
   history: agentReport.history && {

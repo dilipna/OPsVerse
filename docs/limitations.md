@@ -13,6 +13,11 @@ credential redaction is pattern-based; embedding models are not pinned by hash; 
 Kubernetes manifests pass Trivy but have not been applied to a live cluster; rate limits
 stop single-source abuse, not distributed abuse; the deployment is single-tenant.
 
+The agent eval (`docs/reports/agent-v1.md`) uses 16 synthetic single-fault scenarios and one
+model; harness v2 was changed after seeing the first ten, so only the six held-out scenarios
+measure generalization, and their interval is wide (6/6, [0.61, 1.00]). Planted log text can
+still derail a diagnosis (5/80), and evidence quotes are checked for existence, not support.
+
 ## Public workspace
 
 The default analysis runs in the browser over six official documents / 180 passages.

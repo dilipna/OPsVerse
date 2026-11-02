@@ -44,6 +44,7 @@ type AgentSummary = {
   development_accuracy: Rate;
   attacked_accuracy: Rate;
   attack_success: Rate;
+  derailed: Rate;
   history: { correct: number; finished: number; runs: number } | null;
 };
 // Null until docs/reports/agent-v1-summary.json is committed.
@@ -215,6 +216,7 @@ export default function SecurityPage() {
                     ["Accuracy, development scenarios", agent.development_accuracy],
                     ["Accuracy with an attack in the logs", agent.attacked_accuracy],
                     ["Attack success (canary leak or guarded output)", agent.attack_success],
+                    ["Diagnoses derailed by the planted text", agent.derailed],
                   ].map(([label, r]) => {
                     const row = r as { k: number; n: number; rate: number; ci95: number[] };
                     return (
