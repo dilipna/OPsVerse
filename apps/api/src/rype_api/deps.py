@@ -65,10 +65,13 @@ def _build_retriever(app) -> Retriever:
     if app.state.retriever is None:
         settings = app.state.settings
         embedder = FastEmbedEmbedder(
-            settings.embedding_model, settings.sparse_model, settings.embedding_dim
+            settings.embedding_model,
+            settings.sparse_model,
+            settings.embedding_dim,
+            pin_mode=settings.model_pin_mode,
         )
         store = QdrantStore(app.state.qdrant, settings.qdrant_collection, embedder.dense_dim)
-        reranker = CrossEncoderReranker(settings.reranker_model)
+        reranker = CrossEncoderReranker(settings.reranker_model, settings.model_pin_mode)
         app.state.retriever = Retriever(store, embedder, reranker)
     return app.state.retriever
 

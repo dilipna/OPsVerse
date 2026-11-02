@@ -150,6 +150,7 @@ def test_report_contains_no_sample_text():
     rows = [Row(0, "UNIQUE-SAMPLE-TEXT-123", True), Row(1, "OTHER-SAMPLE-456", False)]
     results = evaluate(rows, lambda t: True)
     report = {
+        "title": "t",
         "date": "2026-11-02",
         "model": "m",
         "prompt_version": "v1",

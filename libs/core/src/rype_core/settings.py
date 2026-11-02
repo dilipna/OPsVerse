@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,6 +33,10 @@ class Settings(BaseSettings):
     embedding_dim: int = 768
     sparse_model: str = "Qdrant/bm25"
     reranker_model: str = "BAAI/bge-reranker-base"
+    # Model file integrity (threat model T-09): verify downloaded model files
+    # against registry/model-pins.json. "warn" until pins are recorded;
+    # production runs "enforce", which also refuses unpinned models.
+    model_pin_mode: Literal["enforce", "warn", "off"] = "warn"
 
     # LLM providers (free tiers). Keys use the vendors' canonical env names
     # (no RYPE_ prefix) so litellm and vendor tooling agree on them; the

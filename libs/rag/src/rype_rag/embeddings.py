@@ -1,6 +1,7 @@
 from functools import cached_property
 from typing import Protocol
 
+from rype_rag.model_integrity import PinMode, verify_loaded
 from rype_rag.schemas import SparseVec
 
 
@@ -24,22 +25,27 @@ class FastEmbedEmbedder:
         dense_model: str = "BAAI/bge-base-en-v1.5",
         sparse_model: str = "Qdrant/bm25",
         dense_dim: int = 768,
+        pin_mode: PinMode = "off",
     ):
         self._dense_name = dense_model
         self._sparse_name = sparse_model
         self.dense_dim = dense_dim
+        # Checked after download, before first use (rype_rag.model_integrity).
+        self._pin_mode: PinMode = pin_mode
 
     @cached_property
     def _dense(self):
         from fastembed import TextEmbedding  # heavy import kept out of module load
 
-        return TextEmbedding(model_name=self._dense_name)
+        model = TextEmbedding(model_name=self._dense_name)
+        return verify_loaded(self._dense_name, model, self._pin_mode)
 
     @cached_property
     def _sparse(self):
         from fastembed import SparseTextEmbedding
 
-        return SparseTextEmbedding(model_name=self._sparse_name)
+        model = SparseTextEmbedding(model_name=self._sparse_name)
+        return verify_loaded(self._sparse_name, model, self._pin_mode)
 
     def embed_dense(self, texts: list[str]) -> list[list[float]]:
         return [vector.tolist() for vector in self._dense.embed(texts)]

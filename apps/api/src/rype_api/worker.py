@@ -43,7 +43,10 @@ EMBED_SOFT_DEADLINE_S = 420
 def _get_embedder() -> FastEmbedEmbedder:
     settings = get_settings()
     return FastEmbedEmbedder(
-        settings.embedding_model, settings.sparse_model, settings.embedding_dim
+        settings.embedding_model,
+        settings.sparse_model,
+        settings.embedding_dim,
+        pin_mode=settings.model_pin_mode,
     )
 
 

@@ -285,7 +285,7 @@ def _fmt(summary: dict[str, Any], key: str) -> str:
 
 def render_markdown(report: dict[str, Any]) -> str:
     lines = [
-        "# Injection classifier benchmark v1",
+        f"# {report['title']}",
         "",
         f"*Generated {report['date']} by `python -m rype_security.benchmark`. "
         f"LLM: `{report['model']}` (prompt {report['prompt_version']}).*",
@@ -338,7 +338,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--model", required=True, help="model id on the OpenAI-compatible API")
+    parser.add_argument(
+        "--model",
+        default=None,
+        help="model id on the OpenAI-compatible API; omit to score the regex detector only",
+    )
     parser.add_argument("--base-url", default="https://openrouter.ai/api/v1")
     parser.add_argument("--datasets", default="deepset-test,deepset-train,redteam-v1")
     parser.add_argument(
@@ -349,13 +353,20 @@ def main() -> None:
 
     pins = load_pins()
     names = [n.strip() for n in args.datasets.split(",") if n.strip()]
-    classifier = LLMInjectionClassifier(
-        args.model, base_url=args.base_url, cache=VerdictCache(CACHE_DIR / "verdicts.jsonl")
+    classifier = (
+        LLMInjectionClassifier(
+            args.model, base_url=args.base_url, cache=VerdictCache(CACHE_DIR / "verdicts.jsonl")
+        )
+        if args.model
+        else None
     )
 
-    def llm(text: str) -> bool | None:
+    def classify(text: str) -> bool | None:
+        assert classifier is not None
         verdict = classifier.classify(text)
         return None if verdict.label == "error" else verdict.is_injection
+
+    llm = classify if classifier else None
 
     datasets: dict[str, Any] = {}
     with httpx.Client(timeout=120) as http:
@@ -378,7 +389,9 @@ def main() -> None:
                     f"`{pin['revision'][:12]}`, file SHA-256 `{pin['sha256'][:12]}`."
                 )
             print(f"{name}: {len(rows)} rows", flush=True)
-            results = evaluate(rows, llm, progress=lambda n: print(f"  {n}", end="\r", flush=True))
+            results = evaluate(
+                rows, llm, progress=lambda n: n % 100 == 0 and print(f"  {n} rows", flush=True)
+            )
             datasets[name] = {
                 "meta": {
                     "description": description,
@@ -388,21 +401,26 @@ def main() -> None:
                 },
                 "results": results,
             }
-    classifier.close()
+    if classifier:
+        classifier.close()
 
+    name = "security-classifier-v1" if args.model else "security-benchmark-regex-v1"
     report = {
-        "report": "security-classifier-v1",
+        "report": name,
+        "title": "Injection classifier benchmark v1"
+        if args.model
+        else "Injection detector on external data v1 (regex only)",
         "kind": "security-detection",
         "date": datetime.now(UTC).strftime("%Y-%m-%d"),
-        "model": args.model,
+        "model": args.model or "none (regex only)",
         "prompt_version": "v1",
         "datasets": datasets,
     }
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "security-classifier-v1-summary.json").write_text(
+    (args.out / f"{name}-summary.json").write_text(
         json.dumps(report, indent=1) + "\n", encoding="utf-8"
     )
-    (args.out / "security-classifier-v1.md").write_text(render_markdown(report), encoding="utf-8")
+    (args.out / f"{name}.md").write_text(render_markdown(report), encoding="utf-8")
     print(render_markdown(report))
 
 

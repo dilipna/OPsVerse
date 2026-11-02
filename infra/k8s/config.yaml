@@ -5,6 +5,9 @@ metadata:
   namespace: rype
 data:
   RYPE_ENVIRONMENT: prod # ingestion fails closed without an admin key
+  # Refuse model files that do not match registry/model-pins.json. Requires a pin
+  # for every model in use (recorded by the "Security benchmark" workflow).
+  RYPE_MODEL_PIN_MODE: enforce
   # RYPE_DATABASE_URL is set per container in api.yaml / worker.yaml: it
   # embeds DB_PASSWORD, and $(VAR) expansion does not work in ConfigMap data.
   # In-cluster service DNS names (see stateful.yaml / redis.yaml).
