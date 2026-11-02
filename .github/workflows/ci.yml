@@ -34,6 +34,8 @@ jobs:
         run: uv run python -m opsverse_evals.troubleshooting_contamination --check
       - name: Check displayed evidence provenance
         run: node opslm-demo/scripts/build-study.mjs --check
+      - name: Check the security page matches committed reports and threat model
+        run: node opslm-demo/scripts/build-security.mjs --check
       - name: Exercise frozen scenarios through the actual HTTP handler without a model
         run: node opslm-demo/scripts/model-study.mjs --label excerpts --out docs/reports/troubleshooting-ci.json
       - run: npm run build

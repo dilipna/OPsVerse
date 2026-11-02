@@ -77,6 +77,7 @@ export default function Page() {
         <nav aria-label="Main navigation">
           <a href="/troubleshoot">Troubleshoot</a>
           <a href="/study">Evidence</a>
+          <a href="/security">Security</a>
           <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
         </nav>
       </header>

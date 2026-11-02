@@ -14,6 +14,7 @@ export default function StudyPage() {
         <nav aria-label="Main navigation">
           <a href="/troubleshoot">Troubleshoot</a>
           <a href="/runbooks">Runbooks</a>
+          <a href="/security">Security</a>
           <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
         </nav>
       </header>
