@@ -16,11 +16,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 MAX_IMAGE_B64_CHARS = 8_000_000  # ~6 MB decoded
+# Size limits bound tokens, cost and memory per request (threat model T-10).
+MAX_QUERY_CHARS = 4_000
+MAX_HISTORY_ITEMS = 32
 
 
 class ChatRequest(BaseModel):
-    query: str = Field(min_length=1)
-    history: list[ChatTurn] = []
+    query: str = Field(min_length=1, max_length=MAX_QUERY_CHARS)
+    history: list[ChatTurn] = Field(default=[], max_length=MAX_HISTORY_ITEMS)
     k: int = Field(default=6, ge=1, le=20)
     filters: SearchFilters | None = None
     image_base64: str | None = Field(default=None, max_length=MAX_IMAGE_B64_CHARS)

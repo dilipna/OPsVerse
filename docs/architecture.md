@@ -33,8 +33,11 @@ client ─POST /v1/chat─► API
    │  5. generate: OpenAI-compatible client → serving layer (vLLM/Ollama serving
    │       OpsLM, or Gemini free tier as fallback on 429) → stream tokens (SSE)
    │       └─ serving internals (batching, KV cache, prefix cache): inference-design.md
-   │  6. citations: extract [n] refs the answer used
-   │  7. ledger: model, tokens, cost_usd, latency, degraded[], injection_flags
+   │  6. output guard: per line of the stream, drop images, strip links to hosts
+   │       outside the source allowlist, redact credentials (threat model T-03)
+   │  7. citations: extract [n] refs the answer used
+   │  8. ledger: model, tokens, cost_usd, latency, degraded[], injection_flags,
+   │       output_guard findings
    └────► SSE events: sources → delta* → done
 ```
 

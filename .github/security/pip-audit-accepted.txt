@@ -1,0 +1,56 @@
+# Accepted dependency advisories: the CI pip-audit gate fails on anything NOT listed here.
+# Each entry: <advisory id>  # <package> - <why it is accepted> - <exit condition>
+# Review this file whenever uv.lock changes. Last reviewed: 2026-11-02.
+#
+# diskcache: no fixed release exists. Pulled in only by dvc (dev data tooling), never imported
+# at runtime by the API, worker or MCP server. Exit: upstream fix, or drop dvc.
+PYSEC-2026-2447  # diskcache
+#
+# litellm: fixes need >=1.95 / >=1.100, above the deliberate <1.92 pin (langfuse v2 facade,
+# ADR-0010). Used as a client library only, never as the LiteLLM proxy server (ADR-0008).
+# Exit: migrate tracing to langfuse v3 and lift the pin. Tracked in docs/security/threat-model.md.
+GHSA-g5ff-637f-6q2m  # litellm
+CVE-2026-114612  # litellm
+#
+# pillow: every advisory below is fixed in 13.0.0, but fastembed caps pillow <13. No project
+# code imports PIL; chat images are forwarded to the model provider, never decoded locally.
+# Exit: fastembed release that allows pillow 13.
+CVE-2026-112390  # pillow
+CVE-2026-112391  # pillow
+CVE-2026-112393  # pillow
+CVE-2026-112395  # pillow
+CVE-2026-112399  # pillow
+CVE-2026-112400  # pillow
+CVE-2026-112401  # pillow
+CVE-2026-112404  # pillow
+CVE-2026-112406  # pillow
+CVE-2026-112891  # pillow
+CVE-2026-112892  # pillow
+CVE-2026-112893  # pillow
+CVE-2026-112894  # pillow
+CVE-2026-112895  # pillow
+CVE-2026-112897  # pillow
+CVE-2026-112899  # pillow
+CVE-2026-112900  # pillow
+CVE-2026-96638  # pillow
+CVE-2026-96640  # pillow
+CVE-2026-96778  # pillow
+GHSA-78g4-xqwv-q3g8  # pillow
+PYSEC-2026-4326  # pillow
+PYSEC-2026-4327  # pillow
+PYSEC-2026-4328  # pillow
+PYSEC-2026-4329  # pillow
+PYSEC-2026-4330  # pillow
+PYSEC-2026-4331  # pillow
+PYSEC-2026-4332  # pillow
+PYSEC-2026-4333  # pillow
+PYSEC-2026-4334  # pillow
+PYSEC-2026-4335  # pillow
+PYSEC-2026-4336  # pillow
+PYSEC-2026-4337  # pillow
+PYSEC-2026-4338  # pillow
+PYSEC-2026-4339  # pillow
+PYSEC-2026-4340  # pillow
+PYSEC-2026-4341  # pillow
+PYSEC-2026-4342  # pillow
+PYSEC-2026-4343  # pillow

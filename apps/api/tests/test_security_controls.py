@@ -121,3 +121,25 @@ async def test_fetch_follows_public_redirects_and_returns_body():
 )
 def test_safe_filename(raw, expected):
     assert safe_filename(raw) == expected
+
+
+async def test_chat_and_search_reject_oversized_input(env):
+    from opsverse_api import deps
+
+    # Validation must reject before any service is used; these are never called.
+    env.app.dependency_overrides[deps.get_chat_service] = lambda: None
+    env.app.dependency_overrides[deps.get_retriever] = lambda: None
+    async with client_for(env) as client:
+        chat = await client.post("/v1/chat", json={"query": "x" * 4_001, "stream": False})
+        search = await client.post("/v1/search", json={"query": "x" * 4_001})
+        history = await client.post(
+            "/v1/chat",
+            json={
+                "query": "ok",
+                "stream": False,
+                "history": [{"role": "user", "content": "hi"}] * 33,
+            },
+        )
+    assert chat.status_code == 422
+    assert search.status_code == 422
+    assert history.status_code == 422

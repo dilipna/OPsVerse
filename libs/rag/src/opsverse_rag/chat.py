@@ -14,7 +14,7 @@ from collections.abc import AsyncIterator
 from typing import Literal, Protocol
 
 import anyio
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from opsverse_core.llm import LLMDelta, LLMResult, LLMStreamEvent, Message
 from opsverse_core.tracing import NullTracer, Tracer
@@ -58,7 +58,7 @@ _CITATION_RE = re.compile(r"\[(\d{1,2})\]")
 
 class ChatTurn(BaseModel):
     role: Literal["user", "assistant"]
-    content: str
+    content: str = Field(max_length=16_000)
 
 
 class SourceInfo(BaseModel):

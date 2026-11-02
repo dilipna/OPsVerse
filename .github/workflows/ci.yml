@@ -25,6 +25,9 @@ jobs:
         working-directory: opslm-demo
       - run: npm test
         working-directory: opslm-demo
+      - name: Formatting
+        run: npm run format:check
+        working-directory: opslm-demo
       - name: Rerun actual browser retrieval and both baselines
         run: node opslm-demo/scripts/evaluate-runbooks.mjs --out docs/reports/runbook-ci.json
       - name: Check fresh scenario overlap against committed training inputs
@@ -77,12 +80,28 @@ jobs:
         with:
           enable-cache: true
 
-      # Python dependency CVEs. Advisory (report-only) on purpose: the current
-      # findings are transitive dev-tooling (dvc's gitpython/diskcache), so this
-      # surfaces them in the log rather than blocking on a vuln we don't ship at
-      # runtime. Remove `|| true` to turn it into a hard gate.
-      - name: pip-audit (dependency CVEs)
-        run: uv run --with pip-audit pip-audit || true
+      - name: Sync dependencies
+        run: uv sync --all-packages --frozen
+
+      # Python dependency CVEs, blocking. Accepted advisories live in a reviewed
+      # register with a reason and an exit condition for each; anything new fails.
+      - name: pip-audit (dependency CVEs, blocking)
+        run: |
+          ignores=$(grep -o '^[A-Z][A-Za-z0-9-]*' .github/security/pip-audit-accepted.txt | sed 's/^/--ignore-vuln /' | tr '\n' ' ')
+          uv run --with pip-audit pip-audit --skip-editable $ignores
+
+      # AI-security evals as a named step so a regression is visible in the
+      # job summary, not buried in the full test run.
+      - name: Security controls and detector robustness
+        run: |
+          uv run pytest -q libs/security apps/api/tests/test_security_controls.py
+          uv run python -m opsverse_security.robustness --out security-report
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-robustness
+          path: security-report/
 
       # Filesystem scan: known-vuln packages, leaked secrets, and IaC misconfig
       # across the repo (Dockerfile, k8s, compose). Advisory here too (exit-code 0);

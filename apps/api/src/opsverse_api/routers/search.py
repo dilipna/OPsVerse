@@ -10,7 +10,7 @@ router = APIRouter(prefix="/search", tags=["search"])
 
 
 class SearchRequest(BaseModel):
-    query: str = Field(min_length=1)
+    query: str = Field(min_length=1, max_length=4_000)  # threat model T-10
     k: int = Field(default=8, ge=1, le=50)
     mode: SearchMode = SearchMode.HYBRID
     rerank: bool = False
