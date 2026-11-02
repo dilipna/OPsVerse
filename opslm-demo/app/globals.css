@@ -1095,3 +1095,40 @@ body:has(.navigator)::after {
 .engineering-actions a {
   white-space: nowrap;
 }
+.replay-steps {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+  display: grid;
+  gap: 14px;
+}
+.replay-step {
+  border: 1px solid #3a4b40;
+  padding: 14px;
+  background: #0c120e;
+}
+.replay-step.refused {
+  border-color: #8d4141;
+  background: #1d1111;
+}
+.replay-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 14px;
+}
+.replay-head code {
+  overflow-wrap: anywhere;
+}
+.replay-step.refused strong {
+  color: #ffb4b4;
+}
+.replay-answer {
+  border-top: 1px solid #3a4b40;
+  padding-top: 18px;
+}
+.navigator button[aria-pressed="true"] {
+  outline: 2px solid #a6ebc0;
+  outline-offset: 2px;
+}

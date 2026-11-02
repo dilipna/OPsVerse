@@ -11,6 +11,8 @@ export default function Engineering() {
         <nav aria-label="Main navigation">
           <a href="/">Workspace</a>
           <a href="/study">Evaluation</a>
+          <a href="/lab">Lab</a>
+          <a href="/agent">Agent</a>
           <a href="/security">Security</a>
           <a href="https://github.com/dilipna/OPsVerse">Source code ↗</a>
         </nav>

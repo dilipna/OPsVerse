@@ -125,6 +125,8 @@ export default function TroubleshootPage() {
         <nav aria-label="Main navigation">
           <a href="/runbooks">Runbooks</a>
           <a href="/engineering">Engineering</a>
+          <a href="/lab">Lab</a>
+          <a href="/agent">Agent</a>
           <a href="/security">Security</a>
           <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
         </nav>
