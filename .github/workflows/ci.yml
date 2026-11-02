@@ -23,6 +23,9 @@ jobs:
         run: uv run python -m opsverse_evals.runbook_fixture --check
       - run: npm ci --no-audit --no-fund
         working-directory: opslm-demo
+      - name: npm audit (deployed runtime dependencies, blocking at high)
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: opslm-demo
       - run: npm test
         working-directory: opslm-demo
       - name: Formatting
@@ -92,6 +95,15 @@ jobs:
           ignores=$(grep -o '^[A-Z][A-Za-z0-9-]*' .github/security/pip-audit-accepted.txt | sed 's/^/--ignore-vuln /' | tr '\n' ' ')
           uv run --with pip-audit pip-audit --skip-editable $ignores
 
+      # Software bill of materials for the Python runtime, from the frozen lockfile.
+      - name: SBOM (CycloneDX 1.5)
+        run: uv export --format cyclonedx1.5 --all-packages --frozen --no-dev -o sbom.cdx.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.cdx.json
+
       # AI-security evals as a named step so a regression is visible in the
       # job summary, not buried in the full test run.
       - name: Security controls and detector robustness
@@ -123,6 +135,25 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "0"
           format: table
+
+  web-console:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: npm audit (runtime dependencies, blocking at high)
+        run: npm audit --omit=dev --audit-level=high
+      - run: npx tsc --noEmit
+      - run: npx eslint src
+      - run: npm run build
 
   docker-build:
     runs-on: ubuntu-latest

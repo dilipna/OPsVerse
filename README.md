@@ -52,11 +52,11 @@ document, the model's output, and every URL the worker is asked to fetch.
 | Layer | Control | Where |
 |---|---|---|
 | Ingest | Credential redaction before storage or embedding; documents carrying instructions aimed at the assistant are quarantined (zero chunks reach retrieval) | `libs/ingestion`, `libs/security` |
-| Ingest API | Admin key required, fail closed outside `dev`; URL fetches limited to public addresses on every redirect hop; size caps; safe upload names | `apps/api` |
+| API | Admin key required for ingestion, fail closed outside `dev`; URL fetches pinned to checked public addresses on every hop (no DNS rebinding); per-client rate limits shared through Redis; size caps; admin security-telemetry endpoint with alerts | `apps/api` |
 | Prompt | Retrieved text marked as untrusted data; abstain before generation when retrieval fails or finds nothing | `libs/rag/chat.py` |
 | Output | Images removed, links only to source and official-doc hosts, credentials redacted, applied to the token stream and again in the renderer | `output_guard.py`, `apps/web` |
 | Agency | No tool can change state: MCP tools are read-only; suggested `kubectl` commands are allowlisted and never executed | `apps/mcp-server`, `opslm-demo/lib` |
-| Supply chain | Frozen lockfile; blocking `pip-audit` with a reviewed register of accepted advisories; Trivy scan (advisory); gitleaks pre-commit hook | `.github/` |
+| Supply chain | Frozen lockfile; blocking `pip-audit` and `npm audit` gates with a reviewed register of accepted advisories; CycloneDX SBOM per CI run; Trivy scan (advisory); gitleaks pre-commit hook | `.github/` |
 
 ## Architecture
 
