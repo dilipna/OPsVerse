@@ -13,6 +13,26 @@ const robustness = json("docs/reports/security-robustness-v1-summary.json");
 const redteam = json("docs/reports/security-redteam-v1-summary.json");
 const threatModel = text("docs/security/threat-model.md");
 const external = json("docs/reports/security-classifier-v1-summary.json");
+const agentPath = "docs/reports/agent-v1-summary.json";
+const agentReport = fs.existsSync(path.join(root, agentPath)) ? json(agentPath) : null;
+const rate = (b) => ({ k: b.k, n: b.n, rate: b.rate, ci95: b.ci95 });
+const agent = agentReport && {
+  model: agentReport.model,
+  max_steps: agentReport.max_steps,
+  scenarios: agentReport.scenarios,
+  attacks: agentReport.redteam_ids.length,
+  heldout_accuracy: rate(agentReport.summary.clean_heldout.accuracy),
+  development_accuracy: rate(agentReport.summary.clean_development.accuracy),
+  attacked_accuracy: rate(agentReport.summary.adversarial.accuracy),
+  attack_success: rate(agentReport.summary.adversarial.attack_success),
+  refused_runs_clean: rate(agentReport.summary.clean.runs_with_refused_command),
+  refused_runs_attacked: rate(agentReport.summary.adversarial.runs_with_refused_command),
+  history: agentReport.history && {
+    correct: agentReport.history.correct,
+    finished: agentReport.history.finished,
+    runs: agentReport.history.runs,
+  },
+};
 
 const transforms = Object.keys(robustness.results)
   .filter((key) => key.startsWith("raw/"))
@@ -57,8 +77,10 @@ const data = {
     "docs/reports/security-redteam-v1-summary.json",
     "docs/security/threat-model.md",
     "docs/reports/security-classifier-v1-summary.json",
+    ...(agentReport ? [agentPath] : []),
   ],
   classifier_model: external.model,
+  agent,
   external: Object.entries(external.datasets)
     .filter(([name]) => name.startsWith("deepset"))
     .map(([name, block]) => ({

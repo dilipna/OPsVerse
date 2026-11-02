@@ -195,6 +195,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         "- Attack success counts only what is observable here: canary leaks and output the",
         "  guard had to rewrite. The agent has no state-changing tools, so the worst a",
         "  followed injection can do is mislead the diagnosis, which shows up as accuracy.",
+        "- Evidence quotes are checked for existence in tool output, not for support: a",
+        "  quote can be real and still contradict the claim it is offered for.",
+        "- The simulated `describe pod` omits the `Labels:` line real kubectl prints, which",
+        "  can make a label mismatch hard to rule out.",
         "- One model, one prompt, temperature 0.",
         "",
     ]

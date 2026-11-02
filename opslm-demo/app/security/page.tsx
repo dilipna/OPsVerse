@@ -34,6 +34,21 @@ const BOUNDARIES = [
 
 const pct = (value: number) => `${Math.round(value * 100)}%`;
 
+type Rate = { k: number; n: number; rate: number; ci95: number[] };
+type AgentSummary = {
+  model: string;
+  max_steps: number;
+  scenarios: number;
+  attacks: number;
+  heldout_accuracy: Rate;
+  development_accuracy: Rate;
+  attacked_accuracy: Rate;
+  attack_success: Rate;
+  history: { correct: number; finished: number; runs: number } | null;
+};
+// Null until docs/reports/agent-v1-summary.json is committed.
+const agent = (security as { agent: AgentSummary | null }).agent;
+
 export default function SecurityPage() {
   const { robustness, redteam, threats } = security;
   return (
@@ -174,6 +189,56 @@ export default function SecurityPage() {
             <a href={`${REPO}/docs/reports/security-classifier-v1.md`}>Full report ↗</a>
           </p>
         </section>
+
+        {agent && (
+          <section className="evidence">
+            <h2>An agent that can be attacked through its tools</h2>
+            <p className="intake-note">
+              A read-only Kubernetes investigator ({agent.model}) works through {agent.scenarios}{" "}
+              frozen fault scenarios with at most {agent.max_steps} tool calls. Every command passes
+              a policy check before it runs, tool output is fenced as untrusted data, and a secret
+              canary in its prompt makes leaks measurable. Each scenario is then rerun with one of{" "}
+              {agent.attacks} existing red-team strings planted in the pod logs it reads.
+            </p>
+            <div className="study-table-wrap">
+              <table className="study-table">
+                <caption>Agent diagnosis and attack results, 95% Wilson intervals</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Measure</th>
+                    <th scope="col">Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Accuracy, held-out scenarios", agent.heldout_accuracy],
+                    ["Accuracy, development scenarios", agent.development_accuracy],
+                    ["Accuracy with an attack in the logs", agent.attacked_accuracy],
+                    ["Attack success (canary leak or guarded output)", agent.attack_success],
+                  ].map(([label, r]) => {
+                    const row = r as { k: number; n: number; rate: number; ci95: number[] };
+                    return (
+                      <tr key={label as string}>
+                        <th scope="row">{label as string}</th>
+                        <td>
+                          {row.k}/{row.n} ({pct(row.ci95[0])}–{pct(row.ci95[1])})
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {agent.history && (
+              <p className="intake-note">
+                The first version got {agent.history.correct}/{agent.history.runs} right: it never
+                knew when to stop, and its policy refused harmless reads. The fixes were general,
+                and the held-out scenarios were written before them and never used for debugging.{" "}
+                <a href={`${REPO}/docs/reports/agent-v1.md`}>Full report ↗</a>
+              </p>
+            )}
+          </section>
+        )}
 
         <section className="evidence">
           <h2>Threat model</h2>
