@@ -55,6 +55,7 @@ class Scenario(BaseModel):
     namespace: str
     symptom: str
     root_cause: str
+    heldout: bool = False
     pods: list[Pod] = Field(default_factory=list)
     deployments: list[Deployment] = Field(default_factory=list)
     services: list[Service] = Field(default_factory=list)

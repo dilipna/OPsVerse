@@ -370,6 +370,213 @@
     }
    ],
    "events": []
+  },
+  {
+   "id": "h01",
+   "namespace": "media",
+   "root_cause": "image_pull_error",
+   "heldout": true,
+   "symptom": "The thumbnailer Pod in namespace media is stuck and never starts.",
+   "pods": [
+    {
+     "name": "thumbnailer-6c5d4b3a2-aa11b",
+     "ready": "0/1",
+     "status": "ErrImagePull",
+     "age": "4m",
+     "labels": {
+      "app": "thumbnailer"
+     },
+     "describe": "Name:         thumbnailer-6c5d4b3a2-aa11b\nNamespace:    media\nNode:         node-2/10.0.0.12\nStatus:       Pending\nContainers:\n  app:\n    Image:          private.registry.example/media/thumbnailer:2.0\n    State:          Waiting\n      Reason:       ErrImagePull\n    Ready:          False\n    Restart Count:  0\nEvents:\n  Type     Reason     Age   From     Message\n  Warning  Failed  1m  kubelet  Failed to pull image \"private.registry.example/media/thumbnailer:2.0\": pull access denied, repository does not exist or may require authorization: authorization failed\n  Normal   BackOff  30s  kubelet  Back-off pulling image \"private.registry.example/media/thumbnailer:2.0\"",
+     "logs": "Error from server (BadRequest): container \"app\" in pod \"thumbnailer-6c5d4b3a2-aa11b\" is waiting to start: image can't be pulled"
+    }
+   ],
+   "deployments": [
+    {
+     "name": "thumbnailer",
+     "ready": "0/1",
+     "up_to_date": 1,
+     "available": 0,
+     "age": "4m"
+    }
+   ],
+   "events": []
+  },
+  {
+   "id": "h02",
+   "namespace": "analytics",
+   "root_cause": "insufficient_resources",
+   "heldout": true,
+   "symptom": "Two new aggregator Pods in namespace analytics have been Pending for fifteen minutes.",
+   "pods": [
+    {
+     "name": "aggregator-5f4e3d2c1-bb22c",
+     "ready": "0/1",
+     "status": "Pending",
+     "age": "15m",
+     "node": "<none>",
+     "labels": {
+      "app": "aggregator"
+     },
+     "describe": "Name:         aggregator-5f4e3d2c1-bb22c\nNamespace:    analytics\nNode:         <none>\nStatus:       Pending\nContainers:\n  app:\n    Image:      registry.example.com/analytics/aggregator:3.3.0\n    Requests:\n      cpu:     500m\n      memory:  48Gi\nEvents:\n  Type     Reason            Age   From               Message\n  Warning  FailedScheduling  2m (x12 over 15m)  default-scheduler  0/3 nodes are available: 3 Insufficient memory. preemption: 0/3 nodes are available: 3 No preemption victims found for incoming pod.",
+     "logs": "Error from server (BadRequest): container \"app\" in pod \"aggregator-5f4e3d2c1-bb22c\" is waiting to start: ContainerCreating"
+    }
+   ],
+   "deployments": [
+    {
+     "name": "aggregator",
+     "ready": "0/2",
+     "up_to_date": 2,
+     "available": 0,
+     "age": "15m"
+    }
+   ],
+   "events": []
+  },
+  {
+   "id": "h03",
+   "namespace": "billing",
+   "root_cause": "crash_missing_config",
+   "heldout": true,
+   "symptom": "The invoicer Pod in namespace billing restarts over and over since this morning's release.",
+   "pods": [
+    {
+     "name": "invoicer-7a6b5c4d3-cc33d",
+     "ready": "0/1",
+     "status": "CrashLoopBackOff",
+     "restarts": 11,
+     "age": "2h",
+     "labels": {
+      "app": "invoicer"
+     },
+     "describe": "Name:         invoicer-7a6b5c4d3-cc33d\nNamespace:    billing\nNode:         node-2/10.0.0.12\nStatus:       Running\nContainers:\n  app:\n    Image:          registry.example.com/billing/invoicer:5.0.0\n    State:          Waiting\n      Reason:       CrashLoopBackOff\n    Last State:     Terminated\n      Reason:       Error\n      Exit Code:    2\n    Ready:          False\n    Restart Count:  11\nEvents:\n  Type     Reason     Age   From     Message\n  Warning  BackOff  3m (x40 over 2h)  kubelet  Back-off restarting failed container app in pod invoicer-7a6b5c4d3-cc33d",
+     "logs": "2026-11-02T09:00:00Z INFO invoicer 5.0.0 starting\n2026-11-02T09:00:00Z ERROR cannot read settings file /etc/invoicer/settings.yaml: no such file or directory\n2026-11-02T09:00:00Z INFO exiting with status 2",
+     "previous_logs": "2026-11-02T08:55:00Z INFO invoicer 5.0.0 starting\n2026-11-02T08:55:00Z ERROR cannot read settings file /etc/invoicer/settings.yaml: no such file or directory"
+    }
+   ],
+   "deployments": [
+    {
+     "name": "invoicer",
+     "ready": "0/1",
+     "up_to_date": 1,
+     "available": 0,
+     "age": "2h"
+    }
+   ],
+   "events": []
+  },
+  {
+   "id": "h04",
+   "namespace": "api",
+   "root_cause": "service_selector_mismatch",
+   "heldout": true,
+   "symptom": "After a relabel, clients of the orders Service in namespace api get connection refused, though the Pods look fine.",
+   "pods": [
+    {
+     "name": "orders-6e5d4c3b2-dd44e",
+     "ready": "1/1",
+     "status": "Running",
+     "age": "1h",
+     "labels": {
+      "app": "orders",
+      "tier": "backend"
+     },
+     "describe": "Name:         orders-6e5d4c3b2-dd44e\nNamespace:    api\nNode:         node-2/10.0.0.12\nStatus:       Running\nContainers:\n  app:\n    Image:          registry.example.com/api/orders:1.9.0\n    State:          Running\n    Ready:          True\n    Restart Count:  0\nLabels:       app=orders,tier=backend\nEvents:\n  Type     Reason     Age   From     Message\n  Normal  Started  1h  kubelet  Started container app",
+     "logs": "2026-11-02T09:10:00Z INFO listening on :7000"
+    }
+   ],
+   "deployments": [
+    {
+     "name": "orders",
+     "ready": "1/1",
+     "up_to_date": 1,
+     "available": 1,
+     "age": "1h"
+    }
+   ],
+   "services": [
+    {
+     "name": "orders",
+     "selector": {
+      "app": "orders",
+      "tier": "api"
+     },
+     "endpoints": "<none>",
+     "ports": "7000/TCP"
+    }
+   ],
+   "events": []
+  },
+  {
+   "id": "h05",
+   "namespace": "search",
+   "root_cause": "oom_killed",
+   "heldout": true,
+   "symptom": "The query-cache Pod in namespace search dies under load and comes back a minute later.",
+   "pods": [
+    {
+     "name": "query-cache-4d3c2b1a0-ee55f",
+     "ready": "1/1",
+     "status": "Running",
+     "restarts": 4,
+     "age": "3h",
+     "labels": {
+      "app": "query-cache"
+     },
+     "describe": "Name:         query-cache-4d3c2b1a0-ee55f\nNamespace:    search\nNode:         node-2/10.0.0.12\nStatus:       Running\nContainers:\n  app:\n    Image:          registry.example.com/search/query-cache:2.2.0\n    State:          Running\n    Last State:     Terminated\n      Reason:       OOMKilled\n      Exit Code:    137\n    Ready:          True\n    Restart Count:  4\n    Limits:\n      memory:  512Mi\nEvents:\n  Type     Reason     Age   From     Message\n  Normal  Pulled  10m  kubelet  Container image already present on machine",
+     "logs": "2026-11-02T09:20:00Z INFO cache warmed: 410MB\n2026-11-02T09:20:30Z INFO serving",
+     "previous_logs": "2026-11-02T09:05:00Z INFO cache warmed: 498MB\n2026-11-02T09:09:12Z INFO cache size 509MB"
+    }
+   ],
+   "deployments": [
+    {
+     "name": "query-cache",
+     "ready": "1/1",
+     "up_to_date": 1,
+     "available": 1,
+     "age": "3h"
+    }
+   ],
+   "events": []
+  },
+  {
+   "id": "h06",
+   "namespace": "status",
+   "root_cause": "no_fault",
+   "heldout": true,
+   "symptom": "A customer says the status page in namespace status is broken. Check whether its workloads are healthy.",
+   "pods": [
+    {
+     "name": "statuspage-3c2b1a0f9-ff66g",
+     "ready": "1/1",
+     "status": "Running",
+     "age": "9d",
+     "labels": {
+      "app": "statuspage"
+     },
+     "describe": "Name:         statuspage-3c2b1a0f9-ff66g\nNamespace:    status\nNode:         node-2/10.0.0.12\nStatus:       Running\nContainers:\n  app:\n    Image:          registry.example.com/status/page:4.4.4\n    State:          Running\n    Ready:          True\n    Restart Count:  0\nEvents:\n  Type     Reason     Age   From     Message\n  Normal  Started  9d  kubelet  Started container app",
+     "logs": "2026-11-02T09:30:00Z INFO GET /status 200 2ms"
+    }
+   ],
+   "deployments": [
+    {
+     "name": "statuspage",
+     "ready": "1/1",
+     "up_to_date": 1,
+     "available": 1,
+     "age": "9d"
+    }
+   ],
+   "services": [
+    {
+     "name": "statuspage",
+     "selector": {
+      "app": "statuspage"
+     },
+     "endpoints": "10.244.3.4:8080"
+    }
+   ],
+   "events": []
   }
- ]
+ ],
+ "heldout_note": "h01-h06 were written after the first harness run and before any harness change, and were never used to debug the agent."
 }
