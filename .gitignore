@@ -45,3 +45,6 @@ docs/reports/troubleshooting-ci.json
 CONTINUE_SESSION.md
 CLAUDE.md
 AGENTS.md
+
+# Security benchmark: downloaded datasets and cached model verdicts
+docs/reports/.security-benchmark-cache/
