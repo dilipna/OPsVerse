@@ -1,6 +1,6 @@
 # Evidence index — how to read this repository
 
-Generated 2026-09-07 by `opsverse_evals.overturns` from the committed
+Generated 2026-11-02 by `rype_evals.overturns` from the committed
 `docs/reports/*-summary.json`. Every number below is plucked from those files, so
 this page cannot drift away from the reports it summarises. No network, no stack.
 

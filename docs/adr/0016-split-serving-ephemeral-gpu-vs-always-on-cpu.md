@@ -4,7 +4,7 @@
 
 ## Context
 
-Repositioning OpsVerse as an **LLM inference platform** (see
+Repositioning RYPE as an **LLM inference platform** (see
 `docs/migration-plan.md`) makes vLLM-class serving evidence load-bearing: continuous
 batching, PagedAttention, prefix caching, and a quantization frontier are the claims the
 target roles actually screen for.

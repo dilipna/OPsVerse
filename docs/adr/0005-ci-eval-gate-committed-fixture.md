@@ -28,12 +28,12 @@ Options considered for getting eval data into CI:
 **Option (b)**, structured as two deterministic, secret-free layers in
 `eval-gate.yml`:
 
-1. **`opsverse_evals.regression`** — asserts every committed
+1. **`rype_evals.regression`** — asserts every committed
    `docs/reports/*-summary.json` against pinned thresholds
    (`evalsets/regression-thresholds.json`). Thresholds are pinned to measured
    baselines minus explicit slack; a missing report/mode/metric is a failure,
    not a skip. This stops "the numbers quietly changed/disappeared" PRs.
-2. **`opsverse_evals.ci_retrieval_smoke`** — embeds the committed fixture
+2. **`rype_evals.ci_retrieval_smoke`** — embeds the committed fixture
    into a Qdrant service container and runs the 25 frozen cases in hybrid
    mode, asserting `live: true` thresholds. This catches real retrieval-stack
    regressions (chunking, fusion, store queries, embedder config) on every

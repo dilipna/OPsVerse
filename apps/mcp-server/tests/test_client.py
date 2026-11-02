@@ -2,7 +2,7 @@ import json
 
 import httpx
 
-from opsverse_mcp import client as api
+from rype_mcp import client as api
 
 
 def mock_client(handler) -> httpx.AsyncClient:

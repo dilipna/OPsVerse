@@ -4,29 +4,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: opsverse-api
-  namespace: opsverse
+  name: rype-api
+  namespace: rype
 spec:
   replicas: 2
   selector:
-    matchLabels: { app: opsverse-api }
+    matchLabels: { app: rype-api }
   template:
     metadata:
-      labels: { app: opsverse-api }
+      labels: { app: rype-api }
     spec:
+      # Least privilege (Trivy KSV-0014/0118): non-root with a fixed UID matching
+      # the image, no service-account token (nothing here calls the k8s API),
+      # default seccomp profile.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: api
-          image: ghcr.io/dilipna/opsverse-api:latest
-          command: ["uvicorn", "opsverse_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+          image: ghcr.io/dilipna/rype-api:latest
+          command: ["uvicorn", "rype_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
           envFrom:
-            - configMapRef: { name: opsverse-config }
+            - configMapRef: { name: rype-config }
           env:
             - name: DB_PASSWORD
               valueFrom:
-                secretKeyRef: { name: opsverse-secrets, key: DB_PASSWORD }
+                secretKeyRef: { name: rype-secrets, key: DB_PASSWORD }
+            # $(VAR) expansion works only inside `env`, after the variable it
+            # references, never in ConfigMap data loaded with envFrom.
+            - name: RYPE_DATABASE_URL
+              value: postgresql+asyncpg://rype:$(DB_PASSWORD)@postgres:5432/rype
             - name: GEMINI_API_KEY
               valueFrom:
-                secretKeyRef: { name: opsverse-secrets, key: GEMINI_API_KEY }
+                secretKeyRef: { name: rype-secrets, key: GEMINI_API_KEY }
+            - name: RYPE_ADMIN_API_KEY
+              valueFrom:
+                secretKeyRef: { name: rype-secrets, key: ADMIN_API_KEY }
+            - name: RYPE_MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef: { name: rype-secrets, key: MINIO_ROOT_USER }
+            - name: RYPE_MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef: { name: rype-secrets, key: MINIO_ROOT_PASSWORD }
           ports:
             - containerPort: 8000
           readinessProbe:
@@ -40,26 +62,37 @@ spec:
           resources:
             requests: { cpu: "250m", memory: "512Mi" }
             limits: { cpu: "1", memory: "1Gi" }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            # The only writable path: temp files and the fastembed model cache.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 2Gi }
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: opsverse-api
-  namespace: opsverse
+  name: rype-api
+  namespace: rype
 spec:
-  selector: { app: opsverse-api }
+  selector: { app: rype-api }
   ports: [{ port: 80, targetPort: 8000 }]
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: opsverse-api
-  namespace: opsverse
+  name: rype-api
+  namespace: rype
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: opsverse-api
+    name: rype-api
   minReplicas: 2
   maxReplicas: 6
   metrics:

@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api.db.models import EvalRun
+from rype_api.db.models import EvalRun
 
 REPORT = {"report": "retrieval-ablation-v1", "kind": "retrieval-ablation", "results": {}}
 

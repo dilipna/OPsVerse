@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from opsverse_evals.regression import Threshold, check_report, load_thresholds, run_gate
+from rype_evals.regression import Threshold, check_report, load_thresholds, run_gate
 
 REPORT = {
     "report": "retrieval-ablation-v1",

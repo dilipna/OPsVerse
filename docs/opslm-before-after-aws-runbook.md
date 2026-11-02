@@ -97,16 +97,16 @@ ssh -i key.pem -L 8000:localhost:8000 ubuntu@<PUBLIC_IP>
 
 Then locally, restart the API pointed at the tunnel:
 ```powershell
-$env:OPSVERSE_CHAT_MODEL      = 'openai/base'
-$env:OPSVERSE_CHAT_API_BASE   = 'http://localhost:8000/v1'
-uv run uvicorn opsverse_api.main:app --port 8100
+$env:RYPE_CHAT_MODEL      = 'openai/base'
+$env:RYPE_CHAT_API_BASE   = 'http://localhost:8000/v1'
+uv run uvicorn rype_api.main:app --port 8100
 ```
 
 Run the suites — **note the `--out`**, a default run overwrites the Gemini baseline and
 turns the regression gate red:
 ```bash
-uv run python -m opsverse_evals.rag_suite --n 20 --out docs/reports/opslm-eval/base
-uv run python -m opsverse_evals.structured_eval --n 12 --out docs/reports/opslm-eval/base
+uv run python -m rype_evals.rag_suite --n 20 --out docs/reports/opslm-eval/base
+uv run python -m rype_evals.structured_eval --n 12 --out docs/reports/opslm-eval/base
 ```
 
 > **Not `generator_eval`.** That module scores whether *retrieval* supplied enough
@@ -127,7 +127,7 @@ python -m vllm.entrypoints.openai.api_server \
   --gpu-memory-utilization 0.90 \
   --port 8000 &
 ```
-Locally, `OPSVERSE_CHAT_MODEL='openai/opslm'`, restart uvicorn, and re-run both suites with
+Locally, `RYPE_CHAT_MODEL='openai/opslm'`, restart uvicorn, and re-run both suites with
 `--out docs/reports/opslm-eval/opslm...`.
 
 ## 7. TERMINATE THE INSTANCE
@@ -153,7 +153,7 @@ Run it through the significance machinery rather than eyeballing the gap — `n=
 
 ```bash
 uv run python -c "
-from opsverse_evals.stats import paired_permutation_test
+from rype_evals.stats import paired_permutation_test
 # per-query scores from the two summary JSONs
 print(paired_permutation_test(opslm_scores, base_scores))
 "

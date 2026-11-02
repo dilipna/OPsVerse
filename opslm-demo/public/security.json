@@ -1,0 +1,263 @@
+{
+  "schema": 1,
+  "generated_from": [
+    "docs/reports/security-robustness-v1-summary.json",
+    "docs/reports/security-redteam-v1-summary.json",
+    "docs/security/threat-model.md",
+    "docs/reports/security-classifier-v1-summary.json",
+    "docs/reports/agent-v1-summary.json"
+  ],
+  "classifier_model": "openai/gpt-4o-mini",
+  "agent": {
+    "model": "openai/gpt-4o-mini",
+    "max_steps": 10,
+    "scenarios": 16,
+    "attacks": 5,
+    "heldout_accuracy": {
+      "k": 6,
+      "n": 6,
+      "rate": 1,
+      "ci95": [
+        0.6097,
+        1
+      ]
+    },
+    "development_accuracy": {
+      "k": 9,
+      "n": 10,
+      "rate": 0.9,
+      "ci95": [
+        0.5958,
+        0.9821
+      ]
+    },
+    "attacked_accuracy": {
+      "k": 71,
+      "n": 80,
+      "rate": 0.8875,
+      "ci95": [
+        0.7998,
+        0.9397
+      ]
+    },
+    "attack_success": {
+      "k": 0,
+      "n": 80,
+      "rate": 0,
+      "ci95": [
+        0,
+        0.0458
+      ]
+    },
+    "derailed": {
+      "k": 5,
+      "n": 80,
+      "rate": 0.0625,
+      "ci95": [
+        0.027,
+        0.1381
+      ]
+    },
+    "refused_runs_clean": {
+      "k": 7,
+      "n": 16,
+      "rate": 0.4375,
+      "ci95": [
+        0.231,
+        0.6682
+      ]
+    },
+    "refused_runs_attacked": {
+      "k": 26,
+      "n": 80,
+      "rate": 0.325,
+      "ci95": [
+        0.2324,
+        0.4336
+      ]
+    },
+    "history": {
+      "correct": 3,
+      "finished": 5,
+      "runs": 10
+    }
+  },
+  "external": [
+    {
+      "name": "deepset-test",
+      "attacks": 60,
+      "benign": 56,
+      "tpr": 0.1,
+      "tpr_ci95": [
+        0.0466,
+        0.2015
+      ],
+      "layered_tpr": 0.45,
+      "layered_tpr_ci95": [
+        0.3309,
+        0.5751
+      ],
+      "layered_fpr": 0,
+      "layered_fpr_ci95": [
+        0,
+        0.0642
+      ],
+      "llm_errors": 0
+    },
+    {
+      "name": "deepset-train",
+      "attacks": 203,
+      "benign": 343,
+      "tpr": 0.0739,
+      "tpr_ci95": [
+        0.0453,
+        0.1183
+      ],
+      "layered_tpr": 0.5862,
+      "layered_tpr_ci95": [
+        0.5175,
+        0.6517
+      ],
+      "layered_fpr": 0,
+      "layered_fpr_ci95": [
+        0,
+        0.0111
+      ],
+      "llm_errors": 0
+    }
+  ],
+  "redteam": {
+    "attacks": 15,
+    "benign": 18,
+    "tpr": 1,
+    "specificity": 1
+  },
+  "robustness": {
+    "date": "2026-11-02",
+    "cases": 33,
+    "rows": [
+      {
+        "transform": "identity",
+        "raw_tpr": 1,
+        "normalized_tpr": 1,
+        "raw_specificity": 1,
+        "normalized_specificity": 1
+      },
+      {
+        "transform": "zero_width",
+        "raw_tpr": 0.0667,
+        "normalized_tpr": 1,
+        "raw_specificity": 1,
+        "normalized_specificity": 1
+      },
+      {
+        "transform": "lookalike",
+        "raw_tpr": 0,
+        "normalized_tpr": 1,
+        "raw_specificity": 1,
+        "normalized_specificity": 1
+      },
+      {
+        "transform": "full_width",
+        "raw_tpr": 0,
+        "normalized_tpr": 1,
+        "raw_specificity": 1,
+        "normalized_specificity": 1
+      },
+      {
+        "transform": "line_split",
+        "raw_tpr": 0,
+        "normalized_tpr": 1,
+        "raw_specificity": 1,
+        "normalized_specificity": 1
+      },
+      {
+        "transform": "case_noise",
+        "raw_tpr": 1,
+        "normalized_tpr": 1,
+        "raw_specificity": 1,
+        "normalized_specificity": 1
+      }
+    ]
+  },
+  "threats": [
+    {
+      "id": "T-01",
+      "threat": "Instructions planted in an ingested document steer the model (indirect injection)",
+      "owasp": "LLM01, LLM04",
+      "status": "Partly mitigated"
+    },
+    {
+      "id": "T-02",
+      "threat": "User types instructions to override the assistant (direct injection)",
+      "owasp": "LLM01",
+      "status": "Accepted"
+    },
+    {
+      "id": "T-03",
+      "threat": "Model output exfiltrates data (auto-loading image URLs, links to attacker hosts, javascript: links)",
+      "owasp": "LLM05",
+      "status": "Mitigated"
+    },
+    {
+      "id": "T-04",
+      "threat": "Credentials reach the corpus, answers or traces",
+      "owasp": "LLM02",
+      "status": "Mitigated for known formats"
+    },
+    {
+      "id": "T-05",
+      "threat": "System prompt disclosure",
+      "owasp": "LLM07",
+      "status": "Accepted"
+    },
+    {
+      "id": "T-06",
+      "threat": "Corpus poisoning through the ingest API",
+      "owasp": "LLM04, LLM08",
+      "status": "Mitigated"
+    },
+    {
+      "id": "T-07",
+      "threat": "SSRF: the worker is pointed at internal services or cloud metadata",
+      "owasp": "(web)",
+      "status": "Mitigated"
+    },
+    {
+      "id": "T-08",
+      "threat": "The assistant takes harmful actions",
+      "owasp": "LLM06",
+      "status": "Mitigated by design"
+    },
+    {
+      "id": "T-09",
+      "threat": "Compromised or vulnerable dependency, model artifact or deployment misconfiguration",
+      "owasp": "LLM03",
+      "status": "Partly mitigated"
+    },
+    {
+      "id": "T-10",
+      "threat": "Unbounded consumption (cost, memory, quota)",
+      "owasp": "LLM10",
+      "status": "Mitigated"
+    },
+    {
+      "id": "T-11",
+      "threat": "Confident ungrounded answers",
+      "owasp": "LLM09",
+      "status": "Partly mitigated"
+    },
+    {
+      "id": "T-12",
+      "threat": "Cross-user data exposure through the vector store",
+      "owasp": "LLM08",
+      "status": "Accepted"
+    },
+    {
+      "id": "T-13",
+      "threat": "Path traversal or odd object keys from upload filenames",
+      "owasp": "(web)",
+      "status": "Mitigated"
+    }
+  ]
+}

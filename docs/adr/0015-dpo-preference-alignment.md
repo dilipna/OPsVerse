@@ -20,7 +20,7 @@ Add a **DPO** stage: `OpsLM-v1 (SFT) → OpsLM-v2 (DPO)`, aligning on a single,
 on-theme objective — **prefer the grounded/hedged answer over a confident
 hallucination.**
 
-- **Preference pairs** (`opsverse_training.preferences`): for each SFT example,
+- **Preference pairs** (`rype_training.preferences`): for each SFT example,
   `chosen` = the grounded, cited SFT answer; `rejected` = a synthesized
   confident-but-ungrounded answer (invented flags/fields, no hedging). The
   reject generator is the bulk model (`gemini-3.1-flash-lite`), so this costs

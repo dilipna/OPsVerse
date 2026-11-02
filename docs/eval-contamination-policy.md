@@ -1,6 +1,6 @@
 # Eval-Set Contamination Policy
 
-**Status:** active (v1, 2026-07-13) · **Enforced by:** `opsverse_evals.contamination`
+**Status:** active (v1, 2026-07-13) · **Enforced by:** `rype_evals.contamination`
 
 ## The rule
 
@@ -29,7 +29,7 @@ New frozen sets get a row here in the same PR that adds them.)
 
 ## Enforcement mechanism
 
-Two layers, both implemented in `libs/evals/src/opsverse_evals/contamination.py`
+Two layers, both implemented in `libs/evals/src/rype_evals/contamination.py`
 and unit-tested:
 
 1. **Exact match:** SHA-256 over a *normalized* question (casefold, strip

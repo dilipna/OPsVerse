@@ -1,10 +1,11 @@
 [project]
-name = "opsverse-rag"
+name = "rype-rag"
 version = "0.1.0"
-description = "OpsVerse retrieval: hybrid dense+sparse search over Qdrant, reranking, citations"
+description = "RYPE retrieval: hybrid dense+sparse search over Qdrant, reranking, citations"
 requires-python = ">=3.12"
 dependencies = [
-    "opsverse-core",
+    "rype-core",
+    "rype-security",
     "pydantic>=2.10",
     "qdrant-client>=1.12",
     "fastembed>=0.5",
@@ -12,11 +13,12 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-opsverse-core = { workspace = true }
+rype-core = { workspace = true }
+rype-security = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/opsverse_rag"]
+packages = ["src/rype_rag"]

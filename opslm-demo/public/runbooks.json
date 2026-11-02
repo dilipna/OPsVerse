@@ -1510,7 +1510,8 @@
       "reject_reasons": {},
       "secrets_redacted": 0,
       "quarantined": false,
-      "quarantine_reasons": []
+      "quarantine_reasons": [],
+      "llm_checked_chunks": 0
     },
     {
       "id": "debug-pods",
@@ -1521,7 +1522,8 @@
       "reject_reasons": {},
       "secrets_redacted": 0,
       "quarantined": false,
-      "quarantine_reasons": []
+      "quarantine_reasons": [],
+      "llm_checked_chunks": 0
     },
     {
       "id": "debug-services",
@@ -1532,7 +1534,8 @@
       "reject_reasons": {},
       "secrets_redacted": 0,
       "quarantined": false,
-      "quarantine_reasons": []
+      "quarantine_reasons": [],
+      "llm_checked_chunks": 0
     },
     {
       "id": "resources",
@@ -1543,7 +1546,8 @@
       "reject_reasons": {},
       "secrets_redacted": 0,
       "quarantined": false,
-      "quarantine_reasons": []
+      "quarantine_reasons": [],
+      "llm_checked_chunks": 0
     },
     {
       "id": "deployments",
@@ -1554,7 +1558,8 @@
       "reject_reasons": {},
       "secrets_redacted": 0,
       "quarantined": false,
-      "quarantine_reasons": []
+      "quarantine_reasons": [],
+      "llm_checked_chunks": 0
     },
     {
       "id": "images",
@@ -1565,7 +1570,8 @@
       "reject_reasons": {},
       "secrets_redacted": 0,
       "quarantined": false,
-      "quarantine_reasons": []
+      "quarantine_reasons": [],
+      "llm_checked_chunks": 0
     }
   ]
 }

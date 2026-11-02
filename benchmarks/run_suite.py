@@ -63,7 +63,7 @@ from harness import (
 
 # A prefix long enough that prefilling it is measurable against the noise floor.
 # Real systems hit this shape constantly: a fixed system prompt or a retrieved
-# document reused across many user turns — which is exactly OpsVerse's RAG path.
+# document reused across many user turns — which is exactly RYPE's RAG path.
 PREFIX_CACHE_SYSTEM = """You are OpsLM, an operations assistant. Answer using only the
 runbook excerpts below. Cite the excerpt id inline. If the excerpts do not contain the
 answer, say so rather than guessing.

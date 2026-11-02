@@ -1,7 +1,7 @@
 [project]
-name = "opsverse-ai"
+name = "rype-ai"
 version = "0.1.0"
-description = "OpsVerse AI — production-grade LLM engineering platform for the DevOps/MLOps/LLMOps community"
+description = "RYPE — production-grade LLM engineering platform for the DevOps/MLOps/LLMOps community"
 requires-python = ">=3.12"
 dependencies = []
 
@@ -20,6 +20,7 @@ dev = [
     "httpx>=0.28",
     "aiosqlite>=0.20",
     "dvc[s3]>=3.55",
+    "pyarrow>=17", # tests for the security benchmark's dataset loader
 ]
 
 [tool.ruff]
@@ -55,6 +56,7 @@ asyncio_mode = "auto"
 testpaths = [
     "apps/api/tests",
     "apps/mcp-server/tests",
+    "libs/agent/tests",
     "libs/core/tests",
     "libs/evals/tests",
     "libs/ingestion/tests",

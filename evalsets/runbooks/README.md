@@ -14,7 +14,7 @@ meet both. Stress outcomes are descriptive and all are reported. Selection used 
 results; a future generalization claim requires a new holdout and better passage labels.
 
 ```bash
-uv run python -m opsverse_evals.runbook_fixture --check
+uv run python -m rype_evals.runbook_fixture --check
 node opslm-demo/scripts/evaluate-runbooks.mjs --out docs/reports/runbook-evaluation.json
 ```
 

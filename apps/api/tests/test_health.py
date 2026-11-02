@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
-from opsverse_api.main import create_app
-from opsverse_api.routers import health
+from rype_api.main import create_app
+from rype_api.routers import health
 
 
 def test_live_returns_ok():

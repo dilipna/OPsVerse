@@ -59,7 +59,7 @@ cd c:\Users\user\OneDrive\Pictures\ftrag
 git status -sb                      # MUST be clean; you need a safe rollback point
 docker compose -f infra/compose/docker-compose.yml --profile full up -d --wait
 curl.exe -s http://localhost:8100/health/ready      # 4x ok
-uv run python -m opsverse_evals.regression          # 15/15 PASS -- this is your BEFORE state
+uv run python -m rype_evals.regression          # 15/15 PASS -- this is your BEFORE state
 ```
 
 **Record that the gate is green before you start.** If anything below goes wrong, "the
@@ -69,12 +69,12 @@ gate was 15/15 when I began" is how you know what to roll back to.
 
 ## 3. THE LANDMINE — read before running any eval
 
-`opsverse_evals.rag_suite` writes to a **fixed filename** regardless of which model
+`rype_evals.rag_suite` writes to a **fixed filename** regardless of which model
 generated the answers:
 
 - `docs/reports/rag-quality-smoke-summary.json`, with `"report": "rag-quality-smoke"`
 
-And `opsverse_evals.regression` pins **three thresholds** against that exact report:
+And `rype_evals.regression` pins **three thresholds** against that exact report:
 `judge:faithfulness >= 0.9`, `judge:answer_relevance >= 0.85`, `judge:citation_used >= 0.9`.
 
 **If you run the eval with default `--out`, you will:**
@@ -134,16 +134,16 @@ If that doesn't return JSON listing the model, **stop and fix the tunnel.** Do n
 > HTTP client for `http://localhost:8100/v1/chat`; prefixing variables onto *it* changes
 > nothing. The handoff's one-liner had this wrong.
 >
-> ⚠️ The setting is **`OPSVERSE_CHAT_API_BASE`** (from `chat_api_base` in
-> `libs/core/src/opsverse_core/settings.py`). There is no `OPSVERSE_LLM_API_BASE`.
+> ⚠️ The setting is **`RYPE_CHAT_API_BASE`** (from `chat_api_base` in
+> `libs/core/src/rype_core/settings.py`). There is no `RYPE_LLM_API_BASE`.
 
 Stop the running uvicorn, then in that terminal:
 
 ```powershell
-$env:OPSVERSE_CHAT_MODEL    = 'openai/Qwen3-4B-Base'      # litellm openai/ prefix = OpenAI-compatible server
-$env:OPSVERSE_CHAT_API_BASE = 'https://<tunnel-host>/v1'
-$env:OPSVERSE_LANGFUSE_HOST = 'http://localhost:3002'
-uv run uvicorn opsverse_api.main:app --port 8100
+$env:RYPE_CHAT_MODEL    = 'openai/Qwen3-4B-Base'      # litellm openai/ prefix = OpenAI-compatible server
+$env:RYPE_CHAT_API_BASE = 'https://<tunnel-host>/v1'
+$env:RYPE_LANGFUSE_HOST = 'http://localhost:3002'
+uv run uvicorn rype_api.main:app --port 8100
 ```
 
 Confirm the platform is really talking to the tunnel before spending an eval on it:
@@ -163,16 +163,16 @@ downstream would be measuring the wrong model.
 
 ```powershell
 # BASE model
-uv run python -m opsverse_evals.rag_suite --n 20 --out docs/reports/opslm-eval --run-id base-qwen3-4b
+uv run python -m rype_evals.rag_suite --n 20 --out docs/reports/opslm-eval --run-id base-qwen3-4b
 Rename-Item docs\reports\opslm-eval\rag-quality-smoke-summary.json base-qwen3-4b.json
 ```
 
 Then **swap the served model to OpsLM** (Colab: stop vLLM, `vllm serve dhf1234/OpsLM-v1
---port 8000 ...`), update `OPSVERSE_CHAT_MODEL` to `openai/OpsLM-v1`, **restart uvicorn
+--port 8000 ...`), update `RYPE_CHAT_MODEL` to `openai/OpsLM-v1`, **restart uvicorn
 again**, re-confirm `$r.done.model`, and:
 
 ```powershell
-uv run python -m opsverse_evals.rag_suite --n 20 --out docs/reports/opslm-eval --run-id opslm-v1
+uv run python -m rype_evals.rag_suite --n 20 --out docs/reports/opslm-eval --run-id opslm-v1
 Rename-Item docs\reports\opslm-eval\rag-quality-smoke-summary.json opslm-v1.json
 ```
 
@@ -217,7 +217,7 @@ cd c:\Users\user\OneDrive\Pictures\ftrag
 git status                                     # see exactly what changed
 git checkout -- docs/reports                   # restore any clobbered report
 Remove-Item -Recurse -Force docs\reports\opslm-eval   # drop the scratch dir
-uv run python -m opsverse_evals.regression     # MUST return to 15/15 PASS
+uv run python -m rype_evals.regression     # MUST return to 15/15 PASS
 ```
 
 Then restart the API **without** the override env vars (open a fresh terminal so the old

@@ -1,12 +1,12 @@
 [project]
-name = "opsverse-evals"
+name = "rype-evals"
 version = "0.1.0"
-description = "OpsVerse evaluation: retrieval eval sets, IR metrics, ablation harness (Phase 4 grows RAGAS/DeepEval here)"
+description = "RYPE evaluation: retrieval eval sets, IR metrics, ablation harness (Phase 4 grows RAGAS/DeepEval here)"
 requires-python = ">=3.12"
 dependencies = [
-    "opsverse-core",
-    "opsverse-rag",
-    "opsverse-ingestion",
+    "rype-core",
+    "rype-rag",
+    "rype-ingestion",
     "pydantic>=2.10",
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30",
@@ -15,13 +15,13 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-opsverse-core = { workspace = true }
-opsverse-rag = { workspace = true }
-opsverse-ingestion = { workspace = true }
+rype-core = { workspace = true }
+rype-rag = { workspace = true }
+rype-ingestion = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/opsverse_evals"]
+packages = ["src/rype_evals"]

@@ -1,4 +1,4 @@
-# OpsVerse AI — Demo Runbook
+# RYPE — Demo Runbook
 
 A tight **~12-minute** live walkthrough of an LLM **inference & operations platform**.
 Rehearse once end-to-end before demo day.
@@ -33,17 +33,17 @@ Rehearse once end-to-end before demo day.
 docker compose -f infra/compose/docker-compose.yml --profile full up -d --wait
 
 # 2. API (tracing on) + worker + web UI — three terminals
-$env:OPSVERSE_LANGFUSE_HOST='http://localhost:3002'
-uv run uvicorn opsverse_api.main:app --port 8100        # terminal 1
-uv run arq opsverse_api.worker.WorkerSettings           # terminal 2
+$env:RYPE_LANGFUSE_HOST='http://localhost:3002'
+uv run uvicorn rype_api.main:app --port 8100        # terminal 1
+uv run arq rype_api.worker.WorkerSettings           # terminal 2
 cd apps/web; npm run dev                                # terminal 3 -> :3000  (cd back after!)
 
 # 3. Sanity — do not present until these two pass
 curl.exe -s http://localhost:8100/health/ready          # expect 4x ok  (curl.exe, NOT curl)
-uv run python -m opsverse_evals.regression              # expect 15/15 PASS
+uv run python -m rype_evals.regression              # expect 15/15 PASS
 
 # 4. Clear the gateway cache — REQUIRED, see the warning below
-docker exec opsverse-redis-1 redis-cli --scan --pattern 'gw:cache:*' | ForEach-Object { docker exec opsverse-redis-1 redis-cli DEL $_ }
+docker exec rype-redis-1 redis-cli --scan --pattern 'gw:cache:*' | ForEach-Object { docker exec rype-redis-1 redis-cli DEL $_ }
 ```
 
 > 🚨 **Flush the cache or step 4 dies.** Cache entries live **24 h**. If you rehearsed —
@@ -58,12 +58,12 @@ docker exec opsverse-redis-1 redis-cli --scan --pattern 'gw:cache:*' | ForEach-O
 
 ```bash
 docker compose -f infra/compose/docker-compose.yml --profile full up -d --wait
-OPSVERSE_LANGFUSE_HOST=http://localhost:3002 \
-  uv run uvicorn opsverse_api.main:app --port 8100
-uv run arq opsverse_api.worker.WorkerSettings
+RYPE_LANGFUSE_HOST=http://localhost:3002 \
+  uv run uvicorn rype_api.main:app --port 8100
+uv run arq rype_api.worker.WorkerSettings
 (cd apps/web && npm run dev)
 curl http://localhost:8100/health/ready
-uv run python -m opsverse_evals.regression
+uv run python -m rype_evals.regression
 ```
 </details>
 
@@ -71,12 +71,12 @@ uv run python -m opsverse_evals.regression
 1. `benchmarks/dashboard.html` (open the file directly — no server needed)
 2. `docs/overturns.html` (same — self-contained, no server, no network)
 3. web UI http://localhost:3000
-4. Langfuse http://localhost:3002 (`dev@opsverse.local` / `opsverse-dev-password`)
+4. Langfuse http://localhost:3002 (`dev@rype.local` / `rype-dev-password`)
 5. this runbook
 
 > **Regenerate the two static pages before you present** so they match the repo:
 > ```powershell
-> uv run python -m opsverse_evals.overturns          # -> docs/overturns.html + docs/evidence.md
+> uv run python -m rype_evals.overturns          # -> docs/overturns.html + docs/evidence.md
 > python benchmarks/report.py --out docs/reports/inference-benchmark-v1.md
 > ```
 > Tabs 1 and 2 are the whole `[no stack]` retreat path. If Docker dies mid-demo, those two
@@ -91,7 +91,7 @@ uv run python -m opsverse_evals.regression
 
 ### 1. The pitch (40s, no terminal) **[no stack]**
 
-> "OpsVerse is an **LLM inference and operations platform**. I fine-tuned a model for
+> "RYPE is an **LLM inference and operations platform**. I fine-tuned a model for
 > DevOps, served it on real GPU hardware, and **measured** what production serving
 > actually buys you — continuous batching, KV-cache reuse, guided decoding. Everything
 > here is a measured number with its raw data committed: **22 ADRs, 280 tests**, CI and
@@ -219,7 +219,7 @@ them to scan.
 **Then the CI gate, to land that none of this is theatre:**
 
 ```bash
-uv run python -m opsverse_evals.regression         # 15 pinned thresholds, all green
+uv run python -m rype_evals.regression         # 15 pinned thresholds, all green
 ```
 Then open **`/evals`** in the web UI.
 
@@ -315,7 +315,7 @@ upstream I don't control — the range is the honest answer, and the part that n
 ### 7. Security (45s) — terminal
 
 ```bash
-uv run python -m opsverse_security.evaluate        # TPR 1.0, specificity 1.0
+uv run python -m rype_security.evaluate        # TPR 1.0, specificity 1.0
 ```
 > "Injection detection is a **measured classifier**, not a vibe — tested against benign
 > DevOps text that shares the attack vocabulary, like `override entrypoint` and

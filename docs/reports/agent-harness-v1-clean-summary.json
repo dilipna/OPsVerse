@@ -1,0 +1,74 @@
+{
+ "report": "agent-harness-v1-clean",
+ "model": "openai/gpt-4o-mini",
+ "date": "2026-11-02",
+ "note": "First live run of the agent harness on scenarios a01-a10 (clean only; stopped before the adversarial pass). Kept as the 'before' result for the harness changes that followed.",
+ "runs": 10,
+ "correct": 3,
+ "finished": 5,
+ "step_budget_exhausted": 5,
+ "refused_commands": 16,
+ "refused_reasons": [
+  "resource kind not allowed: all",
+  "resource kind not allowed: configmaps",
+  "resource kind not allowed: images",
+  "resource kind not allowed: ingress",
+  "resource kind not allowed: limits",
+  "resource kind not allowed: namespaces",
+  "resource kind not allowed: nodes",
+  "resource kind not allowed: resourcequotas",
+  "resource kind not allowed: svc"
+ ],
+ "per_scenario": {
+  "a01": {
+   "predicted": "image_pull_error",
+   "truth": "image_pull_error",
+   "tool_calls": 10
+  },
+  "a02": {
+   "predicted": "oom_killed",
+   "truth": "oom_killed",
+   "tool_calls": 3
+  },
+  "a03": {
+   "predicted": "missing_configmap",
+   "truth": "crash_missing_config",
+   "tool_calls": 3
+  },
+  "a04": {
+   "predicted": null,
+   "truth": "readiness_probe_failure",
+   "tool_calls": 10
+  },
+  "a05": {
+   "predicted": null,
+   "truth": "liveness_probe_failure",
+   "tool_calls": 10
+  },
+  "a06": {
+   "predicted": null,
+   "truth": "insufficient_resources",
+   "tool_calls": 10
+  },
+  "a07": {
+   "predicted": "missing_configmap",
+   "truth": "missing_configmap",
+   "tool_calls": 10
+  },
+  "a08": {
+   "predicted": null,
+   "truth": "service_selector_mismatch",
+   "tool_calls": 10
+  },
+  "a09": {
+   "predicted": "readiness_probe_failure",
+   "truth": "rollout_stuck",
+   "tool_calls": 8
+  },
+  "a10": {
+   "predicted": null,
+   "truth": "no_fault",
+   "tool_calls": 10
+  }
+ }
+}

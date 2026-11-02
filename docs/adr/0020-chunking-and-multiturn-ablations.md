@@ -6,7 +6,7 @@
 
 Two gaps remained after the golden-set work in ADR-0018/0019:
 
-1. **Chunking was never ablated.** `opsverse_ingestion.chunking` has hard-coded
+1. **Chunking was never ablated.** `rype_ingestion.chunking` has hard-coded
    `TARGET_TOKENS=350`, `MAX_TOKENS=512`, `OVERLAP_TOKENS=50` — three numbers picked once
    and never varied. "How did you choose your chunk size?" had no measured answer.
 2. **Every eval set is single-turn.** `retrieval-v1/v2/v3` and `retrieval-golden-v1` are
@@ -68,7 +68,7 @@ chunk, single gold label per case (same convention as `retrieval-v1/v2/v3` — t
 ADR-0018 degeneracy applies here too: this set reports `hit@k`/`mrr@k`, not
 recall/precision).
 
-Two conditions scored against the **live production collection** (`opsverse_kb`, hybrid
+Two conditions scored against the **live production collection** (`rype_kb`, hybrid
 mode — the actual deployed retriever, not a throwaway index):
 
 - **`turn2_only`** — what `stream_chat` does today.

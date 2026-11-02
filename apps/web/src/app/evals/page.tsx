@@ -91,7 +91,7 @@ export default function EvalsPage() {
   if (!reports.length)
     return (
       <p className="text-sm text-zinc-500">
-        No eval reports yet — run <code>uv run python -m opsverse_evals.run_ablation</code>.
+        No eval reports yet — run <code>uv run python -m rype_evals.run_ablation</code>.
       </p>
     );
 

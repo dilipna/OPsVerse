@@ -1,7 +1,7 @@
 # OpsLM Fine-Tuning (Phase 5)
 
 OpsLM is a QLoRA fine-tune of **Qwen3-4B** on an instruction dataset
-synthesized from the OpsVerse corpus (Kubernetes, Docker, Terraform, MLflow).
+synthesized from the RYPE corpus (Kubernetes, Docker, Terraform, MLflow).
 The training runs on **free Colab/Kaggle T4 GPUs — never on the dev machine**
 (no local CUDA). This directory holds the reproducible, resumable pipeline;
 the trained model is published to the HF Hub.
@@ -34,7 +34,7 @@ corpus (Postgres/DVC)
                   └─ data/sft/{train,val}.jsonl
                        └─ training/scripts/train_opslm_qlora.py   # Colab T4, QLoRA, resumable
                             └─ huggingface.co/<you>/OpsLM-v1  (merged 16-bit + GGUF Q4_K_M)
-                                 └─ eval: opsverse_evals.rag_suite / retrieval ablation
+                                 └─ eval: rype_evals.rag_suite / retrieval ablation
                                           base Qwen3-4B vs OpsLM-v1  (before/after report)
 ```
 
@@ -52,7 +52,7 @@ Manual:
    !pip install "unsloth==2025.*" "trl>=0.12,<0.20" "datasets>=3" "huggingface_hub"
    !git clone https://github.com/dilipna/OPsVerse && cd OPsVerse
    !HF_TOKEN=hf_xxx python training/scripts/train_opslm_qlora.py \
-       --data-repo <you>/opsverse-sft --push-repo <you>/OpsLM-v1
+       --data-repo <you>/rype-sft --push-repo <you>/OpsLM-v1
    ```
 3. If the session dies, re-run with `--resume` — checkpoints are pushed to the
    Hub every `--save-steps`.
@@ -74,14 +74,14 @@ smoke; run it once on base (default Gemini path) and once on OpsLM:
 
 ```bash
 # Ollama (from the pushed GGUF) — litellm has a default base:
-OPSVERSE_CHAT_MODEL=ollama/opslm uv run python -m opsverse_evals.rag_suite --n 20
+RYPE_CHAT_MODEL=ollama/opslm uv run python -m rype_evals.rag_suite --n 20
 
 # vLLM/SGLang (OpenAI-compatible) — set the api_base:
-OPSVERSE_CHAT_MODEL=openai/OpsLM-v1 OPSVERSE_CHAT_API_BASE=http://localhost:8000/v1 \
-  uv run python -m opsverse_evals.rag_suite --n 20
+RYPE_CHAT_MODEL=openai/OpsLM-v1 RYPE_CHAT_API_BASE=http://localhost:8000/v1 \
+  uv run python -m rype_evals.rag_suite --n 20
 ```
 
-`OPSVERSE_CHAT_API_BASE` is plumbed through the LiteLLM client for exactly
+`RYPE_CHAT_API_BASE` is plumbed through the LiteLLM client for exactly
 this; the eval gate OpsLM must clear already exists.
 
 ## Next (after the first run)

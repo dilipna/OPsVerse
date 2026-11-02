@@ -3,9 +3,9 @@ from itertools import pairwise
 
 import pytest
 
-from opsverse_evals import golden_set
-from opsverse_evals import judge_validation as jv
-from opsverse_evals.schemas import (
+from rype_evals import golden_set
+from rype_evals import judge_validation as jv
+from rype_evals.schemas import (
     GradedRetrievalCase,
     GradedRetrievalDataset,
     HumanLabel,

@@ -1,6 +1,6 @@
 # Inference System — Technical Design
 
-How OpsVerse serves a fine-tuned model in production, and why each choice was
+How RYPE serves a fine-tuned model in production, and why each choice was
 made. Every performance claim here is a **measured** number from
 [`docs/reports/inference-benchmark-v1.md`](reports/inference-benchmark-v1.md)
 (Tesla T4, raw JSON in [`benchmarks/results/`](../benchmarks/results/));

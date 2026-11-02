@@ -58,9 +58,7 @@ export default function Page() {
       setMsgs((m) => [
         ...m,
         { role: "assistant", content: data.reply ?? "…" },
-        ...(data.note
-          ? [{ role: "system" as const, content: data.note }]
-          : []),
+        ...(data.note ? [{ role: "system" as const, content: data.note }] : []),
       ]);
     } catch {
       setMsgs((m) => [
@@ -73,7 +71,10 @@ export default function Page() {
   }
 
   return (
-    <div className="wrap"><p><a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded</p>
+    <div className="wrap">
+      <p>
+        <a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded
+      </p>
       <div className="topbar">
         <div className="brand">
           <b>OpsLM · sample console</b>
@@ -86,25 +87,19 @@ export default function Page() {
           <a href="/dashboard.html" target="_blank" rel="noreferrer">
             benchmarks ↗
           </a>
-          <a
-            href="https://github.com/dilipna/OPsVerse"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://github.com/dilipna/OPsVerse" target="_blank" rel="noreferrer">
             code ↗
           </a>
-          <a
-            href="https://huggingface.co/dhf1234/OpsLM-v1"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://huggingface.co/dhf1234/OpsLM-v1" target="_blank" rel="noreferrer">
             model ↗
           </a>
         </nav>
       </div>
 
       <header className="hero">
-          <div className="tag">sample replies · optional model proxy · no retrieval in this console</div>
+        <div className="tag">
+          sample replies · optional model proxy · no retrieval in this console
+        </div>
         <h1>
           A DevOps model
           <br />
@@ -112,19 +107,17 @@ export default function Page() {
           <span className="cursor" />
         </h1>
         <p className="lede">
-          OpsLM is Qwen3-4B fine-tuned (QLoRA) on a decontaminated DevOps/MLOps
-          corpus, wrapped in a hybrid-retrieval stack and gated by an
-          eval-first platform. Every claim behind it traces to a measured
-          number in the historical research reports. This console is a separate
-          sample experience; a matched SFT quality improvement is not established.
+          OpsLM is Qwen3-4B fine-tuned (QLoRA) on a decontaminated DevOps/MLOps corpus, wrapped in a
+          hybrid-retrieval stack and gated by an eval-first platform. Every claim behind it traces
+          to a measured number in the historical research reports. This console is a separate sample
+          experience; a matched SFT quality improvement is not established.
         </p>
         <p className="lede">
           <a href="/dashboard.html" target="_blank" rel="noreferrer">
             <b>→ See the measured inference benchmark</b>
           </a>{" "}
-          — vLLM vs Ollama on a real Tesla T4 under a 1→16 concurrency sweep:
-          13.4× throughput scaling, a prefix-cache control run, and the raw
-          JSON committed next to every chart.
+          — vLLM vs Ollama on a real Tesla T4 under a 1→16 concurrency sweep: 13.4× throughput
+          scaling, a prefix-cache control run, and the raw JSON committed next to every chart.
         </p>
         <div className="metarow">
           <span>
@@ -168,9 +161,7 @@ export default function Page() {
                   <span className="body">— {m.content}</span>
                 ) : (
                   <>
-                    <span className="who">
-                      {m.role === "user" ? "you@local:~$ " : "opslm:~$ "}
-                    </span>
+                    <span className="who">{m.role === "user" ? "you@local:~$ " : "opslm:~$ "}</span>
                     <span className="body">{m.content}</span>
                   </>
                 )}
@@ -180,7 +171,8 @@ export default function Page() {
               <p className="line assistant">
                 <span className="who">opslm:~$ </span>
                 <span className="body">
-                  thinking<span className="cursor" />
+                  thinking
+                  <span className="cursor" />
                 </span>
               </p>
             )}
@@ -225,29 +217,29 @@ export default function Page() {
           <div className="cell">
             <h3>01 · retrieve</h3>
             <p>
-              The optional local stack uses dense + sparse retrieval (BGE + BM25,
-              RRF fusion). This sample proxy does not call that stack.
+              The optional local stack uses dense + sparse retrieval (BGE + BM25, RRF fusion). This
+              sample proxy does not call that stack.
             </p>
           </div>
           <div className="cell">
             <h3>02 · generate</h3>
             <p>
-              The local ChatService can attach context to generation. OpsLM SFT
-              used 534 training pairs; this does not establish a task-quality gain.
+              The local ChatService can attach context to generation. OpsLM SFT used 534 training
+              pairs; this does not establish a task-quality gain.
             </p>
           </div>
           <div className="cell">
             <h3>03 · guard</h3>
             <p>
-              Prompt-injection quarantine at ingest and secret redaction — a
-              poisoned doc contributes zero chunks.
+              Prompt-injection quarantine at ingest and secret redaction — a poisoned doc
+              contributes zero chunks.
             </p>
           </div>
           <div className="cell">
             <h3>04 · measure</h3>
             <p>
-              CI checks 15 committed-report assertions and two live retrieval
-              thresholds. It does not rerun the historical model-quality studies.
+              CI checks 15 committed-report assertions and two live retrieval thresholds. It does
+              not rerun the historical model-quality studies.
             </p>
           </div>
         </div>
@@ -262,7 +254,10 @@ export default function Page() {
           </div>
           <div className="cell">
             <h3>alignment</h3>
-            <p>SFT on a 593-pair split (534 train). DPO code exists; a completed DPO run and matched SFT quality gain are not established.</p>
+            <p>
+              SFT on a 593-pair split (534 train). DPO code exists; a completed DPO run and matched
+              SFT quality gain are not established.
+            </p>
           </div>
           <div className="cell">
             <h3>serving</h3>
@@ -278,11 +273,7 @@ export default function Page() {
       <footer>
         <span>OpsLM — built as a portfolio system. Depth over breadth.</span>
         <span>
-          <a
-            href="https://huggingface.co/dhf1234/OpsLM-v1"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://huggingface.co/dhf1234/OpsLM-v1" target="_blank" rel="noreferrer">
             huggingface/dhf1234/OpsLM-v1
           </a>
         </span>

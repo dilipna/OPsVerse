@@ -25,7 +25,7 @@ Running the actual `litellm --proxy` binary was evaluated and rejected:
 ## Decision
 
 Implement the missing gateway concerns as a **library layer**,
-`opsverse_core.gateway.LLMGateway`, that wraps any `complete`/`stream` client
+`rype_core.gateway.LLMGateway`, that wraps any `complete`/`stream` client
 and is dropped in where the chat service used the raw client:
 
 1. **Exact-match response cache (Redis).** Keyed by
@@ -36,7 +36,7 @@ and is dropped in where the chat service used the raw client:
    event shape the caller already handles.
 2. **Daily budget kill-switch.** A Redis counter per UTC day
    (`gw:spend:<date>`) accumulates real spend; when it reaches
-   `OPSVERSE_GATEWAY_DAILY_BUDGET_USD` the next call raises
+   `RYPE_GATEWAY_DAILY_BUDGET_USD` the next call raises
    `BudgetExceededError` (surfaced as a chat error event, not a crash). The
    default ceiling is $1/day — the point is to prove the control exists on a
    free-tier stack, not to authorize spend.

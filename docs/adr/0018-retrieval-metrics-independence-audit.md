@@ -8,7 +8,7 @@
 metrics most RAG-evaluation writing (and most RAGAS/DeepEval tutorials) puts at the
 centre. This project reports `hit@k`, `mrr@k` and `ndcg@k` for retrieval, and a
 judged faithfulness / answer-relevance / citation-use triple for generation. The
-obvious move was to add the missing names to `opsverse_evals.metrics` and put them
+obvious move was to add the missing names to `rype_evals.metrics` and put them
 in the ablation reports — broader coverage, more standard vocabulary.
 
 Before doing that, the arithmetic was checked against the actual eval sets.
@@ -39,14 +39,14 @@ question *"what did recall@10 tell you that hit@10 didn't?"*
 **Implement the metrics; do not report the degenerate ones as findings.**
 
 1. `precision_at_k`, `recall_at_k` and `contextual_precision_at_k` are implemented in
-   `opsverse_evals.metrics`, correct for the **general multi-label case**, and unit
+   `rype_evals.metrics`, correct for the **general multi-label case**, and unit
    tested. They are not wrong and not unused — they are ready for an eval set that
    earns them.
 2. The degeneracy is pinned as **executable assertions**
    (`test_single_label_degeneracies_are_real`), which also assert the point at which
    the identities break (two gold labels straddling the cut-off). The property cannot
    silently rot.
-3. A dedicated audit, `opsverse_evals.metrics_audit`, recomputes all five metrics
+3. A dedicated audit, `rype_evals.metrics_audit`, recomputes all five metrics
    per case from the committed `retrieval-ablation-v*-raw.json` and verifies the
    identities to a `1e-12` tolerance. Output:
    [`docs/reports/retrieval-metrics-audit-v1.md`](../reports/retrieval-metrics-audit-v1.md).

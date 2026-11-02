@@ -4,10 +4,10 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import StaticPool
 
-from opsverse_api import deps
-from opsverse_api.db.models import Base
-from opsverse_api.db.session import build_sessionmaker
-from opsverse_api.main import create_app
+from rype_api import deps
+from rype_api.db.models import Base
+from rype_api.db.session import build_sessionmaker
+from rype_api.main import create_app
 
 
 class FakeQueue:

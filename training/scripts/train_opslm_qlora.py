@@ -1,4 +1,4 @@
-"""OpsLM QLoRA fine-tune of Qwen3-4B on the OpsVerse SFT dataset (Colab T4).
+"""OpsLM QLoRA fine-tune of Qwen3-4B on the RYPE SFT dataset (Colab T4).
 
 This runs OFF this machine — Colab/Kaggle free GPU, never locally (no CUDA
 here). It is committed as the reproducible training artifact: pinned, single
@@ -7,7 +7,7 @@ resumes instead of restarting.
 
 Colab quickstart (see training/README.md for the full walkthrough):
     !pip install "unsloth==2025.*" "trl>=0.12,<0.20" "datasets>=3"
-    !python train_opslm_qlora.py --data-repo you/opsverse-sft \
+    !python train_opslm_qlora.py --data-repo you/rype-sft \
         --push-repo you/OpsLM-v1 --hf-token $HF_TOKEN
 
 Design choices (see docs/adr — ADR for LoRA/QLoRA is written alongside P5):

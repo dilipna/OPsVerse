@@ -7,7 +7,7 @@ approach as test_gateway's FakeRedis, so the tests need no live Redis.
 
 import base64
 
-from opsverse_core.streaming import (
+from rype_core.streaming import (
     DEFAULT_DLQ,
     DEFAULT_GROUP,
     DEFAULT_STREAM,

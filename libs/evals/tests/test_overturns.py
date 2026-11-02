@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from opsverse_evals import overturns as ov
+from rype_evals import overturns as ov
 
 REPORTS = Path("docs/reports")
 
@@ -158,7 +158,7 @@ def test_generated_files_on_disk_are_current(rows):
     for r in rows:
         assert r["verdict"] in on_disk, (
             f"{r['key']} is stale in docs/evidence.md -- "
-            "rerun `uv run python -m opsverse_evals.overturns`"
+            "rerun `uv run python -m rype_evals.overturns`"
         )
 
 

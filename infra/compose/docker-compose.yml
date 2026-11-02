@@ -1,4 +1,4 @@
-name: opsverse
+name: rype
 
 # Core dev stack: docker compose -f infra/compose/docker-compose.yml up -d
 # The API container is opt-in:  ... --profile app up -d
@@ -8,15 +8,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: opsverse
-      POSTGRES_PASSWORD: opsverse
-      POSTGRES_DB: opsverse
+      POSTGRES_USER: rype
+      POSTGRES_PASSWORD: rype
+      POSTGRES_DB: rype
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U opsverse -d opsverse"]
+      test: ["CMD-SHELL", "pg_isready -U rype -d rype"]
       interval: 5s
       timeout: 3s
       retries: 12
@@ -49,8 +49,8 @@ services:
     image: minio/minio:latest # TODO: pin to a digest after first pull
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: opsverse
-      MINIO_ROOT_PASSWORD: opsverse-secret
+      MINIO_ROOT_USER: rype
+      MINIO_ROOT_PASSWORD: rype-secret
     ports:
       - "9000:9000" # S3 API
       - "9001:9001" # Console
@@ -68,10 +68,10 @@ services:
       context: ../..
       dockerfile: apps/api/Dockerfile
     environment:
-      OPSVERSE_DATABASE_URL: postgresql+asyncpg://opsverse:opsverse@postgres:5432/opsverse
-      OPSVERSE_REDIS_URL: redis://redis:6379/0
-      OPSVERSE_QDRANT_URL: http://qdrant:6333
-      OPSVERSE_MINIO_ENDPOINT: http://minio:9000
+      RYPE_DATABASE_URL: postgresql+asyncpg://rype:rype@postgres:5432/rype
+      RYPE_REDIS_URL: redis://redis:6379/0
+      RYPE_QDRANT_URL: http://qdrant:6333
+      RYPE_MINIO_ENDPOINT: http://minio:9000
     ports:
       # host 8100: port 8000 is taken by the FIFA2026MLOps model server
       - "8100:8000"
@@ -89,7 +89,7 @@ services:
   # docker compose -f infra/compose/docker-compose.yml --profile full up -d
   # Langfuse v2 self-host = one app container + its own Postgres. Project API
   # keys are bootstrapped headlessly via LANGFUSE_INIT_* so no UI click is
-  # needed; the same keys go in .env (OPSVERSE_LANGFUSE_*). UI on :3001.
+  # needed; the same keys go in .env (RYPE_LANGFUSE_*). UI on :3001.
   langfuse-db:
     profiles: ["full"]
     image: postgres:16-alpine
@@ -116,16 +116,16 @@ services:
     environment:
       DATABASE_URL: postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
       NEXTAUTH_URL: http://localhost:3002
-      NEXTAUTH_SECRET: opsverse-langfuse-nextauth-secret
-      SALT: opsverse-langfuse-salt
+      NEXTAUTH_SECRET: rype-langfuse-nextauth-secret
+      SALT: rype-langfuse-salt
       TELEMETRY_ENABLED: "false"
-      LANGFUSE_INIT_ORG_ID: opsverse
-      LANGFUSE_INIT_PROJECT_ID: opsverse
-      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: pk-lf-opsverse-public
-      LANGFUSE_INIT_PROJECT_SECRET_KEY: sk-lf-opsverse-secret
-      LANGFUSE_INIT_USER_EMAIL: dev@opsverse.local
-      LANGFUSE_INIT_USER_NAME: opsverse
-      LANGFUSE_INIT_USER_PASSWORD: opsverse-dev-password
+      LANGFUSE_INIT_ORG_ID: rype
+      LANGFUSE_INIT_PROJECT_ID: rype
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: pk-lf-rype-public
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: sk-lf-rype-secret
+      LANGFUSE_INIT_USER_EMAIL: dev@rype.local
+      LANGFUSE_INIT_USER_NAME: rype
+      LANGFUSE_INIT_USER_PASSWORD: rype-dev-password
 
 volumes:
   pgdata:

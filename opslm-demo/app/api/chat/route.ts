@@ -29,12 +29,10 @@ const CANNED: Record<string, string> = {
 function cannedReply(q: string): string {
   const s = q.toLowerCase();
   if (s.includes("crashloop") || s.includes("crash loop")) return CANNED.crashloop;
-  if (s.includes("readiness") || s.includes("liveness") || s.includes("probe"))
-    return CANNED.probe;
+  if (s.includes("readiness") || s.includes("liveness") || s.includes("probe")) return CANNED.probe;
   if (s.includes("healthcheck") || s.includes("dockerfile") || s.includes("flask"))
     return CANNED.healthcheck;
-  if (s.includes("terraform") || s.includes("plan") || s.includes("apply"))
-    return CANNED.terraform;
+  if (s.includes("terraform") || s.includes("plan") || s.includes("apply")) return CANNED.terraform;
   return CANNED.default;
 }
 
@@ -43,20 +41,36 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  let messages: {role: "user" | "assistant"; content: string}[];
+  let messages: { role: "user" | "assistant"; content: string }[];
   try {
     const text = await req.text();
-    if (text.length > 32000) return Response.json({error:"Conversation is too large."},{status:413});
+    if (text.length > 32000)
+      return Response.json({ error: "Conversation is too large." }, { status: 413 });
     const data = JSON.parse(text);
-    if (!Array.isArray(data.messages) || !data.messages.length || data.messages.length > 32 ||
-      data.messages.some((m: {role?: unknown; content?: unknown} | null) => !m || !["user","assistant"].includes(String(m.role)) || typeof m.content !== "string" || m.content.length > 4000)) {
-      return Response.json({error:"Provide 1–32 user/assistant messages, each under 4001 characters."},{status:400});
+    if (
+      !Array.isArray(data.messages) ||
+      !data.messages.length ||
+      data.messages.length > 32 ||
+      data.messages.some(
+        (m: { role?: unknown; content?: unknown } | null) =>
+          !m ||
+          !["user", "assistant"].includes(String(m.role)) ||
+          typeof m.content !== "string" ||
+          m.content.length > 4000,
+      )
+    ) {
+      return Response.json(
+        { error: "Provide 1–32 user/assistant messages, each under 4001 characters." },
+        { status: 400 },
+      );
     }
-    messages=data.messages;
-  } catch {return Response.json({error:"Invalid JSON conversation."},{status:400});}
-  const last = [...messages].reverse().find(m => m.role === "user");
+    messages = data.messages;
+  } catch {
+    return Response.json({ error: "Invalid JSON conversation." }, { status: 400 });
+  }
+  const last = [...messages].reverse().find((m) => m.role === "user");
   const question: string = last?.content ?? "";
-  if (!question.trim()) return Response.json({error:"Enter a question."},{status:400});
+  if (!question.trim()) return Response.json({ error: "Enter a question." }, { status: 400 });
 
   const endpoint = process.env.OPSLM_ENDPOINT;
   if (!endpoint) {
@@ -87,8 +101,14 @@ export async function POST(req: Request) {
     const data = await res.json();
     const reply = data?.choices?.[0]?.message?.content?.trim();
     if (!reply) throw new Error("empty response");
-    return Response.json({ reply, note:"Live model response; retrieval is not connected to this proxy." });
+    return Response.json({
+      reply,
+      note: "Live model response; retrieval is not connected to this proxy.",
+    });
   } catch {
-    return Response.json({error:"The configured model did not return a usable response. Try again later."},{status:502});
+    return Response.json(
+      { error: "The configured model did not return a usable response. Try again later." },
+      { status: 502 },
+    );
   }
 }

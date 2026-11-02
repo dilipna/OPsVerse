@@ -2,7 +2,7 @@
 
 import pytest
 
-from opsverse_training.preferences import (
+from rype_training.preferences import (
     PreferenceError,
     PreferencePair,
     build_preference_pair,

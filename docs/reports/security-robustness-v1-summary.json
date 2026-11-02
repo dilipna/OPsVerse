@@ -1,0 +1,266 @@
+{
+ "report": "security-robustness-v1",
+ "kind": "security-detection",
+ "date": "2026-11-02",
+ "dataset": "security-redteam-v1",
+ "cases": 33,
+ "results": {
+  "raw/identity": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "raw/zero_width": {
+   "tpr_recall": 0.0667,
+   "specificity": 1.0
+  },
+  "raw/lookalike": {
+   "tpr_recall": 0.0,
+   "specificity": 1.0
+  },
+  "raw/full_width": {
+   "tpr_recall": 0.0,
+   "specificity": 1.0
+  },
+  "raw/line_split": {
+   "tpr_recall": 0.0,
+   "specificity": 1.0
+  },
+  "raw/case_noise": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "normalized/identity": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "normalized/zero_width": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "normalized/lookalike": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "normalized/full_width": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "normalized/line_split": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  },
+  "normalized/case_noise": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0
+  }
+ },
+ "detail": {
+  "raw/identity": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "raw/zero_width": {
+   "tpr_recall": 0.0667,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 1,
+    "fn": 14,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [
+    "atk-01",
+    "atk-03",
+    "atk-04",
+    "atk-05",
+    "atk-06",
+    "atk-07",
+    "atk-08",
+    "atk-09",
+    "atk-10",
+    "atk-11",
+    "atk-12",
+    "atk-13",
+    "atk-14",
+    "atk-15"
+   ],
+   "false_alarms": []
+  },
+  "raw/lookalike": {
+   "tpr_recall": 0.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 0,
+    "fn": 15,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [
+    "atk-01",
+    "atk-02",
+    "atk-03",
+    "atk-04",
+    "atk-05",
+    "atk-06",
+    "atk-07",
+    "atk-08",
+    "atk-09",
+    "atk-10",
+    "atk-11",
+    "atk-12",
+    "atk-13",
+    "atk-14",
+    "atk-15"
+   ],
+   "false_alarms": []
+  },
+  "raw/full_width": {
+   "tpr_recall": 0.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 0,
+    "fn": 15,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [
+    "atk-01",
+    "atk-02",
+    "atk-03",
+    "atk-04",
+    "atk-05",
+    "atk-06",
+    "atk-07",
+    "atk-08",
+    "atk-09",
+    "atk-10",
+    "atk-11",
+    "atk-12",
+    "atk-13",
+    "atk-14",
+    "atk-15"
+   ],
+   "false_alarms": []
+  },
+  "raw/line_split": {
+   "tpr_recall": 0.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 0,
+    "fn": 15,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [
+    "atk-01",
+    "atk-02",
+    "atk-03",
+    "atk-04",
+    "atk-05",
+    "atk-06",
+    "atk-07",
+    "atk-08",
+    "atk-09",
+    "atk-10",
+    "atk-11",
+    "atk-12",
+    "atk-13",
+    "atk-14",
+    "atk-15"
+   ],
+   "false_alarms": []
+  },
+  "raw/case_noise": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "normalized/identity": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "normalized/zero_width": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "normalized/lookalike": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "normalized/full_width": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "normalized/line_split": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  },
+  "normalized/case_noise": {
+   "tpr_recall": 1.0,
+   "specificity": 1.0,
+   "confusion": {
+    "tp": 15,
+    "fn": 0,
+    "fp": 0,
+    "tn": 18
+   },
+   "missed_attacks": [],
+   "false_alarms": []
+  }
+ }
+}

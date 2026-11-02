@@ -7,17 +7,23 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 COPY pyproject.toml uv.lock ./
 COPY libs/core/pyproject.toml libs/core/pyproject.toml
 COPY apps/api/pyproject.toml apps/api/pyproject.toml
-RUN uv sync --frozen --no-install-workspace --no-dev --package opsverse-api
+RUN uv sync --frozen --no-install-workspace --no-dev --package rype-api
 
 COPY libs libs
 COPY apps/api apps/api
-RUN uv sync --frozen --no-dev --package opsverse-api
+RUN uv sync --frozen --no-dev --package rype-api
 
 FROM python:3.12-slim-bookworm
 WORKDIR /app
-RUN groupadd -r opsverse && useradd -r -g opsverse opsverse
-COPY --from=builder --chown=opsverse:opsverse /app /app
-ENV PATH="/app/.venv/bin:$PATH"
-USER opsverse
+# Fixed numeric UID/GID: Kubernetes can only verify runAsNonRoot against a number
+# (infra/k8s sets runAsUser: 10001 to match).
+RUN groupadd -r -g 10001 rype && useradd -r -u 10001 -g rype rype
+COPY --from=builder --chown=rype:rype /app /app
+# Model file hashes checked at load (RYPE_MODEL_PIN_MODE=enforce); the path is
+# relative to the working directory, /app.
+COPY --chown=rype:rype registry/model-pins.json registry/model-pins.json
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1
+USER 10001
 EXPOSE 8000
-CMD ["uvicorn", "opsverse_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "rype_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

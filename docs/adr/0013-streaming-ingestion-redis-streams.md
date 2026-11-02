@@ -21,9 +21,9 @@ acknowledgement, and recovery of work abandoned by a crashed consumer.
 
 Add a **Redis Streams** intake path alongside the job queue — not replacing it.
 
-- **Producer** (`opsverse_core.streaming.StreamProducer`) `XADD`s a `StreamEvent`
+- **Producer** (`rype_core.streaming.StreamProducer`) `XADD`s a `StreamEvent`
   (inline base64 bytes, or a `url`/`github_repo` reference) onto
-  `opsverse:ingest:stream`, length-capped to bound memory.
+  `rype:ingest:stream`, length-capped to bound memory.
 - **Consumer** (`StreamConsumer`) reads as a **consumer group** (`XREADGROUP`),
   so N replicas share the stream with each entry delivered once. Every entry is
   explicitly `XACK`ed only after the handler succeeds — **at-least-once**
@@ -32,7 +32,7 @@ Add a **Redis Streams** intake path alongside the job queue — not replacing it
   consumer past an idle threshold, so stuck work is picked up by a live replica
   rather than stranded.
 - **Dead-letter**: an entry that fails `max_deliveries` times (or is malformed
-  and can never parse) is moved to `opsverse:ingest:dlq` and acked — one poison
+  and can never parse) is moved to `rype:ingest:dlq` and acked — one poison
   document can never wedge the group.
 - **Reuse, not fork**: the handler (`apps/api/stream_ingest.py`) runs the exact
   same `ingest_bytes` pipeline (parse → chunk → quality → **secret redaction +

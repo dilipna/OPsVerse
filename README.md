@@ -1,125 +1,128 @@
-# OpsVerse
+# RYPE
 
-**Turn Kubernetes symptoms into an inspectable investigation brief.**
+**An evaluation-first, security-hardened RAG system for Kubernetes troubleshooting:
+hybrid retrieval, a QLoRA fine-tune, measured GPU serving, and a threat model where
+every control has a test.**
 
-[Open the workspace](https://ops-verse.vercel.app/) | [Engineering case study](https://ops-verse.vercel.app/engineering) | [Evaluation](https://ops-verse.vercel.app/study) | [Resume evidence](docs/resume-and-interview.md)
+[Live workspace](https://ops-verse.vercel.app/) ·
+[Security](https://ops-verse.vercel.app/security) ([threat model](docs/security/threat-model.md)) ·
+[Evidence index](docs/evidence.md) ·
+[Engineering case study](https://ops-verse.vercel.app/engineering) ·
+[Write-ups](https://dilipna.hashnode.dev)
 
-Describe a symptom, paste sanitized Pod events, and inspect pinned official source
-passages alongside recognized status signals. Export the redacted investigation as
-JSON. Three synthetic examples make the workflow usable immediately. No account,
-model download, paid API, or cluster access is needed for the public workflow.
+[![CI](https://github.com/dilipna/OPsVerse/actions/workflows/ci.yml/badge.svg)](https://github.com/dilipna/OPsVerse/actions/workflows/ci.yml)
+[![Eval Gate](https://github.com/dilipna/OPsVerse/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/dilipna/OPsVerse/actions/workflows/eval-gate.yml)
 
-The default analysis runs in the browser over six official documents / 180 passages.
-It does not upload your diagnostic text or execute commands; normal hosting access
-logs still apply. Credential-pattern redaction is best-effort: sanitize input first.
-A separate optional model path validates JSON, source IDs, exact quotes, output
-completion, and permitted read-only command forms. Those checks do not prove factual
-support. No model endpoint is configured on the public deployment.
+## What it does
 
-Explore [all runbooks](https://ops-verse.vercel.app/runbooks),
-[architecture and decisions](https://ops-verse.vercel.app/engineering), or
-[the implementation contract](docs/troubleshooting.md). The original sample model
-console remains at `/model-demo`; it is separate from this evidence workflow.
+Paste a Kubernetes symptom and its Pod events. RYPE recognizes the status signals,
+retrieves the matching passages from pinned official documentation, and returns an
+exportable investigation brief. With the optional model path enabled, a generated answer
+is accepted only if every claim cites a retrieved passage and quotes it word for word, and
+suggested commands are limited to read-only `kubectl` forms that are never executed.
+The public workspace runs entirely in the browser with no account, API key or cluster.
 
-## What changed
+Behind it is a full research stack: ingestion with quarantine and redaction, hybrid
+dense + sparse retrieval on Qdrant, a streaming chat API with a degradation ladder, an
+MCP server, a fine-tuned model, and a GPU serving benchmark.
 
-The repository already contained hybrid retrieval, ingestion, model training and
-inference experiments. This redevelopment makes one small workflow usable and
-corrects the decision logic behind serving claims:
+## Highlights
 
-- Capacity admission checks errors, successful sample counts, finite latency and
-  throughput, and count consistency. Defaults: zero errors and at least 20 successes.
-  Twenty observations are a bounded minimum, not precise p95 uncertainty estimation.
-- Repeatability requires complete matching identities and distinct run IDs.
-  Cache settings and request counts cannot be pooled. Historical identities are
-  incomplete, so historical repeatability is **not measured**.
-- CI rebuilds the browser corpus through the actual ingestion pipeline and reruns
-  the same retrieval function used by the browser, starting from raw documents.
+| Area | Result | Evidence |
+|---|---|---|
+| **AI security** | 13 threats mapped to the OWASP LLM Top 10 (2025), each with a control, a rerunnable test and an open-items list | [threat-model.md](docs/security/threat-model.md) |
+| | Simple character tricks drop the raw injection detector's recall from 1.00 to 0.00–0.07; scanning normalized text restores 1.00 with no new false positives | [security-robustness-v1](docs/reports/security-robustness-v1.md) |
+| | On an external, hash-pinned dataset the regex layer catches only **7.4%** of 203 injections. Adding an LLM classifier layer lifts recall to **58.6% [51.7, 65.2]** with **zero added false alarms** (exact McNemar p < 1e-6) at about $0.04 per 1,000 texts; it now runs at ingest when configured, failing closed | [security-classifier-v1](docs/reports/security-classifier-v1.md) |
+| | Model files hash-pinned and checked at load; unpinned or altered models are refused, and CI re-verifies the pins on every PR | [model-pins.json](registry/model-pins.json) |
+| **Agents** | Read-only Kubernetes investigation agent: policy-checked tools, fenced tool output, prompt canary, hard budget with forced finish. Held-out accuracy **6/6**; with attack text planted in pod logs, **0/80** leaks and **5/80** diagnoses derailed; every attempt to read Secrets refused | [agent-v1](docs/reports/agent-v1.md), [design](docs/agent.md) |
+| | Streaming output guard blocks zero-click exfiltration through rendered Markdown; SSRF guard re-checks every redirect hop | [output_guard.py](libs/security/src/rype_security/output_guard.py), [netguard.py](libs/security/src/rype_security/netguard.py) |
+| **Evaluation rigor** | Pooled, graded golden set (1,914 judgements) with bootstrap CIs and paired permutation tests on every comparison | [retrieval-golden-v1](docs/reports/retrieval-golden-v1.md) |
+| | LLM relevance judge audited against human labels (n = 40): it finds about half the relevant material (TPR 0.556) | [judge-validation-v2](docs/reports/judge-validation-v2.md) |
+| | Eight of the project's own claims tested and withdrawn, each with the statistic that overturned it | [evidence.md](docs/evidence.md) |
+| **Retrieval** | 150-token chunks beat the shipped 350-token default: nDCG +0.044 [+0.019, +0.074], p < 0.001 | [chunking-ablation-v1](docs/reports/chunking-ablation-v1.md) |
+| | A 3.1× smaller embedding model is statistically indistinguishable from the incumbent (p = 0.94) | [embedding-ablation-v1](docs/reports/embedding-ablation-v1.md) |
+| **Serving** | vLLM FP16 on one T4: 233 tokens/s at concurrency 16, a 13.4× within-engine scaling from c = 1 | [inference-benchmark-v1](docs/reports/inference-benchmark-v1.md) |
+| **Fine-tuning** | Qwen3-4B QLoRA (SFT) published as [OpsLM-v1](https://huggingface.co/dhf1234/OpsLM-v1); DPO pipeline built | [ADR-0009](docs/adr/0009-qwen3-4b-qlora-for-opslm.md) |
 
-## Reproducible evidence
+Every number above links to the committed report that produced it. Scope and caveats for
+each are in [docs/limitations.md](docs/limitations.md).
 
-| Result | Scope and limitations |
-|---|---|
-| Term overlap: 15/16 document hit@1, 16/16 hit@3 | Synthetic agent-authored questions, specified before the first run; six docs / 180 passages. Document labels do not establish passage answer quality. Selection used these results; cases are now public regression data. |
-| BM25: 14/16 hit@1, 16/16 hit@3 | Same inputs. No significant superiority claim. The simpler term-overlap ranker ships. |
-| 4/4 negative cases empty | One empty and three unrelated queries; not calibrated answerability or security evidence. |
-| Historical vLLM FP16: 233.18 reported tokens/s at c=16; Ollama Q4: 37.22 at c=1 | Recomputed stored T4 summaries under p95 TTFT ≤1s, latency ≤30s, zero errors, ≥20 successes. Not new GPU measurements; engine and precision both differ. |
+## Security design
 
-[Per-case retrieval report](docs/reports/runbook-evaluation.json) ·
-[Capacity decisions and reasons](docs/reports/capacity-and-slo-v1.md).
-Stress queries demonstrate vocabulary mismatch and tangential matches. Instruction-like
-queries can match ordinary text. The app presents excerpts, not diagnoses or safety verdicts.
+The threat model treats four things as untrusted: the user's input, every retrieved
+document, the model's output, and every URL the worker is asked to fetch.
 
-## Quickstart
-
-CI uses Node 24 and Python 3.12+ with uv.
-
-```bash
-git clone https://github.com/dilipna/OPsVerse.git
-cd OPsVerse
-uv sync --all-packages --frozen
-uv run python -m opsverse_evals.runbook_fixture --check
-cd opslm-demo
-npm ci
-npm test
-npm run eval
-npm run build
-npm start
-# open http://localhost:3000
-```
-
-Python is for verification/regeneration; runtime search needs only the static corpus.
-From the repository root:
-
-```bash
-uv run python -m opsverse_evals.runbook_fixture
-node opslm-demo/scripts/evaluate-runbooks.mjs --out docs/reports/runbook-evaluation.json
-uv run pytest -q
-uv run ruff check .
-uv run ruff format --check .
-uv run pyright
-uv run python benchmarks/capacity.py --out docs/reports/capacity-and-slo-v1.md
-```
-
-Reports record run ID, code commit, dirty status, implementation hashes, dataset/corpus
-hashes, upstream revision, runtime, hardware and exclusions. CI uploads a fresh evaluation
-for the tested commit. A dirty-tree run is developmental evidence, not a clean release run.
+| Layer | Control | Where |
+|---|---|---|
+| Ingest | Credential redaction before storage or embedding; documents carrying instructions aimed at the assistant are quarantined (zero chunks reach retrieval) | `libs/ingestion`, `libs/security` |
+| API | Admin key required for ingestion, fail closed outside `dev`; URL fetches pinned to checked public addresses on every hop (no DNS rebinding); per-client rate limits shared through Redis; size caps; admin security-telemetry endpoint with alerts | `apps/api` |
+| Prompt | Retrieved text marked as untrusted data; abstain before generation when retrieval fails or finds nothing | `libs/rag/chat.py` |
+| Output | Images removed, links only to source and official-doc hosts, credentials redacted, applied to the token stream and again in the renderer | `output_guard.py`, `apps/web` |
+| Agency | No tool can change state: MCP tools are read-only; suggested `kubectl` commands are allowlisted and never executed | `apps/mcp-server`, `opslm-demo/lib` |
+| Supply chain | Frozen lockfile; blocking `pip-audit` and `npm audit` gates with a reviewed register of accepted advisories; blocking Trivy scan (dependencies, secrets, Dockerfiles, Kubernetes manifests); non-root, read-only Kubernetes workloads; CycloneDX SBOM per CI run; gitleaks pre-commit hook | `.github/` |
 
 ## Architecture
 
-```text
-Pinned Kubernetes Markdown + SHA-256 manifest
-  → existing parser → chunker → quality → redact/quarantine pipeline (Python)
-  → generated runbooks.json (checked against raw inputs in CI)
-  → browser term-overlap retrieval → original excerpts + source links
-
-Separate local research stack:
-FastAPI / MCP → hybrid BGE + BM25 / Qdrant → optional reranker → LLM gateway
-Serving harness → session JSON → failure-aware capacity analysis
+```mermaid
+flowchart LR
+  subgraph Public["Public workspace (browser only)"]
+    U[Symptom + Pod events] --> R1[Redact] --> S[Signal recognition] --> L[Lexical retrieval<br/>6 docs / 180 passages] --> B[Cited brief + JSON export]
+  end
+  subgraph Stack["Research stack"]
+    I[URL / upload / repo] -->|admin key, SSRF guard| W[Worker: parse, chunk,<br/>redact, quarantine]
+    W --> Q[(Qdrant<br/>dense + sparse)]
+    C[Chat / MCP client] --> API[FastAPI]
+    API --> Q
+    API --> G[Gateway: cache,<br/>budget kill switch]
+    G --> M[LLM: Gemini or<br/>OpsLM on vLLM]
+    M --> OG[Output guard] --> C
+  end
 ```
 
-[Product architecture](docs/runbook-architecture.md) · [Full-stack design](docs/architecture.md) ·
-[Optional local research setup](docs/local-research.md) · [22 historical ADRs](docs/adr/).
+More detail: [architecture.md](docs/architecture.md) ·
+[inference design](docs/inference-design.md) · [22 ADRs](docs/adr/).
 
-## Research boundaries
+## Run it
 
-- [Retrieval studies](docs/reports/retrieval-golden-v1.md) are stored experiments, not newly
-  rerun model studies. Preserve original dataset scope and judge limitations.
-- [OpsLM-v1](https://huggingface.co/dhf1234/OpsLM-v1) is a published SFT artifact
-  (534 train / 59 validation pairs). A matched base-versus-SFT task-quality gain is
-  unverified. DPO code exists; a completed DPO run is not established.
-- [Historical serving dashboard](https://ops-verse.vercel.app/dashboard.html): 13.4× is
-  within-vLLM c=1→16 scaling. Cross-engine comparisons do not isolate scheduling;
-  token-counting provenance is incomplete. Cost uses an assumed $0.35 GPU/hour.
-- [Model demo](https://ops-verse.vercel.app/model-demo) shows labeled samples without an
-  endpoint. Configuration does not establish availability, and the proxy does not retrieve
-  context. Upstream failures return errors.
-- Original Eval Gate checks 15 committed-report assertions and two live retrieval
-  thresholds over prechunked fixtures. The new navigator CI independently exercises raw
-  input. Neither reruns every historical model study.
+Needs Python 3.12+ with [uv](https://docs.astral.sh/uv/) and Node 24.
 
-No hosted GPU, paid jobs, production maturity, external users, adoption impact,
-completed DPO training or measured SFT quality improvement is claimed.
-Kubernetes documentation © Kubernetes Authors, CC BY 4.0; attribution and pinned
-sources are in the [manifest](evalsets/runbooks/manifest.json). The project's own license
-is separate. See the [evaluation protocol](evalsets/runbooks/README.md).
+```bash
+git clone https://github.com/dilipna/OPsVerse.git && cd OPsVerse
+```
+
+```bash
+uv sync --all-packages --frozen
+```
+
+```bash
+uv run pytest -q
+```
+
+```bash
+uv run python -m rype_security.robustness
+```
+
+```bash
+cd opslm-demo && npm ci && npm test && npm run build && npm start
+```
+
+Then open http://localhost:3000. The full local stack (Postgres, Redis, Qdrant, MinIO,
+Langfuse) is described in [local-research.md](docs/local-research.md).
+
+## Repository map
+
+```text
+apps/api          FastAPI: ingest, search, chat (SSE + WebSocket), evals, costs; arq worker
+apps/web          Next.js research console        apps/mcp-server  read-only MCP tools
+opslm-demo/       Public workspace (Vercel)       benchmarks/      serving harness + results
+libs/security     Injection scan, redaction, output guard, SSRF guard, robustness eval
+libs/ingestion    Parsers, chunking, quality gates          libs/rag  hybrid retrieval, chat
+libs/evals        Golden set, judge validation, ablations, stats, regression gate
+libs/training     SFT/DPO data pipeline           training/        QLoRA and DPO scripts
+docs/             Threat model, ADRs, reports, write-ups
+```
+
+## License
+
+MIT for this project's code. Kubernetes documentation © The Kubernetes Authors, CC BY 4.0;
+attribution and pinned sources are in the [manifest](evalsets/runbooks/manifest.json).

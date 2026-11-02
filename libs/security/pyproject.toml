@@ -1,10 +1,17 @@
 [project]
-name = "opsverse-security"
+name = "rype-security"
 version = "0.1.0"
-description = "OpsVerse AI security: prompt-injection heuristics, secret redaction, ingest-time document scanning (Phase 9)"
+description = "RYPE security: prompt-injection heuristics, secret redaction, ingest-time document scanning (Phase 9)"
 requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.10",
+]
+
+[project.optional-dependencies]
+# LLM classifier benchmark: OpenRouter client and the external dataset loader.
+benchmark = [
+    "httpx>=0.28",
+    "pyarrow>=17",
 ]
 
 [build-system]
@@ -12,4 +19,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/opsverse_security"]
+packages = ["src/rype_security"]

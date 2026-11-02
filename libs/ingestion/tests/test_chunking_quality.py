@@ -1,7 +1,7 @@
-from opsverse_ingestion.chunking import MAX_TOKENS, chunk_document
-from opsverse_ingestion.pipeline import detect_tool, ingest_bytes
-from opsverse_ingestion.quality import apply_quality_gates, hamming, simhash
-from opsverse_ingestion.schemas import ChunkDraft, DocType, ParsedDocument, Segment
+from rype_ingestion.chunking import MAX_TOKENS, chunk_document
+from rype_ingestion.pipeline import detect_tool, ingest_bytes
+from rype_ingestion.quality import apply_quality_gates, hamming, simhash
+from rype_ingestion.schemas import ChunkDraft, DocType, ParsedDocument, Segment
 
 
 def _draft(text: str, ord_: int = 0) -> ChunkDraft:

@@ -14,7 +14,7 @@ library to it or making the core stack depend on it.
 
 **Self-host Langfuse v2** (single app container + its own Postgres) in the
 compose **`full` profile**, and instrument the pipeline through a **thin
-in-house facade** (`opsverse_core.tracing`) rather than the Langfuse SDK
+in-house facade** (`rype_core.tracing`) rather than the Langfuse SDK
 directly.
 
 - **Langfuse v2, not v3.** v3 self-host requires ClickHouse + Redis + S3 +
@@ -27,7 +27,7 @@ directly.
   protocols; `NullTracer` is the default and every method is a no-op. libs/rag
   depends on the facade, never on `langfuse`. Consequences:
   - The **core stack and every test run with zero Langfuse** — tracing is
-    active only when `OPSVERSE_LANGFUSE_HOST` is set (the `full` profile).
+    active only when `RYPE_LANGFUSE_HOST` is set (the `full` profile).
   - **Tracing can never break a request:** every SDK call is wrapped in
     `suppress(Exception)`; a broken/absent Langfuse degrades to no-op.
   - Swapping backends later (OTel/Phoenix/Langfuse Cloud) is one class, not a

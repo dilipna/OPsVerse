@@ -1,7 +1,7 @@
 import pytest
 
-from opsverse_core.gateway import BudgetExceededError, LLMGateway
-from opsverse_core.llm import LLMDelta, LLMResult
+from rype_core.gateway import BudgetExceededError, LLMGateway
+from rype_core.llm import LLMDelta, LLMResult
 
 
 class FakeRedis:

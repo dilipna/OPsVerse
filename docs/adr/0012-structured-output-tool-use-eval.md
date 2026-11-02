@@ -13,7 +13,7 @@ measure it before and after.
 
 ## Decision
 
-Add `opsverse_evals.structured_eval`: a frozen set
+Add `rype_evals.structured_eval`: a frozen set
 (`evalsets/structured-output-v1.jsonl`) of DevOps tasks that each require a
 **structured JSON answer with deterministically checkable fields** (extract
 resource limits, parse a `docker run`, emit a `search_docs` tool call, pull
@@ -36,8 +36,8 @@ Recorded to `eval_runs` like every other report, surfaced at
 
 Gemini `3.1-flash-lite` scores **1.0 / 1.0 / 1.0** on the 12-case set — a
 clean base-model baseline. The point is the **delta**: re-run
-`structured_eval` against a served OpsLM (via `OPSVERSE_CHAT_MODEL` +
-`OPSVERSE_CHAT_API_BASE`, ADR from the gateway/eval wiring) and compare. A
+`structured_eval` against a served OpsLM (via `RYPE_CHAT_MODEL` +
+`RYPE_CHAT_API_BASE`, ADR from the gateway/eval wiring) and compare. A
 drop in `json_parse_rate` after SFT is the canonical "fine-tuning broke tool
 calling" regression, and now it is a number, not a worry.
 

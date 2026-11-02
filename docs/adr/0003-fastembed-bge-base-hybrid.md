@@ -23,7 +23,7 @@ dense and sparse vectors) via fastembed.
   fastembed's supported list).
 - **Fusion: RRF** server-side in Qdrant over the two named vectors.
 
-All four choices are `OPSVERSE_*` settings, not code constants; swapping to a
+All four choices are `RYPE_*` settings, not code constants; swapping to a
 sentence-transformers/BGE-M3 stack later is an embedder implementation +
 re-embed sweep, nothing else.
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
   type ChatDone,
@@ -17,6 +17,29 @@ type AssistantMessage = {
   error?: string;
 };
 type Message = { role: "user"; content: string; hasImage?: boolean } | AssistantMessage;
+
+// Client-side output handling (threat model T-03). The API already rewrites
+// unsafe Markdown; the renderer enforces the same rules again so a bypass of
+// one layer is not enough: no images ever, links only over http(s), and links
+// open without passing a referrer or the opener to the target page.
+function safeUrl(url: string): string {
+  if (url.startsWith("#")) return url;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? url : "";
+  } catch {
+    return "";
+  }
+}
+
+function SafeLink({ href, children }: { href?: string; children?: ReactNode }) {
+  if (!href) return <span>{children}</span>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer nofollow">
+      {children}
+    </a>
+  );
+}
 
 function DegradedBadges({ degraded }: { degraded: string[] }) {
   if (!degraded.length) return null;
@@ -186,7 +209,13 @@ export default function ChatPage() {
               {m.sources && <SourcesPanel sources={m.sources} />}
               <div className="prose prose-invert prose-sm mt-2 max-w-none rounded-lg bg-zinc-800/60 px-4 py-3 [&_code]:text-emerald-300 [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-zinc-950 [&_pre]:p-3">
                 {m.content ? (
-                  <ReactMarkdown>{m.content}</ReactMarkdown>
+                  <ReactMarkdown
+                    disallowedElements={["img"]}
+                    urlTransform={safeUrl}
+                    components={{ a: SafeLink }}
+                  >
+                    {m.content}
+                  </ReactMarkdown>
                 ) : (
                   !m.error && (
                     <p className="animate-pulse text-zinc-500">retrieving…</p>

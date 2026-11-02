@@ -1,4 +1,4 @@
-from opsverse_core.tracing import NullTracer, build_tracer
+from rype_core.tracing import NullTracer, build_tracer
 
 
 def test_null_tracer_is_total_noop():

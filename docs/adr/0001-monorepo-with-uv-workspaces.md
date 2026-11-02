@@ -4,7 +4,7 @@ Date: 2026-07-12 · Status: Accepted
 
 ## Context
 
-OpsVerse spans an API service, a web UI, an MCP server, training scripts, and several shared
+RYPE spans an API service, a web UI, an MCP server, training scripts, and several shared
 Python libraries (ingestion, RAG, evals, security). These pieces share Pydantic schemas and
 settings, and they evolve together — a chunking change touches ingestion, RAG, and evals in
 one commit.
@@ -18,7 +18,7 @@ One repository, managed as a **uv workspace**: apps under `apps/`, shared librar
 
 - Cross-cutting changes (schema + consumers) land atomically; no version dance between repos.
 - `uv sync` gives every developer and CI job an identical environment from one `uv.lock`.
-- Workspace source dependencies (`opsverse-core = { workspace = true }`) keep imports honest —
+- Workspace source dependencies (`rype-core = { workspace = true }`) keep imports honest —
   apps consume libraries through declared dependencies, not path hacks.
 - Tradeoff: CI runs the whole workspace on every PR. Acceptable at this scale; if it slows,
   add path-filtered jobs rather than splitting repos.

@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from opsverse_evals.stats import (
+from rype_evals.stats import (
     bootstrap_ci,
     bootstrap_statistic_ci,
     paired_permutation_test,

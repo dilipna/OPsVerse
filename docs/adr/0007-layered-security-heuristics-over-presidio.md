@@ -37,7 +37,7 @@ Three layers in `libs/security`, all deterministic, all measured or unit-tested:
 **The heuristic is treated as a classifier with an eval.** A frozen red-team
 set (`evalsets/security-redteam-v1.jsonl`: 15 attacks, 18 benign DevOps
 sentences chosen to share surface vocabulary with attacks) is scored by
-`python -m opsverse_security.evaluate`; measured 2026-07-17: TPR 1.0,
+`python -m rype_security.evaluate`; measured 2026-07-17: TPR 1.0,
 specificity 1.0, precision 1.0. Thresholds pinned in the regression gate
 (TPR ≥ 0.85, specificity ≥ 0.95). The set is small and hand-curated — the
 claim is "commodity attacks are caught and measured", not "injection solved".
@@ -63,3 +63,26 @@ claim is "commodity attacks are caught and measured", not "injection solved".
 - False negatives are possible by construction (novel phrasings); the
   red-team set is versioned and grows with every observed miss, and the
   gate keeps the measured floor from regressing.
+
+## Addendum (2026-11-02): output handling, normalization, API controls
+
+The original decision covered what enters the corpus. Three gaps were found by testing
+the system as an attacker would, not by rereading the design:
+
+1. **Output was trusted.** The console rendered model Markdown as-is, so an image URL
+   written by the model would be fetched by the browser with no click. A streaming
+   output guard (`rype_security.output_guard`) now removes images, keeps links only
+   to source and official-doc hosts, and redacts credentials; the renderer enforces the
+   same rules again.
+2. **The 1.0 red-team score did not survive trivial rewrites.** Character-level
+   transforms of the same 15 attacks (invisible characters, look-alike letters,
+   full-width forms, line splits) dropped raw recall to 0.00–0.07. Scanning normalized
+   text restores 1.00 with no lost specificity
+   ([security-robustness-v1](../reports/security-robustness-v1.md)). Rewording and
+   translation remain out of reach for regexes; that is the trigger for a learned layer.
+3. **The ingest API was unauthenticated and fetched any URL.** Ingestion now needs an
+   admin key (fail closed outside `dev`), and URL fetches are restricted to public
+   addresses on every redirect hop.
+
+The full mapping to the OWASP LLM Top 10 lives in
+[docs/security/threat-model.md](../security/threat-model.md).

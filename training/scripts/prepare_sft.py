@@ -17,8 +17,8 @@ import random
 from collections import Counter
 from pathlib import Path
 
-from opsverse_evals.contamination import ContaminationGuard
-from opsverse_training.schemas import InstructionPair
+from rype_evals.contamination import ContaminationGuard
+from rype_training.schemas import InstructionPair
 
 SEED = 20260718
 VAL_FRACTION = 0.1
@@ -83,7 +83,7 @@ def main() -> None:
         "by_tool": dict(Counter(p.tool or "unknown" for p in kept)),
         "format": "chat/messages (TRL SFTTrainer ready)",
         "decontamination": {
-            "guard": "opsverse_evals.contamination.ContaminationGuard",
+            "guard": "rype_evals.contamination.ContaminationGuard",
             "eval_questions_protected": len(guard.hashes),
         },
     }

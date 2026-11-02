@@ -1,23 +1,23 @@
 [project]
-name = "opsverse-training"
+name = "rype-training"
 version = "0.1.0"
-description = "OpsVerse training data: synthetic instruction dataset pipeline (Phase 5) — generation, quality filtering, dedup, decontamination"
+description = "RYPE training data: synthetic instruction dataset pipeline (Phase 5) — generation, quality filtering, dedup, decontamination"
 requires-python = ">=3.12"
 dependencies = [
-    "opsverse-core",
-    "opsverse-evals",
+    "rype-core",
+    "rype-evals",
     "pydantic>=2.10",
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30",
 ]
 
 [tool.uv.sources]
-opsverse-core = { workspace = true }
-opsverse-evals = { workspace = true }
+rype-core = { workspace = true }
+rype-evals = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/opsverse_training"]
+packages = ["src/rype_training"]

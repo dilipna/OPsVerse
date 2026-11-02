@@ -1,4 +1,4 @@
-from opsverse_core.llm import LiteLLMClient
+from rype_core.llm import LiteLLMClient
 
 
 def make_client(**kw):
