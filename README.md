@@ -56,7 +56,7 @@ document, the model's output, and every URL the worker is asked to fetch.
 | Prompt | Retrieved text marked as untrusted data; abstain before generation when retrieval fails or finds nothing | `libs/rag/chat.py` |
 | Output | Images removed, links only to source and official-doc hosts, credentials redacted, applied to the token stream and again in the renderer | `output_guard.py`, `apps/web` |
 | Agency | No tool can change state: MCP tools are read-only; suggested `kubectl` commands are allowlisted and never executed | `apps/mcp-server`, `opslm-demo/lib` |
-| Supply chain | Frozen lockfile; blocking `pip-audit` and `npm audit` gates with a reviewed register of accepted advisories; CycloneDX SBOM per CI run; Trivy scan (advisory); gitleaks pre-commit hook | `.github/` |
+| Supply chain | Frozen lockfile; blocking `pip-audit` and `npm audit` gates with a reviewed register of accepted advisories; blocking Trivy scan (dependencies, secrets, Dockerfiles, Kubernetes manifests); non-root, read-only Kubernetes workloads; CycloneDX SBOM per CI run; gitleaks pre-commit hook | `.github/` |
 
 ## Architecture
 

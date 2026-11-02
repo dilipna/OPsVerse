@@ -9,8 +9,9 @@ is in [claims.md](claims.md).
 
 See the *Status / open* column of the [threat model](security/threat-model.md). In short:
 the injection detector is regex-based and cannot catch rewording, translation or encodings;
-credential redaction is pattern-based; URL ingestion still has a DNS-rebinding window;
-there is no per-client rate limiting; the deployment is single-tenant.
+credential redaction is pattern-based; embedding models are not pinned by hash; the
+Kubernetes manifests pass Trivy but have not been applied to a live cluster; rate limits
+stop single-source abuse, not distributed abuse; the deployment is single-tenant.
 
 ## Public workspace
 

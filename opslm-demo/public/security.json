@@ -110,7 +110,7 @@
     },
     {
       "id": "T-09",
-      "threat": "Compromised or vulnerable dependency or model artifact",
+      "threat": "Compromised or vulnerable dependency, model artifact or deployment misconfiguration",
       "owasp": "LLM03",
       "status": "Partly mitigated"
     },
