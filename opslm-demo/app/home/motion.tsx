@@ -80,7 +80,8 @@ export function Counter({
     x.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
   const final = `${fmt(value)}${suffix}`;
   return (
-    <span ref={ref} aria-label={final}>
+    <span ref={ref}>
+      <span className="sr-only">{final}</span>
       <span aria-hidden="true">
         {fmt(seen ? current : 0)}
         {suffix}

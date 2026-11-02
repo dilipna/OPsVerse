@@ -1,12 +1,14 @@
 import "./home.css";
 import home from "../public/home.json";
 import security from "../public/security.json";
+import writing from "../public/writing.json";
 import Architecture from "./home/Architecture";
 import BreakIt from "./home/BreakIt";
 import AskProject from "./home/AskProject";
 import HeroConsole from "./home/HeroConsole";
 import Tour, { TourButton } from "./home/Tour";
 import { Counter, RateBars, Reveal } from "./home/motion";
+import SiteHeader from "./SiteHeader";
 
 const REPO = "https://github.com/dilipna/OPsVerse";
 const BLOB = `${REPO}/blob/main`;
@@ -88,35 +90,11 @@ const EXPLORE = [
   },
 ];
 
-const WRITING = [
-  {
-    n: "05",
-    title: "My perfect prompt-injection score did not survive a zero-width space",
-    href: `${BLOB}/docs/blog/05-my-perfect-injection-score-did-not-survive.md`,
-  },
-  {
-    n: "04",
-    title: "Who grades the grader? I audited my LLM judge, and then had to audit the audit",
-    href: `${BLOB}/docs/blog/04-who-grades-the-grader.md`,
-  },
-  {
-    n: "02",
-    title: "The document is the attack surface: RAG security at ingest, measured like a classifier",
-    href: "https://dilipna.hashnode.dev/the-document-is-the-attack-surface-rag-security-at-ingest-measured-like-a-classifier",
-  },
-  {
-    n: "01",
-    title:
-      "We built the eval harness before the model, and the numbers changed our retrieval design twice",
-    href: "https://dilipna.hashnode.dev/evaluation-first-the-rag-harness-that-stopped-me-from-shipping-two-wrong-decisions",
-  },
-  {
-    n: "03",
-    title:
-      "“Which engine is faster?” is the wrong question: measuring continuous batching on a free T4",
-    href: "https://dilipna.hashnode.dev/which-engine-is-faster-is-the-wrong-question-measuring-continuous-batching-on-a-free-t4",
-  },
-];
+const WRITING = [...writing.posts].reverse().map((p) => ({
+  n: p.n,
+  title: p.title,
+  href: `/writing/${p.slug}`,
+}));
 
 export default function Home() {
   const evaluatedRuns = agent.scenarios + agent.attacked_runs;
@@ -125,20 +103,7 @@ export default function Home() {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / Dilip Nallamasa</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/lab">Lab</a>
-          <a href="/agent">Agent</a>
-          <a href="/security">Security</a>
-          <a href="/troubleshoot">Workspace</a>
-          <a href="/engineering">Engineering</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="Dilip Nallamasa" />
 
       <main id="main">
         <section className="hero">
@@ -335,7 +300,7 @@ export default function Home() {
                 <a href={w.href}>
                   <b>{w.n}</b>
                   <span>{w.title}</span>
-                  <i aria-hidden="true">↗</i>
+                  <i aria-hidden="true">→</i>
                 </a>
               </li>
             ))}

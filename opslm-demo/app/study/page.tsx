@@ -1,4 +1,5 @@
 import study from "../../public/study.json";
+import SiteHeader from "../SiteHeader";
 
 export default function StudyPage() {
   return (
@@ -6,20 +7,7 @@ export default function StudyPage() {
       <a className="skip" href="#results">
         Skip to evidence
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / engineering lab</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/troubleshoot">Troubleshoot</a>
-          <a href="/runbooks">Runbooks</a>
-          <a href="/lab">Lab</a>
-          <a href="/agent">Agent</a>
-          <a href="/security">Security</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="evaluation" />
       <main>
         <section className="intro">
           <p className="eyebrow">EVALUATION / METHODS & OUTCOMES</p>

@@ -44,6 +44,8 @@ jobs:
         run: node opslm-demo/scripts/build-home.mjs --check
       - name: Check the Ask corpus and its retrieval evaluation are current
         run: node opslm-demo/scripts/build-ask.mjs --check
+      - name: Check the writing pages match docs/blog
+        run: node opslm-demo/scripts/build-writing.mjs --check
       - name: Check the lab's JS ports against the Python controls (fixture current)
         run: uv run python -m rype_agent.lab_fixtures --check
       - name: Check agent replays rebuild from committed trajectories and scenarios
@@ -51,6 +53,12 @@ jobs:
       - name: Exercise frozen scenarios through the actual HTTP handler without a model
         run: node opslm-demo/scripts/model-study.mjs --label excerpts --out docs/reports/troubleshooting-ci.json
       - run: npm run build
+        working-directory: opslm-demo
+      - name: Install Chromium for the browser smoke test
+        run: npx playwright install --with-deps chromium
+        working-directory: opslm-demo
+      - name: Browser smoke test (every page at desktop and phone width, key features)
+        run: npm run smoke
         working-directory: opslm-demo
       - uses: actions/upload-artifact@v4
         if: always()

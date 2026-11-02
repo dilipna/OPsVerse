@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { search, type Corpus } from "../../lib/runbooks.mjs";
+import SiteHeader from "../SiteHeader";
 
 const examples = [
   "readiness probe failure",
@@ -69,20 +70,7 @@ export default function Page() {
       <a className="skip" href="#question">
         Skip to search
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / engineering lab</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/troubleshoot">Troubleshoot</a>
-          <a href="/study">Evidence</a>
-          <a href="/lab">Lab</a>
-          <a href="/agent">Agent</a>
-          <a href="/security">Security</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="runbooks" />
       <main>
         <section className="intro">
           <p className="eyebrow">01 / RUNBOOK NAVIGATOR</p>

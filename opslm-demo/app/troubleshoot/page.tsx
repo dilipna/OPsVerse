@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { troubleshoot, redact, type Result } from "../../lib/troubleshoot.mjs";
 import type { Corpus } from "../../lib/runbooks.mjs";
+import SiteHeader from "../SiteHeader";
 
 const EXAMPLES = [
   {
@@ -117,20 +118,7 @@ export default function TroubleshootPage() {
       <a className="skip" href="#incident-issue">
         Skip to incident input
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / engineering lab</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/runbooks">Runbooks</a>
-          <a href="/engineering">Engineering</a>
-          <a href="/lab">Lab</a>
-          <a href="/agent">Agent</a>
-          <a href="/security">Security</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="workspace" current="/troubleshoot" />
       <main>
         <section className="intro">
           <div className="intro-topline">
