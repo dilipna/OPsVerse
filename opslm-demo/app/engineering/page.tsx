@@ -9,7 +9,7 @@ export default function Engineering() {
           <small> / engineering lab</small>
         </a>
         <nav aria-label="Main navigation">
-          <a href="/">Workspace</a>
+          <a href="/troubleshoot">Workspace</a>
           <a href="/study">Evaluation</a>
           <a href="/lab">Lab</a>
           <a href="/agent">Agent</a>
@@ -31,7 +31,7 @@ export default function Engineering() {
             evaluation, and a usable public product.
           </p>
           <p className="engineering-actions">
-            <a className="workspace-cta" href="/">
+            <a className="workspace-cta" href="/troubleshoot">
               Try an incident →
             </a>{" "}
             <a className="secondary-cta" href="https://github.com/dilipna/OPsVerse">
@@ -153,7 +153,7 @@ export default function Engineering() {
       </main>
       <footer className="site-footer">
         <span>Dilip Nallamasa · M.S. Artificial Intelligence, University at Buffalo</span>
-        <a href="/">Open the incident workspace →</a>
+        <a href="/troubleshoot">Open the incident workspace →</a>
       </footer>
     </div>
   );

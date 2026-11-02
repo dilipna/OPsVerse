@@ -73,7 +73,8 @@ export default function Page() {
   return (
     <div className="wrap">
       <p>
-        <a href="/">← Incident workspace</a> · Sample model console; not retrieval-grounded
+        <a href="/troubleshoot">← Incident workspace</a> · Sample model console; not
+        retrieval-grounded
       </p>
       <div className="topbar">
         <div className="brand">
