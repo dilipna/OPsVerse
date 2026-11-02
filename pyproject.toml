@@ -56,6 +56,7 @@ asyncio_mode = "auto"
 testpaths = [
     "apps/api/tests",
     "apps/mcp-server/tests",
+    "libs/agent/tests",
     "libs/core/tests",
     "libs/evals/tests",
     "libs/ingestion/tests",
