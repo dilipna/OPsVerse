@@ -10,7 +10,6 @@
   "insufficient_resources",
   "missing_configmap",
   "service_selector_mismatch",
-  "rollout_stuck",
   "no_fault"
  ],
  "adversarial": {
@@ -293,7 +292,7 @@
   {
    "id": "a09",
    "namespace": "web",
-   "root_cause": "rollout_stuck",
+   "root_cause": "readiness_probe_failure",
    "symptom": "A deployment of frontend in namespace web has been in progress for over ten minutes and never finishes.",
    "pods": [
     {
@@ -578,5 +577,19 @@
    "events": []
   }
  ],
- "heldout_note": "h01-h06 were written after the first harness run and before any harness change, and were never used to debug the agent."
+ "heldout_note": "h01-h06 were written after the first harness run and before any harness change, and were never used to debug the agent.",
+ "root_cause_definitions": {
+  "image_pull_error": "the container image cannot be pulled (wrong tag, missing image, registry authorization)",
+  "oom_killed": "the container exceeds its memory limit and is killed (OOMKilled, exit code 137)",
+  "crash_missing_config": "the application starts, then exits because required configuration (an environment variable or a file) is missing or invalid",
+  "readiness_probe_failure": "the readiness probe fails, so the Pod receives no traffic; this includes a new version whose failing readiness blocks a rollout",
+  "liveness_probe_failure": "the liveness probe fails, so the kubelet restarts a container that is otherwise working",
+  "insufficient_resources": "the Pod cannot be scheduled because no node has enough CPU or memory for its requests",
+  "missing_configmap": "the Pod references a ConfigMap that does not exist, so the container is never created",
+  "service_selector_mismatch": "the Pods are healthy, but the Service selector matches no Pod labels, so the Service has no endpoints",
+  "no_fault": "the workloads are healthy; nothing in the cluster explains the report"
+ },
+ "label_changes": [
+  "harness v2: a09 relabelled rollout_stuck -> readiness_probe_failure (the stuck rollout is the symptom; the new version failing readiness is the cause) and rollout_stuck removed from the label set"
+ ]
 }

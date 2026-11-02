@@ -1,16 +1,16 @@
 """Tool policy: the only commands the agent may run (threat model T-08, excessive agency).
 
-A Python port of the allowlist the public workspace already ships and tests
-(`opslm-demo/lib/troubleshoot.mjs::readOnlyCommand`), extended to return *why* a
-command was refused, so the trajectory eval can report what an agent attempted.
+Started as a port of the allowlist the public workspace ships for commands it
+*suggests to people* (`opslm-demo/lib/troubleshoot.mjs::readOnlyCommand`), and still
+agrees with it on that list's own test cases. The first live agent run showed that
+list is too narrow for an investigator: 16 refused calls, every one a harmless read
+(nodes, configmaps, quotas, ingresses, `svc`). So the agent policy is a documented
+superset: more read-only kinds and the standard short names. Secrets, exec, port-
+forward, raw API access, credential flags, shell syntax and every mutating verb are
+still refused, and the tests pin that.
 
-The policy is the security boundary, not the prompt: the model is told the rules,
-but every tool call is checked here before anything runs, and a refusal is shown
-to the model as a tool error. Allowed: `kubectl get|describe|logs` and
-`kubectl rollout status|history` on a fixed set of read-only resource kinds, with
-a namespace, an output format, one name, and for logs `--previous`/`--tail=N`.
-Everything else (mutations, exec, raw API access, credentials flags, shell
-metacharacters, paths) is refused.
+The policy is the security boundary, not the prompt: every tool call is checked here
+before anything runs, and a refusal is shown to the model as a tool error.
 """
 
 from __future__ import annotations
@@ -28,10 +28,25 @@ _SAFE_CHARS = re.compile(r"^[a-zA-Z0-9_./=:\s-]*$")
 _NAME = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 _NAMESPACE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 _LOGS_TARGET = re.compile(r"^(?:pods?/)?[a-z0-9][a-z0-9.-]*$")
-_ROLLOUT_TARGET = re.compile(r"^deployments?(/[a-z0-9][a-z0-9.-]*)?$")
-_RESOURCE = re.compile(
-    r"^(pods?|deployments?|services?|endpoints?|events|replicasets?)(/[a-z0-9][a-z0-9.-]*)?$"
-)
+_ROLLOUT_TARGET = re.compile(r"^(deployments?|deploy)(/[a-z0-9][a-z0-9.-]*)?$")
+# Read-only kinds an investigator needs, with kubectl's standard short names.
+# Secrets are deliberately absent.
+READ_KINDS = {
+    "pod": "pods", "pods": "pods", "po": "pods",
+    "deployment": "deployments", "deployments": "deployments", "deploy": "deployments",
+    "service": "services", "services": "services", "svc": "services",
+    "endpoint": "endpoints", "endpoints": "endpoints", "ep": "endpoints",
+    "event": "events", "events": "events", "ev": "events",
+    "replicaset": "replicasets", "replicasets": "replicasets", "rs": "replicasets",
+    "node": "nodes", "nodes": "nodes", "no": "nodes",
+    "configmap": "configmaps", "configmaps": "configmaps", "cm": "configmaps",
+    "resourcequota": "resourcequotas", "resourcequotas": "resourcequotas",
+    "quota": "resourcequotas",
+    "limitrange": "limitranges", "limitranges": "limitranges", "limits": "limitranges",
+    "ingress": "ingresses", "ingresses": "ingresses", "ing": "ingresses",
+    "namespace": "namespaces", "namespaces": "namespaces", "ns": "namespaces",
+}  # fmt: skip
+_RESOURCE = re.compile(r"^([a-z]+)(/[a-z0-9][a-z0-9.-]*)?$")
 
 
 class PolicyDecision(BaseModel):
@@ -78,8 +93,10 @@ def check_kubectl(command: object) -> PolicyDecision:
         return _deny("invalid logs target")
     if verb == "rollout" and not _ROLLOUT_TARGET.match(resource):
         return _deny("rollout works on deployments only")
-    if verb not in ("logs", "rollout") and not _RESOURCE.match(resource):
-        return _deny(f"resource kind not allowed: {resource}")
+    if verb not in ("logs", "rollout"):
+        match = _RESOURCE.match(resource)
+        if not match or match.group(1) not in READ_KINDS:
+            return _deny(f"resource kind not allowed: {resource.split('/')[0]}")
     names = 0
     i = 0
     while i < len(options):

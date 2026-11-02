@@ -38,6 +38,8 @@ from rype_security.benchmark import wilson
 SCENARIOS_PATH = Path("evalsets/agent-v1/scenarios.json")
 REDTEAM_PATH = Path("evalsets/security-redteam-v1.jsonl")
 CACHE_PATH = Path("docs/reports/.agent-eval-cache/results.jsonl")
+HARNESS_VERSION = "harness-v2"
+HISTORY_PATH = Path("docs/reports/agent-harness-v1-clean-summary.json")
 
 
 def load_scenarios(path: Path = SCENARIOS_PATH) -> tuple[dict[str, Any], list[Scenario]]:
@@ -79,7 +81,10 @@ def _rate(k: int, n: int) -> dict[str, Any]:
 
 
 def summarize(
-    clean: list[AgentResult], adversarial: list[AgentResult], truth: dict[str, str]
+    clean: list[AgentResult],
+    adversarial: list[AgentResult],
+    truth: dict[str, str],
+    heldout: set[str] | None = None,
 ) -> dict[str, Any]:
     def correct(r: AgentResult) -> bool:
         return r.root_cause == truth[r.scenario_id.split("+")[0]]
@@ -105,7 +110,12 @@ def summarize(
             },
         }
 
-    summary = {"clean": block(clean)}
+    heldout = heldout or set()
+    summary: dict[str, Any] = {
+        "clean": block(clean),
+        "clean_development": block([r for r in clean if r.scenario_id not in heldout]),
+        "clean_heldout": block([r for r in clean if r.scenario_id in heldout]) if heldout else None,
+    }
     if adversarial:
         summary["adversarial"] = {
             **block(adversarial),
@@ -123,6 +133,7 @@ def summarize(
 
 def render_markdown(report: dict[str, Any]) -> str:
     c, a = report["summary"]["clean"], report["summary"].get("adversarial")
+    dev, held = report["summary"]["clean_development"], report["summary"].get("clean_heldout")
 
     def pct(block: dict[str, Any]) -> str:
         if block["rate"] is None:
@@ -143,7 +154,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "| Metric | Clean | Under attack |",
         "|---|---|---|",
-        f"| Root-cause accuracy | {pct(c['accuracy'])} | {pct(a['accuracy']) if a else 'n/a'} |",
+        f"| Root-cause accuracy, all | {pct(c['accuracy'])} | "
+        f"{pct(a['accuracy']) if a else 'n/a'} |",
+        f"| … development scenarios (a01-a10) | {pct(dev['accuracy'])} | |",
+        f"| … held-out scenarios (h01-h06) | {pct(held['accuracy']) if held else 'n/a'} | |",
         f"| Finished cleanly | {pct(c['finished'])} | {pct(a['finished']) if a else 'n/a'} |",
         f"| Mean tool calls | {c['mean_steps']} | {a['mean_steps'] if a else 'n/a'} |",
         f"| Runs with a refused command | {pct(c['runs_with_refused_command'])} | "
@@ -162,6 +176,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         ]
     lines += [
         "",
+        "## How the harness got here",
+        "",
+        *(_history(report.get("history"))),
         "## Per scenario (clean)",
         "",
         "| Scenario | Predicted | Correct | Tool calls |",
@@ -182,6 +199,24 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
     ]
     return "\n".join(lines)
+
+
+def _history(h: dict[str, Any] | None) -> list[str]:
+    if not h:
+        return []
+    return [
+        f"The first run (harness v1, same model) got {h['correct']}/{h['runs']} right and finished "
+        f"{h['finished']}/{h['runs']}: the agent was never told its remaining budget or made to "
+        "conclude, and its policy (copied from the list of commands suggested to people) refused "
+        f"{h['refused_commands']} harmless reads such as `get nodes` and `get configmaps`. Harness "
+        "v2 shows the budget after every call, forces a `finish` when it is spent, defines every "
+        "label, and widens the policy to read-only investigator kinds (secrets, exec and every "
+        "mutation still refused). Scenario a09 was relabelled from `rollout_stuck` (a symptom) to "
+        "`readiness_probe_failure` (its cause). Those changes were made after seeing a01-a10, so "
+        "the held-out row is the one to trust: h01-h06 were written before the changes and never "
+        "used for debugging.",
+        "",
+    ]
 
 
 def _load_cache() -> dict[str, dict[str, Any]]:
@@ -208,11 +243,15 @@ def run(
     truth = {s.id: s.root_cause for s in scenarios}
 
     def execute(scenario: Scenario) -> AgentResult:
-        key = f"{model}|v1|{scenario.id}"
+        key = f"{model}|{HARNESS_VERSION}|{scenario.id}"
         if key in cache:
             return AgentResult(**cache[key])
         result = run_agent(
-            scenario, llm, corpus=corpus, root_causes=doc["root_causes"], max_steps=max_steps
+            scenario,
+            llm,
+            corpus=corpus,
+            root_causes=doc["root_cause_definitions"],
+            max_steps=max_steps,
         )
         _save(key, result)
         print(f"  {scenario.id}: {result.root_cause} ({len(result.steps)} calls)", flush=True)
@@ -229,7 +268,9 @@ def run(
         "max_steps": max_steps,
         "scenarios": len(scenarios),
         "redteam_ids": attack_ids,
-        "summary": summarize(clean, attacked, truth),
+        "summary": summarize(clean, attacked, truth, {s.id for s in scenarios if s.heldout}),
+        "harness_version": HARNESS_VERSION,
+        "history": json.loads(HISTORY_PATH.read_text()) if HISTORY_PATH.exists() else None,
     }
 
 

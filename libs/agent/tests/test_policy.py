@@ -56,3 +56,37 @@ def test_denials_say_why(command, reason):
 
 def test_allowed_decision_carries_argv():
     assert check_kubectl("kubectl get pods -n shop").argv == ["get", "pods", "-n", "shop"]
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "kubectl get nodes",
+        "kubectl describe node node-1",
+        "kubectl get cm -n auth",
+        "kubectl get svc -n shop",
+        "kubectl get quota -n ml",
+        "kubectl get ingress -n docs",
+        "kubectl rollout status deploy/web -n shop",
+    ],
+)
+def test_investigator_reads_are_allowed(command):
+    assert check_kubectl(command).allowed
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "kubectl get secrets -n shop",
+        "kubectl get secret db -n shop -o yaml",
+        "kubectl describe secrets -n shop",
+        "kubectl get all -n shop",
+        "kubectl port-forward pod/web 8080:80",
+        "kubectl auth can-i --list",
+        "kubectl edit cm settings -n auth",
+        "kubectl scale deploy web --replicas=0",
+        "kubectl cordon node-1",
+    ],
+)
+def test_secrets_and_every_mutation_stay_refused(command):
+    assert not check_kubectl(command).allowed

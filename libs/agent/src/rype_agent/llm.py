@@ -31,7 +31,12 @@ class ChatTurn(BaseModel):
 
 
 class ChatClient(Protocol):
-    def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ChatTurn: ...
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        tool_choice: str | dict[str, Any] | None = None,
+    ) -> ChatTurn: ...
 
 
 def parse_message(message: dict[str, Any], usage: dict[str, Any] | None = None) -> ChatTurn:
@@ -85,14 +90,21 @@ class OpenAICompatibleChat:
             transport=transport,
         )
 
-    def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ChatTurn:
-        body = {
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        tool_choice: str | dict[str, Any] | None = None,
+    ) -> ChatTurn:
+        body: dict[str, Any] = {
             "model": self.model,
             "messages": messages,
             "tools": tools,
             "temperature": 0,
             "max_tokens": 800,
         }
+        if tool_choice is not None:
+            body["tool_choice"] = tool_choice
         delay = 2.0
         for attempt in range(self._retries + 1):
             response = self._client.post("/chat/completions", json=body)
@@ -112,7 +124,14 @@ class ScriptedChat:
     def __init__(self, turns: list[ChatTurn]):
         self.turns = list(turns)
         self.seen: list[list[dict[str, Any]]] = []
+        self.tool_choices: list[Any] = []
 
-    def complete(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ChatTurn:
+    def complete(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        tool_choice: str | dict[str, Any] | None = None,
+    ) -> ChatTurn:
         self.seen.append([dict(m) for m in messages])
+        self.tool_choices.append(tool_choice)
         return self.turns.pop(0) if self.turns else ChatTurn(content="(no more scripted turns)")

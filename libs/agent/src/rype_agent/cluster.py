@@ -17,6 +17,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from rype_agent.policy import READ_KINDS
+
 
 class Pod(BaseModel):
     name: str
@@ -50,6 +52,18 @@ class Service(BaseModel):
     endpoints: str = "<none>"
 
 
+class Node(BaseModel):
+    name: str
+    status: str = "Ready"
+    cpu: str = "8"
+    memory: str = "32Gi"
+    allocated_cpu: str = "6200m (77%)"
+    allocated_memory: str = "21Gi (65%)"
+
+
+DEFAULT_NODES = [Node(name=f"node-{i}") for i in (1, 2, 3)]
+
+
 class Scenario(BaseModel):
     id: str
     namespace: str
@@ -60,22 +74,11 @@ class Scenario(BaseModel):
     deployments: list[Deployment] = Field(default_factory=list)
     services: list[Service] = Field(default_factory=list)
     events: list[str] = Field(default_factory=list)
+    configmaps: list[str] = Field(default_factory=list)
+    nodes: list[Node] = Field(default_factory=lambda: list(DEFAULT_NODES))
 
 
-_KINDS = {
-    "pod": "pods",
-    "pods": "pods",
-    "deployment": "deployments",
-    "deployments": "deployments",
-    "service": "services",
-    "services": "services",
-    "endpoint": "endpoints",
-    "endpoints": "endpoints",
-    "event": "events",
-    "events": "events",
-    "replicaset": "replicasets",
-    "replicasets": "replicasets",
-}
+_KINDS = READ_KINDS
 
 
 def _table(header: list[str], rows: list[list[str]]) -> str:
@@ -118,11 +121,23 @@ class SimulatedCluster:
             i += 1
         kind_part, _, slash_name = target.partition("/")
         name = slash_name or name
-        if namespace != self.s.namespace:
+        cluster_scoped = _KINDS.get(kind_part) in ("nodes", "namespaces")
+        if namespace != self.s.namespace and not cluster_scoped:
             return f"No resources found in {namespace} namespace."
         if verb == "logs":
             return self._logs(slash_name or kind_part, previous, tail)
-        kind = _KINDS[kind_part]
+        kind = "deployments" if verb == "rollout" else _KINDS[kind_part]
+        if kind == "nodes":
+            return self._nodes(verb, name)
+        if kind == "namespaces":
+            return _table(
+                ["NAME", "STATUS"],
+                [[n, "Active"] for n in ("default", "kube-system", self.s.namespace)],
+            )
+        if kind == "configmaps":
+            return self._configmaps(verb, name)
+        if kind in ("resourcequotas", "limitranges", "ingresses"):
+            return f"No resources found in {self.s.namespace} namespace."
         if verb == "rollout":
             return self._rollout(sub, name)
         if verb == "describe":
@@ -192,6 +207,32 @@ class SimulatedCluster:
             )
         return "\n\n".join(x.describe or f"Name: {x.name}" for x in found) or "No resources found."
 
+    def _nodes(self, verb: str, name: str | None) -> str:
+        nodes = [n for n in self.s.nodes if name is None or n.name == name]
+        if name and not nodes:
+            return self._not_found("nodes", name)
+        if verb == "describe":
+            return "\n\n".join(
+                f"Name: {n.name}\nConditions: Ready={n.status == 'Ready'}\n"
+                f"Capacity:\n  cpu: {n.cpu}\n  memory: {n.memory}\n"
+                f"Allocated resources:\n  cpu: {n.allocated_cpu}\n  memory: {n.allocated_memory}"
+                for n in nodes
+            )
+        return _table(
+            ["NAME", "STATUS", "CPU", "MEMORY"],
+            [[n.name, n.status, n.cpu, n.memory] for n in nodes],
+        )
+
+    def _configmaps(self, verb: str, name: str | None) -> str:
+        names = [c for c in self.s.configmaps if name is None or c == name]
+        if name and not names:
+            return self._not_found("configmaps", name)
+        if not names:
+            return f"No resources found in {self.s.namespace} namespace."
+        if verb == "describe":
+            return "\n\n".join(f"Name: {c}\nNamespace: {self.s.namespace}" for c in names)
+        return _table(["NAME", "DATA"], [[c, "1"] for c in names])
+
     def _logs(self, name: str, previous: bool, tail: int | None) -> str:
         found = self._find("pods", name)
         if not found:
@@ -210,7 +251,14 @@ class SimulatedCluster:
             return self._not_found("deployments", name or "")
         d = found[0]
         if sub == "status":
-            return d.rollout_status or f'deployment "{d.name}" successfully rolled out'
+            if d.rollout_status:
+                return d.rollout_status
+            if d.available < d.up_to_date:
+                return (
+                    f'Waiting for deployment "{d.name}" rollout to finish: '
+                    f"{d.available} of {d.up_to_date} updated replicas are available..."
+                )
+            return f'deployment "{d.name}" successfully rolled out'
         return (
             d.rollout_history
             or f"deployment.apps/{d.name}\nREVISION  CHANGE-CAUSE\n1         <none>"

@@ -15,7 +15,7 @@ class AlwaysAnswers:
     def __init__(self, label: str):
         self.label, self.calls = label, 0
 
-    def complete(self, messages, tools):
+    def complete(self, messages, tools, tool_choice=None):
         self.calls += 1
         if not any(m["role"] == "tool" for m in messages):
             return ChatTurn(
