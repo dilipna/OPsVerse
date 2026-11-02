@@ -1,1 +1,1 @@
-export {default} from "./troubleshoot/page";
+export { default } from "./troubleshoot/page";

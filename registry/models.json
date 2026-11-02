@@ -4,7 +4,7 @@
   {
    "name": "OpsLM-v1",
    "version": "1.0",
-   "status": "production",
+   "status": "published",
    "base_model": "unsloth/Qwen3-4B-Base",
    "license": "Apache-2.0",
    "hub": "dhf1234/OpsLM-v1",

@@ -5,7 +5,7 @@
 > `docs/reports/`. Measured fields are never hand-copied; `pending` means
 > not yet measured, not "assumed fine".
 
-## OpsLM-v1  ·  `production`
+## OpsLM-v1  ·  `published`
 
 - **Base model:** `unsloth/Qwen3-4B-Base`  ·  **Hub:** `dhf1234/OpsLM-v1`
 - **Fine-tuning:** QLoRA (r=16, alpha=16, 0.5% params)
