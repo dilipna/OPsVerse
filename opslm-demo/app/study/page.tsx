@@ -8,7 +8,7 @@ export default function StudyPage() {
       </a>
       <header className="site-header">
         <a className="wordmark" href="/">
-          OPS<span>VERSE</span>
+          RY<span>PE</span>
           <small> / engineering lab</small>
         </a>
         <nav aria-label="Main navigation">
@@ -157,8 +157,8 @@ export default function StudyPage() {
           </div>
           <pre className="study-code">
             {[
-              "uv run python -m opsverse_evals.runbook_fixture --check",
-              "uv run python -m opsverse_evals.troubleshooting_contamination",
+              "uv run python -m rype_evals.runbook_fixture --check",
+              "uv run python -m rype_evals.troubleshooting_contamination",
               "node opslm-demo/scripts/model-study.mjs --label excerpts --split heldout",
               "cd opslm-demo && npm test && npm run build",
             ].join(String.fromCharCode(10))}

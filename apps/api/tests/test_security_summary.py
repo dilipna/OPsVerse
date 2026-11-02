@@ -3,8 +3,8 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api.db.models import Document, RequestLedger
-from opsverse_core.settings import get_settings
+from rype_api.db.models import Document, RequestLedger
+from rype_core.settings import get_settings
 
 
 def client_for(env) -> AsyncClient:
@@ -75,7 +75,7 @@ async def test_quiet_window_has_no_alerts(env):
 
 @pytest.fixture
 def admin_key(monkeypatch):
-    monkeypatch.setenv("OPSVERSE_ADMIN_API_KEY", "k-admin")
+    monkeypatch.setenv("RYPE_ADMIN_API_KEY", "k-admin")
     get_settings.cache_clear()
     yield "k-admin"
     get_settings.cache_clear()

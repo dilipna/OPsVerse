@@ -18,15 +18,15 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "opsverse-ai",
-    "opsverse-api",
-    "opsverse-core",
-    "opsverse-evals",
-    "opsverse-ingestion",
-    "opsverse-mcp",
-    "opsverse-rag",
-    "opsverse-security",
-    "opsverse-training",
+    "rype-ai",
+    "rype-api",
+    "rype-core",
+    "rype-evals",
+    "rype-ingestion",
+    "rype-mcp",
+    "rype-rag",
+    "rype-security",
+    "rype-training",
 ]
 
 [[package]]
@@ -3074,226 +3074,6 @@ wheels = [
 ]
 
 [[package]]
-name = "opsverse-ai"
-version = "0.1.0"
-source = { virtual = "." }
-
-[package.dev-dependencies]
-dev = [
-    { name = "aiosqlite" },
-    { name = "dvc", extra = ["s3"] },
-    { name = "httpx" },
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "aiosqlite", specifier = ">=0.20" },
-    { name = "dvc", extras = ["s3"], specifier = ">=3.55" },
-    { name = "httpx", specifier = ">=0.28" },
-    { name = "pyright", specifier = ">=1.1.390" },
-    { name = "pytest", specifier = ">=8.3" },
-    { name = "pytest-asyncio", specifier = ">=0.25" },
-    { name = "ruff", specifier = ">=0.9" },
-]
-
-[[package]]
-name = "opsverse-api"
-version = "0.1.0"
-source = { editable = "apps/api" }
-dependencies = [
-    { name = "alembic" },
-    { name = "anyio" },
-    { name = "arq" },
-    { name = "asyncpg" },
-    { name = "certifi" },
-    { name = "fastapi" },
-    { name = "httpcore" },
-    { name = "httpx" },
-    { name = "opsverse-core" },
-    { name = "opsverse-ingestion" },
-    { name = "opsverse-rag" },
-    { name = "python-multipart" },
-    { name = "qdrant-client" },
-    { name = "redis" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", specifier = ">=1.14" },
-    { name = "anyio", specifier = ">=4" },
-    { name = "arq", specifier = ">=0.26" },
-    { name = "asyncpg", specifier = ">=0.30" },
-    { name = "certifi" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "httpcore", specifier = ">=1.0,<2" },
-    { name = "httpx", specifier = ">=0.28,<0.29" },
-    { name = "opsverse-core", editable = "libs/core" },
-    { name = "opsverse-ingestion", editable = "libs/ingestion" },
-    { name = "opsverse-rag", editable = "libs/rag" },
-    { name = "python-multipart", specifier = ">=0.0.18" },
-    { name = "qdrant-client", specifier = ">=1.12" },
-    { name = "redis", specifier = ">=5.2" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
-]
-
-[[package]]
-name = "opsverse-core"
-version = "0.1.0"
-source = { editable = "libs/core" }
-dependencies = [
-    { name = "langfuse" },
-    { name = "litellm" },
-    { name = "minio" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "langfuse", specifier = ">=2.50,<3.0" },
-    { name = "litellm", specifier = ">=1.60,<1.92" },
-    { name = "minio", specifier = ">=7.2" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "pydantic-settings", specifier = ">=2.7" },
-]
-
-[[package]]
-name = "opsverse-evals"
-version = "0.1.0"
-source = { editable = "libs/evals" }
-dependencies = [
-    { name = "anyio" },
-    { name = "asyncpg" },
-    { name = "opsverse-core" },
-    { name = "opsverse-ingestion" },
-    { name = "opsverse-rag" },
-    { name = "pydantic" },
-    { name = "qdrant-client" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio", specifier = ">=4" },
-    { name = "asyncpg", specifier = ">=0.30" },
-    { name = "opsverse-core", editable = "libs/core" },
-    { name = "opsverse-ingestion", editable = "libs/ingestion" },
-    { name = "opsverse-rag", editable = "libs/rag" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "qdrant-client", specifier = ">=1.12" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
-]
-
-[[package]]
-name = "opsverse-ingestion"
-version = "0.1.0"
-source = { editable = "libs/ingestion" }
-dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "httpx" },
-    { name = "opsverse-core" },
-    { name = "opsverse-security" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-pdf = [
-    { name = "docling" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.12" },
-    { name = "docling", marker = "extra == 'pdf'", specifier = ">=2.15" },
-    { name = "httpx", specifier = ">=0.28" },
-    { name = "opsverse-core", editable = "libs/core" },
-    { name = "opsverse-security", editable = "libs/security" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "pyyaml", specifier = ">=6.0" },
-]
-provides-extras = ["pdf"]
-
-[[package]]
-name = "opsverse-mcp"
-version = "0.1.0"
-source = { editable = "apps/mcp-server" }
-dependencies = [
-    { name = "httpx" },
-    { name = "mcp" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "httpx", specifier = ">=0.28" },
-    { name = "mcp", specifier = ">=1.30,<2" },
-]
-
-[[package]]
-name = "opsverse-rag"
-version = "0.1.0"
-source = { editable = "libs/rag" }
-dependencies = [
-    { name = "anyio" },
-    { name = "fastembed" },
-    { name = "opsverse-core" },
-    { name = "opsverse-security" },
-    { name = "pydantic" },
-    { name = "qdrant-client" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio", specifier = ">=4" },
-    { name = "fastembed", specifier = ">=0.5" },
-    { name = "opsverse-core", editable = "libs/core" },
-    { name = "opsverse-security", editable = "libs/security" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "qdrant-client", specifier = ">=1.12" },
-]
-
-[[package]]
-name = "opsverse-security"
-version = "0.1.0"
-source = { editable = "libs/security" }
-dependencies = [
-    { name = "pydantic" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.10" }]
-
-[[package]]
-name = "opsverse-training"
-version = "0.1.0"
-source = { editable = "libs/training" }
-dependencies = [
-    { name = "asyncpg" },
-    { name = "opsverse-core" },
-    { name = "opsverse-evals" },
-    { name = "pydantic" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "asyncpg", specifier = ">=0.30" },
-    { name = "opsverse-core", editable = "libs/core" },
-    { name = "opsverse-evals", editable = "libs/evals" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
-]
-
-[[package]]
 name = "orjson"
 version = "3.11.9"
 source = { registry = "https://pypi.org/simple" }
@@ -4524,6 +4304,226 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/3a/3c/37d0ecb729a7cc2d393ea7dce316fc585680f35d93b8d62139d7d0a3700c/ruff-0.15.21-py3-none-win32.whl", hash = "sha256:01f8d5be84823c172b389e123174f781f9daf86d6c58719d603f941932195cdd", size = 10896555, upload-time = "2026-07-09T20:01:26.941Z" },
     { url = "https://files.pythonhosted.org/packages/c0/b8/e43466b2a6067ce91e669068f6e28d6c719a920f014b070d5c8731725de3/ruff-0.15.21-py3-none-win_amd64.whl", hash = "sha256:d4b8d9a2f0f12b816b50447f6eccb9f4bb01a6b82c86b50fb3b5354b458dc6d3", size = 12038772, upload-time = "2026-07-09T20:01:29.497Z" },
     { url = "https://files.pythonhosted.org/packages/dd/75/e90ab9aeece218a9fc5a5bc3ec97d0ee6bb3c4ff95869463c1de58e29a1c/ruff-0.15.21-py3-none-win_arm64.whl", hash = "sha256:6e83115d4b9377c1cbc13abf0e051f069fab0ef815ea0504a8a008cee24dd0a8", size = 11375265, upload-time = "2026-07-09T20:01:31.772Z" },
+]
+
+[[package]]
+name = "rype-ai"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "aiosqlite" },
+    { name = "dvc", extra = ["s3"] },
+    { name = "httpx" },
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "aiosqlite", specifier = ">=0.20" },
+    { name = "dvc", extras = ["s3"], specifier = ">=3.55" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "pyright", specifier = ">=1.1.390" },
+    { name = "pytest", specifier = ">=8.3" },
+    { name = "pytest-asyncio", specifier = ">=0.25" },
+    { name = "ruff", specifier = ">=0.9" },
+]
+
+[[package]]
+name = "rype-api"
+version = "0.1.0"
+source = { editable = "apps/api" }
+dependencies = [
+    { name = "alembic" },
+    { name = "anyio" },
+    { name = "arq" },
+    { name = "asyncpg" },
+    { name = "certifi" },
+    { name = "fastapi" },
+    { name = "httpcore" },
+    { name = "httpx" },
+    { name = "python-multipart" },
+    { name = "qdrant-client" },
+    { name = "redis" },
+    { name = "rype-core" },
+    { name = "rype-ingestion" },
+    { name = "rype-rag" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", specifier = ">=1.14" },
+    { name = "anyio", specifier = ">=4" },
+    { name = "arq", specifier = ">=0.26" },
+    { name = "asyncpg", specifier = ">=0.30" },
+    { name = "certifi" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "httpcore", specifier = ">=1.0,<2" },
+    { name = "httpx", specifier = ">=0.28,<0.29" },
+    { name = "python-multipart", specifier = ">=0.0.18" },
+    { name = "qdrant-client", specifier = ">=1.12" },
+    { name = "redis", specifier = ">=5.2" },
+    { name = "rype-core", editable = "libs/core" },
+    { name = "rype-ingestion", editable = "libs/ingestion" },
+    { name = "rype-rag", editable = "libs/rag" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
+]
+
+[[package]]
+name = "rype-core"
+version = "0.1.0"
+source = { editable = "libs/core" }
+dependencies = [
+    { name = "langfuse" },
+    { name = "litellm" },
+    { name = "minio" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "langfuse", specifier = ">=2.50,<3.0" },
+    { name = "litellm", specifier = ">=1.60,<1.92" },
+    { name = "minio", specifier = ">=7.2" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "pydantic-settings", specifier = ">=2.7" },
+]
+
+[[package]]
+name = "rype-evals"
+version = "0.1.0"
+source = { editable = "libs/evals" }
+dependencies = [
+    { name = "anyio" },
+    { name = "asyncpg" },
+    { name = "pydantic" },
+    { name = "qdrant-client" },
+    { name = "rype-core" },
+    { name = "rype-ingestion" },
+    { name = "rype-rag" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4" },
+    { name = "asyncpg", specifier = ">=0.30" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "qdrant-client", specifier = ">=1.12" },
+    { name = "rype-core", editable = "libs/core" },
+    { name = "rype-ingestion", editable = "libs/ingestion" },
+    { name = "rype-rag", editable = "libs/rag" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
+]
+
+[[package]]
+name = "rype-ingestion"
+version = "0.1.0"
+source = { editable = "libs/ingestion" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "rype-core" },
+    { name = "rype-security" },
+]
+
+[package.optional-dependencies]
+pdf = [
+    { name = "docling" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "docling", marker = "extra == 'pdf'", specifier = ">=2.15" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "rype-core", editable = "libs/core" },
+    { name = "rype-security", editable = "libs/security" },
+]
+provides-extras = ["pdf"]
+
+[[package]]
+name = "rype-mcp"
+version = "0.1.0"
+source = { editable = "apps/mcp-server" }
+dependencies = [
+    { name = "httpx" },
+    { name = "mcp" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "mcp", specifier = ">=1.30,<2" },
+]
+
+[[package]]
+name = "rype-rag"
+version = "0.1.0"
+source = { editable = "libs/rag" }
+dependencies = [
+    { name = "anyio" },
+    { name = "fastembed" },
+    { name = "pydantic" },
+    { name = "qdrant-client" },
+    { name = "rype-core" },
+    { name = "rype-security" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", specifier = ">=4" },
+    { name = "fastembed", specifier = ">=0.5" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "qdrant-client", specifier = ">=1.12" },
+    { name = "rype-core", editable = "libs/core" },
+    { name = "rype-security", editable = "libs/security" },
+]
+
+[[package]]
+name = "rype-security"
+version = "0.1.0"
+source = { editable = "libs/security" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.10" }]
+
+[[package]]
+name = "rype-training"
+version = "0.1.0"
+source = { editable = "libs/training" }
+dependencies = [
+    { name = "asyncpg" },
+    { name = "pydantic" },
+    { name = "rype-core" },
+    { name = "rype-evals" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "asyncpg", specifier = ">=0.30" },
+    { name = "pydantic", specifier = ">=2.10" },
+    { name = "rype-core", editable = "libs/core" },
+    { name = "rype-evals", editable = "libs/evals" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
 ]
 
 [[package]]

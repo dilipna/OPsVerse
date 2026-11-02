@@ -21,7 +21,7 @@ jobs:
           cache: npm
           cache-dependency-path: opslm-demo/package-lock.json
       - name: Raw documents through real ingestion must match browser corpus
-        run: uv run python -m opsverse_evals.runbook_fixture --check
+        run: uv run python -m rype_evals.runbook_fixture --check
       - run: npm ci --no-audit --no-fund
         working-directory: opslm-demo
       - name: npm audit (deployed runtime dependencies, blocking at high)
@@ -35,7 +35,7 @@ jobs:
       - name: Rerun actual browser retrieval and both baselines
         run: node opslm-demo/scripts/evaluate-runbooks.mjs --out docs/reports/runbook-ci.json
       - name: Check fresh scenario overlap against committed training inputs
-        run: uv run python -m opsverse_evals.troubleshooting_contamination --check
+        run: uv run python -m rype_evals.troubleshooting_contamination --check
       - name: Check displayed evidence provenance
         run: node opslm-demo/scripts/build-study.mjs --check
       - name: Check the security page matches committed reports and threat model
@@ -110,7 +110,7 @@ jobs:
       - name: Security controls and detector robustness
         run: |
           uv run pytest -q libs/security apps/api/tests/test_security_controls.py
-          uv run python -m opsverse_security.robustness --out security-report
+          uv run python -m rype_security.robustness --out security-report
 
       - uses: actions/upload-artifact@v4
         if: always()

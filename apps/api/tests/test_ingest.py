@@ -3,8 +3,8 @@ import uuid
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 
-from opsverse_api.db.models import Chunk, Document, IngestJob
-from opsverse_api.worker import run_ingest_job
+from rype_api.db.models import Chunk, Document, IngestJob
+from rype_api.worker import run_ingest_job
 
 MARKDOWN = b"""# Kubernetes Autoscaling
 

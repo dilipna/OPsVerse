@@ -1,0 +1,185 @@
+import logging
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field, ValidationError
+
+from rype_api.db.models import RequestLedger
+from rype_api.deps import get_chat_service, get_chat_service_ws
+from rype_api.ratelimit import exceeded, rate_limit
+from rype_rag import ChatService, ChatTurn, SearchFilters
+from rype_rag.chat import ChatDelta, ChatDone, ChatError, ChatEvent, ChatSources
+from rype_security import scan_injection
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/chat", tags=["chat"])
+
+MAX_IMAGE_B64_CHARS = 8_000_000  # ~6 MB decoded
+# Size limits bound tokens, cost and memory per request (threat model T-10).
+MAX_QUERY_CHARS = 4_000
+MAX_HISTORY_ITEMS = 32
+
+
+class ChatRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=MAX_QUERY_CHARS)
+    history: list[ChatTurn] = Field(default=[], max_length=MAX_HISTORY_ITEMS)
+    k: int = Field(default=6, ge=1, le=20)
+    filters: SearchFilters | None = None
+    image_base64: str | None = Field(default=None, max_length=MAX_IMAGE_B64_CHARS)
+    image_mime: str = "image/png"
+    stream: bool = True
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    sources: ChatSources
+    done: ChatDone | None = None
+    error: str | None = None
+
+
+async def _write_ledger(
+    app, route: str, body: ChatRequest, done: ChatDone | None, error: str | None
+) -> None:
+    """Best-effort ledger row; never fails the response."""
+    if error is not None:
+        status = "error"
+    elif done is not None and done.status == "abstained":
+        status = "abstained"
+    elif done is not None and done.degraded:
+        status = "degraded"
+    else:
+        status = "ok"
+    try:
+        async with app.state.db_sessionmaker() as session:
+            session.add(
+                RequestLedger(
+                    route=route,
+                    model=done.model if done else None,
+                    status=status,
+                    prompt_tokens=done.prompt_tokens if done else None,
+                    completion_tokens=done.completion_tokens if done else None,
+                    cost_usd=done.cost_usd if done else None,
+                    latency_ms=done.latency_ms if done else None,
+                    first_token_ms=done.first_token_ms if done else None,
+                    meta={
+                        "k": body.k,
+                        "has_image": body.image_base64 is not None,
+                        "degraded": done.degraded if done else [],
+                        "cited": done.cited if done else [],
+                        "error": error,
+                        # query-time injection is flagged, not blocked (ADR-0007):
+                        # this is read-only RAG and DevOps vocab makes blocking
+                        # on heuristics an FPR trap. Surfaced for audit/alerting.
+                        "injection_flags": scan_injection(body.query).matched,
+                        "output_guard": done.output_guard if done else {},
+                    },
+                )
+            )
+            await session.commit()
+    except Exception:
+        logger.exception("request_ledger write failed")
+
+
+def _sse(event: ChatEvent) -> str:
+    return f"event: {event.type}\ndata: {event.model_dump_json()}\n\n"
+
+
+def _events(service: ChatService, body: ChatRequest):
+    return service.stream_chat(
+        body.query,
+        history=body.history,
+        k=body.k,
+        filters=body.filters,
+        image_b64=body.image_base64,
+        image_mime=body.image_mime,
+    )
+
+
+@router.post("", dependencies=[Depends(rate_limit("chat"))])
+async def chat(
+    body: ChatRequest,
+    request: Request,
+    service: Annotated[ChatService, Depends(get_chat_service)],
+):
+    events = _events(service, body)
+
+    if body.stream:
+
+        async def sse_stream():
+            done: ChatDone | None = None
+            error: str | None = None
+            async for event in events:
+                if isinstance(event, ChatDone):
+                    done = event
+                elif isinstance(event, ChatError):
+                    error = event.message
+                yield _sse(event)
+            await _write_ledger(request.app, "/v1/chat", body, done, error)
+
+        return StreamingResponse(
+            sse_stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
+    # Non-streaming: collect the same event stream into one JSON response.
+    # The retrieval-eval and RAGAS harnesses use this mode.
+    answer_parts: list[str] = []
+    sources = ChatSources(sources=[])
+    done: ChatDone | None = None
+    error: str | None = None
+    async for event in events:
+        if isinstance(event, ChatSources):
+            sources = event
+        elif isinstance(event, ChatDelta):
+            answer_parts.append(event.text)
+        elif isinstance(event, ChatDone):
+            done = event
+        elif isinstance(event, ChatError):
+            error = event.message
+    await _write_ledger(request.app, "/v1/chat", body, done, error)
+    return ChatResponse(answer="".join(answer_parts), sources=sources, done=done, error=error)
+
+
+@router.websocket("/stream")
+async def chat_stream(
+    websocket: WebSocket,
+    service: Annotated[ChatService, Depends(get_chat_service_ws)],
+):
+    """Multi-turn chat over one socket; supports image upload (base64).
+
+    Client sends ChatRequest-shaped JSON; server replies with the same typed
+    events as the SSE endpoint (sources / delta / done / error), then waits
+    for the next request.
+    """
+    await websocket.accept()
+    try:
+        while True:
+            payload = await websocket.receive_json()
+            # One socket can carry many questions, so the chat budget is
+            # charged per message, not per connection (threat model T-10).
+            if over := await exceeded(websocket, "chat"):
+                await websocket.send_json(
+                    {"type": "error", "message": "rate limit exceeded", "retry_after": over[1]}
+                )
+                continue
+            try:
+                body = ChatRequest.model_validate(payload)
+            except ValidationError as exc:
+                await websocket.send_json(
+                    {"type": "error", "message": f"invalid request: {exc.error_count()} errors"}
+                )
+                continue
+            done: ChatDone | None = None
+            error: str | None = None
+            async for event in _events(service, body):
+                if isinstance(event, ChatDone):
+                    done = event
+                elif isinstance(event, ChatError):
+                    error = event.message
+                await websocket.send_json(event.model_dump(mode="json"))
+            await _write_ledger(websocket.app, "/v1/chat/stream", body, done, error)
+    except WebSocketDisconnect:
+        return

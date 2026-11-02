@@ -1,6 +1,6 @@
 # Injection detector robustness v1
 
-*Generated 2026-11-02 by `python -m opsverse_security.robustness` from `evalsets/security-redteam-v1.jsonl`.*
+*Generated 2026-11-02 by `python -m rype_security.robustness` from `evalsets/security-redteam-v1.jsonl`.*
 
 Each red-team case (15 attacks, 18 benign DevOps sentences) is rewritten with a
 character-level transform that keeps it readable, then scored by the raw regex

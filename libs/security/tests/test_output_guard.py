@@ -1,4 +1,4 @@
-from opsverse_security.output_guard import (
+from rype_security.output_guard import (
     OutputGuard,
     StreamingOutputGuard,
     hosts_from_sources,

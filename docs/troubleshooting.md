@@ -26,9 +26,9 @@ workflow needs no model or paid service. To connect an already running local
 OpenAI-compatible server when resources permit, configure these server-only variables:
 
 ```text
-OPSVERSE_TROUBLESHOOT_ENDPOINT=http://127.0.0.1:8011/v1
-OPSVERSE_TROUBLESHOOT_MODEL=your-local-model-name
-# OPSVERSE_TROUBLESHOOT_API_KEY is optional for an authenticated endpoint
+RYPE_TROUBLESHOOT_ENDPOINT=http://127.0.0.1:8011/v1
+RYPE_TROUBLESHOOT_MODEL=your-local-model-name
+# RYPE_TROUBLESHOOT_API_KEY is optional for an authenticated endpoint
 ```
 
 Then run the Next.js application locally. Endpoint configuration does not verify
@@ -54,7 +54,7 @@ no chunks; tests assert no model call in those paths.
 ## Evaluation and reproduction
 
 ```bash
-uv run python -m opsverse_evals.troubleshooting_contamination --check
+uv run python -m rype_evals.troubleshooting_contamination --check
 node opslm-demo/scripts/build-study.mjs --check
 node opslm-demo/scripts/model-study.mjs --label excerpts --out /tmp/excerpts.json
 cd opslm-demo && npm test && npm run build

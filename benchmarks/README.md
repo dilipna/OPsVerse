@@ -143,7 +143,7 @@ uv run pytest benchmarks/tests -q
 ## Quantization vs quality
 
 Speed is half the story. For each quant (FP16 / Q8 / Q4), re-run the
-**Phase-4 eval** (`opsverse_evals.rag_suite`) pointed at that served model to
+**Phase-4 eval** (`rype_evals.rag_suite`) pointed at that served model to
 get the **quality delta**, producing a quality-vs-cost curve rather than a
 speed-only table. This reuses the harness that already gates the platform.
 

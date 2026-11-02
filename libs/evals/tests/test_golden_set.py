@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from opsverse_evals.golden_eval import degeneracy_still_holds
-from opsverse_evals.golden_set import build_pools, load_chunk_text
-from opsverse_evals.metrics import ndcg_at_k_graded
-from opsverse_evals.schemas import GradedRetrievalCase, GradedRetrievalDataset
+from rype_evals.golden_eval import degeneracy_still_holds
+from rype_evals.golden_set import build_pools, load_chunk_text
+from rype_evals.metrics import ndcg_at_k_graded
+from rype_evals.schemas import GradedRetrievalCase, GradedRetrievalDataset
 
 
 def test_build_pools_unions_modes_and_preserves_first_seen_order(tmp_path: Path):

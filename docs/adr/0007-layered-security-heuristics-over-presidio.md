@@ -37,7 +37,7 @@ Three layers in `libs/security`, all deterministic, all measured or unit-tested:
 **The heuristic is treated as a classifier with an eval.** A frozen red-team
 set (`evalsets/security-redteam-v1.jsonl`: 15 attacks, 18 benign DevOps
 sentences chosen to share surface vocabulary with attacks) is scored by
-`python -m opsverse_security.evaluate`; measured 2026-07-17: TPR 1.0,
+`python -m rype_security.evaluate`; measured 2026-07-17: TPR 1.0,
 specificity 1.0, precision 1.0. Thresholds pinned in the regression gate
 (TPR ≥ 0.85, specificity ≥ 0.95). The set is small and hand-curated — the
 claim is "commodity attacks are caught and measured", not "injection solved".
@@ -71,7 +71,7 @@ the system as an attacker would, not by rereading the design:
 
 1. **Output was trusted.** The console rendered model Markdown as-is, so an image URL
    written by the model would be fetched by the browser with no click. A streaming
-   output guard (`opsverse_security.output_guard`) now removes images, keeps links only
+   output guard (`rype_security.output_guard`) now removes images, keeps links only
    to source and official-doc hosts, and redacts credentials; the renderer enforces the
    same rules again.
 2. **The 1.0 red-team score did not survive trivial rewrites.** Character-level

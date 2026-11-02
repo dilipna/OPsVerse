@@ -6,8 +6,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from opsverse_api.db.models import Base
-from opsverse_core.settings import get_settings
+from rype_api.db.models import Base
+from rype_core.settings import get_settings
 
 config = context.config
 

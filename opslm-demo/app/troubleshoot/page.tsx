@@ -107,7 +107,7 @@ export default function TroubleshootPage() {
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = "opsverse-incident-brief.json";
+    link.download = "rype-incident-brief.json";
     link.click();
     URL.revokeObjectURL(url);
     setCopied("Incident brief downloaded. It contains the redacted input and displayed evidence.");
@@ -119,7 +119,7 @@ export default function TroubleshootPage() {
       </a>
       <header className="site-header">
         <a className="wordmark" href="/">
-          OPS<span>VERSE</span>
+          RY<span>PE</span>
           <small> / engineering lab</small>
         </a>
         <nav aria-label="Main navigation">
@@ -415,7 +415,7 @@ export default function TroubleshootPage() {
         </section>
       </main>
       <footer className="site-footer">
-        <span>OpsVerse · built by Dilip Nallamasa</span>
+        <span>RYPE · built by Dilip Nallamasa</span>
         <a href="/runbooks">Search all runbook passages</a>
         <a href="/engineering">Architecture & engineering decisions →</a>
       </footer>

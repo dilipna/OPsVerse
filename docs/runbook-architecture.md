@@ -4,7 +4,7 @@ The user is an engineer finding an official passage while learning or troublesho
 Kubernetes. No external users or partner corpus are assumed.
 
 The manifest pins upstream revision and SHA-256 for six raw Markdown files.
-`opsverse_evals.runbook_fixture` verifies each hash and calls `ingest_bytes`: parsing,
+`rype_evals.runbook_fixture` verifies each hash and calls `ingest_bytes`: parsing,
 section-aware chunking, quality/deduplication, secret redaction, injection quarantine.
 It fails if a document yields no usable chunks. Each passage retains document ID,
 section, pinned source and canonical URL. CI compares the generated JSON byte-for-byte.

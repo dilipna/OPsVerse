@@ -15,7 +15,7 @@ export default function Nav() {
     <header className="border-b border-zinc-800 bg-zinc-950">
       <nav className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
         <span className="font-mono text-sm font-bold tracking-tight text-emerald-400">
-          OpsVerse<span className="text-zinc-500">.ai</span>
+          RYPE<span className="text-zinc-500">.ai</span>
         </span>
         {links.map(({ href, label }) => (
           <Link

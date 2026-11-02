@@ -1,24 +1,24 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: opsverse-config
-  namespace: opsverse
+  name: rype-config
+  namespace: rype
 data:
-  OPSVERSE_ENVIRONMENT: prod # ingestion fails closed without an admin key
-  # OPSVERSE_DATABASE_URL is set per container in api.yaml / worker.yaml: it
+  RYPE_ENVIRONMENT: prod # ingestion fails closed without an admin key
+  # RYPE_DATABASE_URL is set per container in api.yaml / worker.yaml: it
   # embeds DB_PASSWORD, and $(VAR) expansion does not work in ConfigMap data.
   # In-cluster service DNS names (see stateful.yaml / redis.yaml).
-  OPSVERSE_REDIS_URL: redis://redis:6379/0
-  OPSVERSE_QDRANT_URL: http://qdrant:6333
-  OPSVERSE_MINIO_ENDPOINT: http://minio:9000
-  OPSVERSE_CHAT_MODEL: gemini/gemini-3.5-flash
-  OPSVERSE_GATEWAY_DAILY_BUDGET_USD: "1.0"
+  RYPE_REDIS_URL: redis://redis:6379/0
+  RYPE_QDRANT_URL: http://qdrant:6333
+  RYPE_MINIO_ENDPOINT: http://minio:9000
+  RYPE_CHAT_MODEL: gemini/gemini-3.5-flash
+  RYPE_GATEWAY_DAILY_BUDGET_USD: "1.0"
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: opsverse-secrets
-  namespace: opsverse
+  name: rype-secrets
+  namespace: rype
 # PLACEHOLDER ONLY. In production these come from an external-secrets /
 # sealed-secrets operator and are never committed. Values are base64 in a
 # real Secret; stringData is used here for readability of the artifact.
@@ -26,6 +26,6 @@ type: Opaque
 stringData:
   DB_PASSWORD: "change-me"
   GEMINI_API_KEY: "change-me"
-  MINIO_ROOT_USER: "opsverse"
+  MINIO_ROOT_USER: "rype"
   MINIO_ROOT_PASSWORD: "change-me"
   ADMIN_API_KEY: "change-me" # required for /v1/ingest and /v1/security

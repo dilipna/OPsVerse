@@ -3,19 +3,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: opsverse
-  namespace: opsverse
+  name: rype
+  namespace: rype
   annotations:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120" # SSE/WS chat streaming
     # cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: opsverse.example.com
+    - host: rype.example.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: opsverse-api
+                name: rype-api
                 port: { number: 80 }

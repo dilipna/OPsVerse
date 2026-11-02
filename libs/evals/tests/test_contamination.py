@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from opsverse_evals.contamination import (
+from rype_evals.contamination import (
     ContaminationGuard,
     frozen_evalsets,
     jaccard,
@@ -8,7 +8,7 @@ from opsverse_evals.contamination import (
     question_hash,
     shingles,
 )
-from opsverse_evals.schemas import RetrievalCase, RetrievalDataset
+from rype_evals.schemas import RetrievalCase, RetrievalDataset
 
 
 def test_normalize_question():

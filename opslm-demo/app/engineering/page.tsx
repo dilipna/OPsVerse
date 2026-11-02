@@ -5,7 +5,7 @@ export default function Engineering() {
     <div className="navigator engineering">
       <header className="site-header">
         <a className="wordmark" href="/">
-          OPS<span>VERSE</span>
+          RY<span>PE</span>
           <small> / engineering lab</small>
         </a>
         <nav aria-label="Main navigation">
@@ -24,9 +24,9 @@ export default function Engineering() {
             <span>An inspectable system.</span>
           </h1>
           <p className="intro-copy">
-            OpsVerse connects Kubernetes diagnostic text to official runbook evidence. The
-            engineering work is in the complete path: ingestion, retrieval, failure handling,
-            provenance, evaluation, and a usable public product.
+            RYPE connects Kubernetes diagnostic text to official runbook evidence. The engineering
+            work is in the complete path: ingestion, retrieval, failure handling, provenance,
+            evaluation, and a usable public product.
           </p>
           <p className="engineering-actions">
             <a className="workspace-cta" href="/">
@@ -125,7 +125,7 @@ export default function Engineering() {
               "git clone https://github.com/dilipna/OPsVerse.git",
               "cd OPsVerse",
               "uv sync --all-packages --frozen",
-              "uv run python -m opsverse_evals.runbook_fixture --check",
+              "uv run python -m rype_evals.runbook_fixture --check",
               "uv run pytest -q",
               "cd opslm-demo && npm ci && npm test && npm run build",
             ].join(String.fromCharCode(10))}

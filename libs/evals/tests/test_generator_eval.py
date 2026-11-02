@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from opsverse_evals.generator_eval import render, summarise
-from opsverse_evals.schemas import GoldenAnswer, GoldenAnswerSet
+from rype_evals.generator_eval import render, summarise
+from rype_evals.schemas import GoldenAnswer, GoldenAnswerSet
 
 
 def _answers(n: int = 3) -> GoldenAnswerSet:

@@ -1,6 +1,6 @@
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api.db.models import RequestLedger
+from rype_api.db.models import RequestLedger
 
 
 async def seed(env):

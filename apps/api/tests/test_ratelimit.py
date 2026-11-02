@@ -3,16 +3,16 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api import deps
-from opsverse_api.ratelimit import WINDOW_S, RateLimiter
-from opsverse_core.settings import get_settings
+from rype_api import deps
+from rype_api.ratelimit import WINDOW_S, RateLimiter
+from rype_core.settings import get_settings
 
 
 @pytest.fixture
 def limits(monkeypatch):
     def apply(**values: str) -> None:
         for key, value in values.items():
-            monkeypatch.setenv(f"OPSVERSE_{key.upper()}", value)
+            monkeypatch.setenv(f"RYPE_{key.upper()}", value)
         get_settings.cache_clear()
 
     yield apply
@@ -113,7 +113,7 @@ async def test_redis_outage_falls_back_to_local_limits():
 def test_websocket_charges_the_chat_budget_per_message(env, limits):
     from fastapi.testclient import TestClient
 
-    from opsverse_rag.chat import ChatDelta
+    from rype_rag.chat import ChatDelta
 
     class OneLineService:
         async def stream_chat(self, query, **kwargs):

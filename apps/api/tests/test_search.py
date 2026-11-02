@@ -1,7 +1,7 @@
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api import deps
-from opsverse_rag import RetrievedChunk
+from rype_api import deps
+from rype_rag import RetrievedChunk
 
 
 class FakeRetriever:

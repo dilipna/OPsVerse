@@ -1,6 +1,6 @@
-from opsverse_training.generate_instructions import plan_tasks
-from opsverse_training.quality import Deduper, quality_drop_reason
-from opsverse_training.schemas import DatasetManifest, InstructionPair, Message
+from rype_training.generate_instructions import plan_tasks
+from rype_training.quality import Deduper, quality_drop_reason
+from rype_training.schemas import DatasetManifest, InstructionPair, Message
 
 GOOD_USER = "How do I configure liveness probes for a Deployment in Kubernetes?"
 GOOD_ASSISTANT = (

@@ -1,5 +1,5 @@
-from opsverse_core.llm import LLMDelta, LLMError, LLMResult
-from opsverse_rag.chat import (
+from rype_core.llm import LLMDelta, LLMError, LLMResult
+from rype_rag.chat import (
     ChatDelta,
     ChatDone,
     ChatError,
@@ -10,7 +10,7 @@ from opsverse_rag.chat import (
     build_messages,
     extract_citations,
 )
-from opsverse_rag.schemas import RetrievedChunk
+from rype_rag.schemas import RetrievedChunk
 
 
 def make_chunk(i: int, text: str = "some text") -> RetrievedChunk:

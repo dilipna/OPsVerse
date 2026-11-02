@@ -1,7 +1,7 @@
 import pytest
 
-from opsverse_ingestion.parsers import UnsupportedDocumentError, detect_doc_type, parse_document
-from opsverse_ingestion.parsers.common import DecodingError
+from rype_ingestion.parsers import UnsupportedDocumentError, detect_doc_type, parse_document
+from rype_ingestion.parsers.common import DecodingError
 
 MARKDOWN = b"""# Install
 

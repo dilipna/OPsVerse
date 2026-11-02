@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import security from "../../public/security.json";
 
 export const metadata: Metadata = {
-  title: "OpsVerse — Security",
+  title: "RYPE — Security",
   description:
     "Threat model, measured detector robustness and the controls that treat user input, retrieved documents, model output and fetched URLs as untrusted.",
 };
@@ -43,7 +43,7 @@ export default function SecurityPage() {
       </a>
       <header className="site-header">
         <a className="wordmark" href="/">
-          OPS<span>VERSE</span>
+          RY<span>PE</span>
           <small> / security</small>
         </a>
         <nav aria-label="Main navigation">
@@ -62,7 +62,7 @@ export default function SecurityPage() {
             <span>Every gap is listed.</span>
           </h1>
           <p className="intro-copy">
-            OpsVerse treats four things as untrusted: what users type, every retrieved document,
+            RYPE treats four things as untrusted: what users type, every retrieved document,
             everything the model writes, and every URL it is asked to fetch. Each control below maps
             to a threat, a test that can be rerun, and an honest status.
           </p>

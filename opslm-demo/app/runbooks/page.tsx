@@ -71,7 +71,7 @@ export default function Page() {
       </a>
       <header className="site-header">
         <a className="wordmark" href="/">
-          OPS<span>VERSE</span>
+          RY<span>PE</span>
           <small> / engineering lab</small>
         </a>
         <nav aria-label="Main navigation">
@@ -219,9 +219,8 @@ export default function Page() {
             <div>
               <h3>From raw docs to passages</h3>
               <p>
-                Six official Markdown files pass through OpsVerse’s parser, chunker, quality
-                filters, and security checks. The browser searches that generated corpus with term
-                overlap.
+                Six official Markdown files pass through RYPE’s parser, chunker, quality filters,
+                and security checks. The browser searches that generated corpus with term overlap.
               </p>
             </div>
             <div>
@@ -259,7 +258,7 @@ export default function Page() {
         </section>
       </main>
       <footer className="site-footer">
-        <span>Built by Dilip Nallamasa · OpsVerse</span>
+        <span>Built by Dilip Nallamasa · RYPE</span>
         <a href="https://github.com/dilipna/OPsVerse#quickstart">Reproduce locally ↗</a>
         <span>Public-data prototype · no adoption claim</span>
       </footer>

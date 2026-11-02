@@ -1,15 +1,15 @@
-# OpsVerse → LLM Inference & Operations Platform: migration plan
+# RYPE → LLM Inference & Operations Platform: migration plan
 
-> Status: **approved 2026-07-23**. This document records the repositioning of OpsVerse
+> Status: **approved 2026-07-23**. This document records the repositioning of RYPE
 > from "RAG platform with a fine-tune" to "**LLM inference platform**, with RAG as its
 > workload." It is a migration plan, not a rewrite plan — the audit below found that
 > most of the target architecture already exists and is mis-framed rather than missing.
 
 ## 1. Why reposition at all
 
-OpsVerse is portfolio project #3 of 3, targeting **LLM Engineer / Inference Engineer /
+RYPE is portfolio project #3 of 3, targeting **LLM Engineer / Inference Engineer /
 AI Infrastructure Engineer** roles. Its siblings already cover the adjacent ground:
-FIFA2026MLOps owns classical MLOps, ProtoPro owns agents. OpsVerse must therefore own
+FIFA2026MLOps owns classical MLOps, ProtoPro owns agents. RYPE must therefore own
 the part neither does: **what happens to a model after it is trained** — serving,
 optimization, measurement, and operation.
 

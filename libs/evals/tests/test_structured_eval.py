@@ -1,4 +1,4 @@
-from opsverse_evals.structured_eval import aggregate, extract_json, score_case
+from rype_evals.structured_eval import aggregate, extract_json, score_case
 
 
 def test_extract_json_from_fence_and_bare():

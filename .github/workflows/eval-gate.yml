@@ -51,7 +51,7 @@ jobs:
           key: fastembed-${{ hashFiles('uv.lock') }}
 
       - name: Regression thresholds vs committed reports
-        run: uv run python -m opsverse_evals.regression
+        run: uv run python -m rype_evals.regression
 
       - name: Live retrieval smoke on CI fixture
-        run: uv run python -m opsverse_evals.ci_retrieval_smoke --qdrant http://localhost:6333
+        run: uv run python -m rype_evals.ci_retrieval_smoke --qdrant http://localhost:6333

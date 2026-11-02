@@ -1,4 +1,4 @@
-from opsverse_evals.paraphrase_evalset import acceptable_paraphrase, token_overlap
+from rype_evals.paraphrase_evalset import acceptable_paraphrase, token_overlap
 
 
 def test_token_overlap():

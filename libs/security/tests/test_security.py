@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from opsverse_security import redact_secrets, scan_injection
-from opsverse_security.evaluate import evaluate
+from rype_security import redact_secrets, scan_injection
+from rype_security.evaluate import evaluate
 
 
 def test_redacts_common_credential_shapes():
@@ -101,8 +101,8 @@ def test_obfuscation_alone_never_crosses_threshold():
 
 
 def test_robustness_eval_pins_normalized_detector():
-    from opsverse_security.robustness import TRANSFORMS
-    from opsverse_security.robustness import evaluate as robustness
+    from rype_security.robustness import TRANSFORMS
+    from rype_security.robustness import evaluate as robustness
 
     root = Path(__file__).resolve().parents[3]
     results = robustness(root / "evalsets" / "security-redteam-v1.jsonl")

@@ -2,7 +2,7 @@
 
 import pytest
 
-from opsverse_evals.runbook_fixture import build
+from rype_evals.runbook_fixture import build
 
 
 def test_real_raw_docs_are_attributed_and_chunked():
@@ -14,6 +14,6 @@ def test_real_raw_docs_are_attributed_and_chunked():
 
 
 def test_broken_chunker_cannot_pass_browser_fixture_generation(monkeypatch):
-    monkeypatch.setattr("opsverse_ingestion.pipeline.chunk_document", lambda parsed: [])
+    monkeypatch.setattr("rype_ingestion.pipeline.chunk_document", lambda parsed: [])
     with pytest.raises(ValueError, match="no usable chunks"):
         build()

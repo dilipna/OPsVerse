@@ -1,6 +1,6 @@
-# OpsVerse AI — Architecture
+# RYPE — Architecture
 
-OpsVerse is a monorepo LLM platform: a FastAPI service over Postgres / Redis /
+RYPE is a monorepo LLM platform: a FastAPI service over Postgres / Redis /
 Qdrant / MinIO, a Next.js UI, and an MCP server, with an offline training track
 (Colab) for the OpsLM model and a measured **inference/serving layer** in front of
 it. This document is the map; the [ADRs](adr/) hold the *why* for each decision.
@@ -75,7 +75,7 @@ the `/v1/costs/summary` panel.
 | Store | Holds | Notes |
 |---|---|---|
 | Postgres | documents, chunks, ingest_jobs, eval_runs/results, judge_cache, request_ledger | JSONB for flexible eval/ledger payloads; Alembic-migrated |
-| Qdrant | `opsverse_kb` — named vectors {dense 768d, sparse BM25} + payload | one collection, metadata-partitioned (ADR-0002) |
+| Qdrant | `rype_kb` — named vectors {dense 768d, sparse BM25} + payload | one collection, metadata-partitioned (ADR-0002) |
 | Redis | response cache, arq queue, gateway budget counters | all reconstructible/transient |
 | MinIO | raw ingested docs (S3-compatible) | swap to real S3 via one env var |
 

@@ -1,6 +1,6 @@
-# OpsVerse on Kubernetes — documented manifests (artifact, not operated)
+# RYPE on Kubernetes — documented manifests (artifact, not operated)
 
-These manifests show how OpsVerse deploys to Kubernetes. They are a
+These manifests show how RYPE deploys to Kubernetes. They are a
 **portfolio artifact**: reviewed, internally consistent, and explained — but
 the operated runtime for this project is Docker Compose (per the plan's
 free-tier constraint). They are not applied to a live cluster here.
@@ -8,21 +8,21 @@ free-tier constraint). They are not applied to a live cluster here.
 ## Topology
 
 ```
-Namespace: opsverse
-  Deployment/opsverse-api   (2 replicas, HPA 2–6 on CPU)  ─► Service ─► Ingress
-  Deployment/opsverse-worker (arq; 1 replica, no Service — pulls from Redis)
+Namespace: rype
+  Deployment/rype-api   (2 replicas, HPA 2–6 on CPU)  ─► Service ─► Ingress
+  Deployment/rype-worker (arq; 1 replica, no Service — pulls from Redis)
   StatefulSet/postgres      (PVC)      StatefulSet/qdrant (PVC)
   Deployment/redis          (ephemeral cache/queue)
   StatefulSet/minio         (PVC)
-  Secret/opsverse-secrets   (DB creds, GEMINI_API_KEY, MinIO creds)
-  ConfigMap/opsverse-config (non-secret OPSVERSE_* settings)
+  Secret/rype-secrets   (DB creds, GEMINI_API_KEY, MinIO creds)
+  ConfigMap/rype-config (non-secret RYPE_* settings)
 ```
 
 ## What each file is
 
 | File | Purpose |
 |---|---|
-| `namespace.yaml` | the `opsverse` namespace |
+| `namespace.yaml` | the `rype` namespace |
 | `config.yaml` | ConfigMap (service URLs, model names) + Secret (credentials) |
 | `stateful.yaml` | Postgres, Qdrant, MinIO StatefulSets + Services + PVCs |
 | `redis.yaml` | Redis Deployment + Service (cache/queue, no persistence) |
@@ -45,7 +45,7 @@ watch for permission errors on the writable paths listed in each manifest.
 
 ## Production notes (what would change from Compose)
 
-- **Secrets**: `Secret/opsverse-secrets` here is a placeholder; in a real
+- **Secrets**: `Secret/rype-secrets` here is a placeholder; in a real
   cluster it comes from a sealed-secret / external-secrets operator, never
   committed.
 - **Storage**: PVCs assume a default StorageClass. Postgres and Qdrant are
@@ -65,5 +65,5 @@ kubectl apply -f infra/k8s/namespace.yaml
 kubectl apply -f infra/k8s/config.yaml      # edit secrets first
 kubectl apply -f infra/k8s/stateful.yaml infra/k8s/redis.yaml
 kubectl apply -f infra/k8s/api.yaml infra/k8s/worker.yaml infra/k8s/ingress.yaml
-kubectl -n opsverse rollout status deploy/opsverse-api
+kubectl -n rype rollout status deploy/rype-api
 ```

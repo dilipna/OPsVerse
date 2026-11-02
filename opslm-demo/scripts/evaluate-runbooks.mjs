@@ -51,10 +51,10 @@ const report = {
   evaluated_source_sha256: hash(code("opslm-demo/lib/runbooks.mjs")),
   ingestion_source_sha256: hash(
     Buffer.concat([
-      code("libs/ingestion/src/opsverse_ingestion/parsers/markdown.py"),
-      code("libs/ingestion/src/opsverse_ingestion/chunking.py"),
-      code("libs/ingestion/src/opsverse_ingestion/pipeline.py"),
-      code("libs/ingestion/src/opsverse_ingestion/quality.py"),
+      code("libs/ingestion/src/rype_ingestion/parsers/markdown.py"),
+      code("libs/ingestion/src/rype_ingestion/chunking.py"),
+      code("libs/ingestion/src/rype_ingestion/pipeline.py"),
+      code("libs/ingestion/src/rype_ingestion/quality.py"),
     ]),
   ),
   corpus_sha256: hash(read("opslm-demo/public/runbooks.json")),

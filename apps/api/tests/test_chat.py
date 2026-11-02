@@ -1,9 +1,9 @@
 import sqlalchemy as sa
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api import deps
-from opsverse_api.db.models import RequestLedger
-from opsverse_rag.chat import ChatDelta, ChatDone, ChatError, ChatSources, SourceInfo
+from rype_api import deps
+from rype_api.db.models import RequestLedger
+from rype_rag.chat import ChatDelta, ChatDone, ChatError, ChatSources, SourceInfo
 
 
 def make_events(error: bool = False):

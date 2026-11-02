@@ -1,6 +1,6 @@
 import pytest
 
-from opsverse_security.netguard import UnsafeURLError, check_url_shape, resolve_public_url
+from rype_security.netguard import UnsafeURLError, check_url_shape, resolve_public_url
 
 
 @pytest.mark.parametrize(

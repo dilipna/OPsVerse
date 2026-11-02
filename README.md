@@ -1,4 +1,4 @@
-# OpsVerse
+# RYPE
 
 **An evaluation-first, security-hardened RAG system for Kubernetes troubleshooting:
 hybrid retrieval, a QLoRA fine-tune, measured GPU serving, and a threat model where
@@ -15,7 +15,7 @@ every control has a test.**
 
 ## What it does
 
-Paste a Kubernetes symptom and its Pod events. OpsVerse recognizes the status signals,
+Paste a Kubernetes symptom and its Pod events. RYPE recognizes the status signals,
 retrieves the matching passages from pinned official documentation, and returns an
 exportable investigation brief. With the optional model path enabled, a generated answer
 is accepted only if every claim cites a retrieved passage and quotes it word for word, and
@@ -32,7 +32,7 @@ MCP server, a fine-tuned model, and a GPU serving benchmark.
 |---|---|---|
 | **AI security** | 13 threats mapped to the OWASP LLM Top 10 (2025), each with a control, a rerunnable test and an open-items list | [threat-model.md](docs/security/threat-model.md) |
 | | Simple character tricks drop the raw injection detector's recall from 1.00 to 0.00–0.07; scanning normalized text restores 1.00 with no new false positives | [security-robustness-v1](docs/reports/security-robustness-v1.md) |
-| | Streaming output guard blocks zero-click exfiltration through rendered Markdown; SSRF guard re-checks every redirect hop | [output_guard.py](libs/security/src/opsverse_security/output_guard.py), [netguard.py](libs/security/src/opsverse_security/netguard.py) |
+| | Streaming output guard blocks zero-click exfiltration through rendered Markdown; SSRF guard re-checks every redirect hop | [output_guard.py](libs/security/src/rype_security/output_guard.py), [netguard.py](libs/security/src/rype_security/netguard.py) |
 | **Evaluation rigor** | Pooled, graded golden set (1,914 judgements) with bootstrap CIs and paired permutation tests on every comparison | [retrieval-golden-v1](docs/reports/retrieval-golden-v1.md) |
 | | LLM relevance judge audited against human labels (n = 40): it finds about half the relevant material (TPR 0.556) | [judge-validation-v2](docs/reports/judge-validation-v2.md) |
 | | Eight of the project's own claims tested and withdrawn, each with the statistic that overturned it | [evidence.md](docs/evidence.md) |
@@ -96,7 +96,7 @@ uv run pytest -q
 ```
 
 ```bash
-uv run python -m opsverse_security.robustness
+uv run python -m rype_security.robustness
 ```
 
 ```bash

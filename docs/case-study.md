@@ -1,6 +1,6 @@
 # From an impressive stack to inspectable evidence
 
-OpsVerse already combined ingestion, hybrid RAG, QLoRA artifacts and serving measurements.
+RYPE already combined ingestion, hybrid RAG, QLoRA artifacts and serving measurements.
 The missing product property was a visitor workflow that worked without infrastructure.
 
 The audit found that success-only latency percentiles could hide 99 failures out of 100.

@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: opsverse
+  namespace: rype
 spec:
   serviceName: postgres
   replicas: 1
@@ -33,16 +33,16 @@ spec:
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_USER
-              value: opsverse
+              value: rype
             - name: POSTGRES_DB
-              value: opsverse
+              value: rype
             - name: POSTGRES_PASSWORD
               valueFrom:
-                secretKeyRef: { name: opsverse-secrets, key: DB_PASSWORD }
+                secretKeyRef: { name: rype-secrets, key: DB_PASSWORD }
           ports:
             - containerPort: 5432
           readinessProbe:
-            exec: { command: ["pg_isready", "-U", "opsverse", "-d", "opsverse"] }
+            exec: { command: ["pg_isready", "-U", "rype", "-d", "rype"] }
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
@@ -70,7 +70,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: opsverse
+  namespace: rype
 spec:
   selector: { app: postgres }
   ports: [{ port: 5432, targetPort: 5432 }]
@@ -79,7 +79,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: qdrant
-  namespace: opsverse
+  namespace: rype
 spec:
   serviceName: qdrant
   replicas: 1
@@ -135,7 +135,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: qdrant
-  namespace: opsverse
+  namespace: rype
 spec:
   selector: { app: qdrant }
   ports: [{ port: 6333, targetPort: 6333 }]
@@ -144,7 +144,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: minio
-  namespace: opsverse
+  namespace: rype
 spec:
   serviceName: minio
   replicas: 1
@@ -176,10 +176,10 @@ spec:
               value: /tmp
             - name: MINIO_ROOT_USER
               valueFrom:
-                secretKeyRef: { name: opsverse-secrets, key: MINIO_ROOT_USER }
+                secretKeyRef: { name: rype-secrets, key: MINIO_ROOT_USER }
             - name: MINIO_ROOT_PASSWORD
               valueFrom:
-                secretKeyRef: { name: opsverse-secrets, key: MINIO_ROOT_PASSWORD }
+                secretKeyRef: { name: rype-secrets, key: MINIO_ROOT_PASSWORD }
           ports:
             - containerPort: 9000
           readinessProbe:
@@ -207,7 +207,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: minio
-  namespace: opsverse
+  namespace: rype
 spec:
   selector: { app: minio }
   ports: [{ port: 9000, targetPort: 9000 }]

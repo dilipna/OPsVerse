@@ -5,10 +5,10 @@ import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from opsverse_api.routers.ingest import safe_filename
-from opsverse_api.safe_fetch import PinnedNetworkBackend, PinnedTransport, fetch_public_url
-from opsverse_core.settings import get_settings
-from opsverse_security.netguard import UnsafeURLError
+from rype_api.routers.ingest import safe_filename
+from rype_api.safe_fetch import PinnedNetworkBackend, PinnedTransport, fetch_public_url
+from rype_core.settings import get_settings
+from rype_security.netguard import UnsafeURLError
 
 DOC_URL = {"source_type": "url", "uri": "https://kubernetes.io/docs/concepts/"}
 
@@ -19,11 +19,11 @@ def client_for(env) -> AsyncClient:
 
 @pytest.fixture
 def settings_env(monkeypatch):
-    """Set OPSVERSE_* variables for one test and rebuild the cached settings."""
+    """Set RYPE_* variables for one test and rebuild the cached settings."""
 
     def apply(**values: str) -> None:
         for key, value in values.items():
-            monkeypatch.setenv(f"OPSVERSE_{key.upper()}", value)
+            monkeypatch.setenv(f"RYPE_{key.upper()}", value)
         get_settings.cache_clear()
 
     yield apply
@@ -125,7 +125,7 @@ def test_safe_filename(raw, expected):
 
 
 async def test_chat_and_search_reject_oversized_input(env):
-    from opsverse_api import deps
+    from rype_api import deps
 
     # Validation must reject before any service is used; these are never called.
     env.app.dependency_overrides[deps.get_chat_service] = lambda: None

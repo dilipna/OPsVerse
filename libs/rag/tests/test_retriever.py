@@ -1,5 +1,5 @@
-from opsverse_rag.retriever import Retriever
-from opsverse_rag.schemas import RetrievedChunk, SearchMode, SparseVec
+from rype_rag.retriever import Retriever
+from rype_rag.schemas import RetrievedChunk, SearchMode, SparseVec
 
 
 class FakeEmbedder:

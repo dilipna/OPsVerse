@@ -13,7 +13,7 @@ streaming, and what happens when a provider fails.
 ## Decision
 
 1. **LiteLLM SDK directly (`litellm.acompletion`), not the proxy.**
-   `opsverse_core.llm.LiteLLMClient` is a ~150-line wrapper that is already
+   `rype_core.llm.LiteLLMClient` is a ~150-line wrapper that is already
    OpenAI-shaped, so the Phase 6 proxy swap is a config change (point at the
    proxy's base URL) rather than a rewrite. Running the proxy now would add a
    service to the compose stack with none of its value used yet.

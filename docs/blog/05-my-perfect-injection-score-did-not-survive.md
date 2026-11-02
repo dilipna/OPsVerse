@@ -1,9 +1,9 @@
 # My perfect prompt-injection score did not survive a zero-width space
 
 > **Draft, unpublished.** Every number below comes from a committed report or test in the
-> [OpsVerse repository](https://github.com/dilipna/OPsVerse).
+> [RYPE repository](https://github.com/dilipna/OPsVerse).
 
-*Post #2 in this series measured the OpsVerse injection detector like a classifier and
+*Post #2 in this series measured the RYPE injection detector like a classifier and
 reported recall 1.0, specificity 1.0, precision 1.0 on a 33-case red-team set. This post
 is about what happened when I stopped reading my own defenses and started testing them.*
 

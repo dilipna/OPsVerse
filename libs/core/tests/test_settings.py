@@ -1,4 +1,4 @@
-from opsverse_core.settings import Settings
+from rype_core.settings import Settings
 
 
 def test_defaults_match_compose_stack():
@@ -10,8 +10,8 @@ def test_defaults_match_compose_stack():
 
 
 def test_env_override(monkeypatch):
-    monkeypatch.setenv("OPSVERSE_REDIS_URL", "redis://elsewhere:6380/1")
-    monkeypatch.setenv("OPSVERSE_ENVIRONMENT", "prod")
+    monkeypatch.setenv("RYPE_REDIS_URL", "redis://elsewhere:6380/1")
+    monkeypatch.setenv("RYPE_ENVIRONMENT", "prod")
     settings = Settings(_env_file=None)  # pyright: ignore[reportCallIssue]
     assert settings.redis_url == "redis://elsewhere:6380/1"
     assert settings.environment == "prod"

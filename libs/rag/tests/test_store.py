@@ -3,8 +3,8 @@ from types import SimpleNamespace
 import pytest
 from qdrant_client import models
 
-from opsverse_rag.schemas import SearchFilters, SearchMode, SparseVec
-from opsverse_rag.store import QdrantStore
+from rype_rag.schemas import SearchFilters, SearchMode, SparseVec
+from rype_rag.store import QdrantStore
 
 
 class FakeClient:

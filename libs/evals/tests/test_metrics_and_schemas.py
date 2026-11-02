@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from opsverse_evals import (
+from rype_evals import (
     RetrievalCase,
     RetrievalDataset,
     contextual_precision_at_k,
@@ -10,7 +10,7 @@ from opsverse_evals import (
     precision_at_k,
     recall_at_k,
 )
-from opsverse_evals.judge import parse_json_reply
+from rype_evals.judge import parse_json_reply
 
 RANKED = ["a", "b", "c", "d"]
 
@@ -121,7 +121,7 @@ def test_dataset_jsonl_roundtrip(tmp_path: Path):
 
 
 def test_faithfulness_score():
-    from opsverse_evals.rag_suite import faithfulness_score
+    from rype_evals.rag_suite import faithfulness_score
 
     score, n = faithfulness_score(
         {"claims": [{"claim": "a", "supported": True}, {"claim": "b", "supported": False}]}

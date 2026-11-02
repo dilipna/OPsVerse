@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpsVerse AI",
+  title: "RYPE",
   description:
     "LLM engineering platform for the DevOps/MLOps community — RAG chat with citations, evals, cost tracking.",
 };

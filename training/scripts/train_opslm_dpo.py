@@ -7,7 +7,7 @@ model and no on-policy sampling, so it fits the same single-T4 budget as SFT.
 
 Data: a JSONL of TRL conversational DPO rows, i.e. each line has
 `prompt` / `chosen` / `rejected` as message lists (produced by
-opsverse_training.preferences.PreferencePair.to_trl). See training/README.md.
+rype_training.preferences.PreferencePair.to_trl). See training/README.md.
 
 Colab quickstart:
     !pip install "unsloth==2025.*" "trl>=0.12,<0.20" "datasets>=3"

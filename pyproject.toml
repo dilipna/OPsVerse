@@ -1,7 +1,7 @@
 [project]
-name = "opsverse-ai"
+name = "rype-ai"
 version = "0.1.0"
-description = "OpsVerse AI — production-grade LLM engineering platform for the DevOps/MLOps/LLMOps community"
+description = "RYPE — production-grade LLM engineering platform for the DevOps/MLOps/LLMOps community"
 requires-python = ">=3.12"
 dependencies = []
 

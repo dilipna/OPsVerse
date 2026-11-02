@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from opsverse_evals import failure_taxonomy as ft
+from rype_evals import failure_taxonomy as ft
 
 GOLDEN = Path("evalsets/retrieval-golden-v1.jsonl")
 RAW = Path("docs/reports/retrieval-ablation-v2-raw.json")
@@ -120,6 +120,5 @@ def test_generated_report_on_disk_is_current(flagged):
     report = ft.build(cases, ft.load_codes(CODES), total_queries=len(golden))
     on_disk = out.read_text(encoding="utf-8")
     assert f"**{report['real_defects']}**" in on_disk, (
-        "failure-taxonomy-v1.md is stale -- rerun "
-        "`uv run python -m opsverse_evals.failure_taxonomy`"
+        "failure-taxonomy-v1.md is stale -- rerun `uv run python -m rype_evals.failure_taxonomy`"
     )
