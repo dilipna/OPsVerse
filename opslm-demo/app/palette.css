@@ -157,3 +157,12 @@
     display: none !important;
   }
 }
+
+/* Shared header: mark the page you are on. */
+.site-header nav a[aria-current="page"] {
+  color: #f2f7f4 !important;
+  text-decoration: underline;
+  text-decoration-color: #9ce5b8;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}

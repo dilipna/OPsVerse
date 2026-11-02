@@ -1,22 +1,10 @@
 import study from "../../public/study.json";
+import SiteHeader from "../SiteHeader";
 
 export default function Engineering() {
   return (
     <div className="navigator engineering">
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / engineering lab</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/troubleshoot">Workspace</a>
-          <a href="/study">Evaluation</a>
-          <a href="/lab">Lab</a>
-          <a href="/agent">Agent</a>
-          <a href="/security">Security</a>
-          <a href="https://github.com/dilipna/OPsVerse">Source code ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="engineering" current="/engineering" />
       <main>
         <section className="intro">
           <p className="eyebrow">ENGINEERING CASE STUDY / DILIP NALLAMASA</p>

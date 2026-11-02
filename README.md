@@ -13,7 +13,7 @@ every control has a test.**
 [Security](https://ops-verse.vercel.app/security) ([threat model](docs/security/threat-model.md)) ·
 [Evidence index](docs/evidence.md) ·
 [Engineering case study](https://ops-verse.vercel.app/engineering) ·
-[Write-ups](https://dilipna.hashnode.dev)
+[Writing](https://ops-verse.vercel.app/writing) ([Hashnode](https://dilipna.hashnode.dev))
 
 [![CI](https://github.com/dilipna/OPsVerse/actions/workflows/ci.yml/badge.svg)](https://github.com/dilipna/OPsVerse/actions/workflows/ci.yml)
 [![Eval Gate](https://github.com/dilipna/OPsVerse/actions/workflows/eval-gate.yml/badge.svg)](https://github.com/dilipna/OPsVerse/actions/workflows/eval-gate.yml)

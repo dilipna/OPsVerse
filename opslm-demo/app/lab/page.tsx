@@ -9,6 +9,7 @@ import {
   scanInjection,
 } from "../../lib/security.mjs";
 import { GUARD_EXAMPLE, POLICY_EXAMPLES, SCAN_EXAMPLES } from "../../lib/lab-examples.mjs";
+import SiteHeader from "../SiteHeader";
 
 const REPO = "https://github.com/dilipna/OPsVerse/blob/main";
 const visible = (text: string) => [...text].map((c) => (/\p{Cf}/u.test(c) ? "⟨·⟩" : c)).join("");
@@ -28,18 +29,7 @@ export default function LabPage() {
       <a className="skip" href="#scanner">
         Skip to the lab
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / lab</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/troubleshoot">Troubleshoot</a>
-          <a href="/agent">Agent</a>
-          <a href="/security">Security</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="lab" current="/lab" />
       <main>
         <section className="intro">
           <p className="eyebrow">SECURITY LAB / RUNS IN YOUR BROWSER</p>

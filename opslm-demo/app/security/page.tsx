@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import security from "../../public/security.json";
+import SiteHeader from "../SiteHeader";
 
 export const metadata: Metadata = {
   title: "RYPE — Security",
@@ -57,19 +58,7 @@ export default function SecurityPage() {
       <a className="skip" href="#robustness">
         Skip to measurements
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / security</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/troubleshoot">Troubleshoot</a>
-          <a href="/study">Evaluation</a>
-          <a href="/lab">Lab</a>
-          <a href="/agent">Agent</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="security" current="/security" />
       <main>
         <section className="intro">
           <p className="eyebrow">SECURITY / THREAT MODEL &amp; MEASURED CONTROLS</p>

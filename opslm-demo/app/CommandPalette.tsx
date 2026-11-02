@@ -38,6 +38,12 @@ const ITEMS: Item[] = [
   },
   {
     group: "Go to",
+    label: "Writing",
+    hint: "Write-ups on what the numbers changed",
+    href: "/writing",
+  },
+  {
+    group: "Go to",
     label: "One-page brief",
     hint: "Printable, for hiring managers",
     href: "/brief",

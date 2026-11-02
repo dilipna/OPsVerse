@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import data from "../../public/agent-replays.json";
+import SiteHeader from "../SiteHeader";
 
 const REPO = "https://github.com/dilipna/OPsVerse/blob/main";
 
@@ -52,18 +53,7 @@ export default function AgentPage() {
       <a className="skip" href="#replay">
         Skip to the replay
       </a>
-      <header className="site-header">
-        <a className="wordmark" href="/">
-          RY<span>PE</span>
-          <small> / agent</small>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/troubleshoot">Troubleshoot</a>
-          <a href="/lab">Lab</a>
-          <a href="/security">Security</a>
-          <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
-        </nav>
-      </header>
+      <SiteHeader section="agent" current="/agent" />
       <main>
         <section className="intro">
           <p className="eyebrow">AGENT / RECORDED INVESTIGATIONS</p>
