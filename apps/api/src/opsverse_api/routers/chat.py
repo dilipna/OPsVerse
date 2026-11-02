@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from opsverse_api.db.models import RequestLedger
 from opsverse_api.deps import get_chat_service, get_chat_service_ws
+from opsverse_api.ratelimit import exceeded, rate_limit
 from opsverse_rag import ChatService, ChatTurn, SearchFilters
 from opsverse_rag.chat import ChatDelta, ChatDone, ChatError, ChatEvent, ChatSources
 from opsverse_security import scan_injection
@@ -96,7 +97,7 @@ def _events(service: ChatService, body: ChatRequest):
     )
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(rate_limit("chat"))])
 async def chat(
     body: ChatRequest,
     request: Request,
@@ -157,6 +158,13 @@ async def chat_stream(
     try:
         while True:
             payload = await websocket.receive_json()
+            # One socket can carry many questions, so the chat budget is
+            # charged per message, not per connection (threat model T-10).
+            if over := await exceeded(websocket, "chat"):
+                await websocket.send_json(
+                    {"type": "error", "message": "rate limit exceeded", "retry_after": over[1]}
+                )
+                continue
             try:
                 body = ChatRequest.model_validate(payload)
             except ValidationError as exc:

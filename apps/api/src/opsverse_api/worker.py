@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from opsverse_api.db.models import Chunk, Document, IngestJob, utcnow
 from opsverse_api.db.session import build_sessionmaker
+from opsverse_api.safe_fetch import fetch_public_url
 from opsverse_core.object_store import ObjectStore
 from opsverse_core.settings import get_settings
 from opsverse_ingestion import PipelineResult, ingest_bytes
@@ -25,17 +26,12 @@ from opsverse_ingestion.parsers import SUPPORTED_EXTENSIONS, UnsupportedDocument
 from opsverse_ingestion.parsers.common import DecodingError
 from opsverse_rag import ChunkPoint, QdrantStore
 from opsverse_rag.embeddings import FastEmbedEmbedder
-from opsverse_security.netguard import Resolver, UnsafeURLError, resolve_public_url
 
 MAX_REPO_FILES = 300
 MAX_REPO_MEMBER_BYTES = 2 * 1024 * 1024
 # PDFs are excluded from repo walks: parsing them requires the optional
 # docling extra and repo PDFs are rarely worth the cost.
 REPO_EXTENSIONS = SUPPORTED_EXTENSIONS - {".pdf"}
-
-# URL ingestion limits (SSRF and resource-exhaustion controls, threat model T-07).
-MAX_URL_BYTES = 20 * 1024 * 1024
-MAX_URL_REDIRECTS = 5
 
 EMBED_BATCH = 32
 # Stop sweeping well before WorkerSettings.job_timeout (600s) and re-enqueue;
@@ -105,42 +101,6 @@ async def _ingest_upload(
     _merge_stats(stats, result)
     stats["reject_reasons"] = result.stats.reject_reasons
     return stats
-
-
-async def fetch_public_url(
-    uri: str,
-    *,
-    transport: httpx.AsyncBaseTransport | None = None,
-    resolver: Resolver | None = None,
-) -> bytes:
-    """GET a user-supplied URL without letting it reach internal addresses.
-
-    Redirects are followed by hand so every hop is re-checked; automatic
-    following would let a public URL bounce the worker to an internal one.
-    The body is streamed and capped so a huge response cannot exhaust memory.
-    """
-    check = partial(resolve_public_url, resolver=resolver) if resolver else resolve_public_url
-    url = uri
-    async with httpx.AsyncClient(
-        timeout=30.0, follow_redirects=False, transport=transport
-    ) as client:
-        for _ in range(MAX_URL_REDIRECTS + 1):
-            await anyio.to_thread.run_sync(check, url)
-            async with client.stream("GET", url) as response:
-                if response.is_redirect:
-                    location = response.headers.get("location")
-                    if not location:
-                        raise UnsafeURLError("redirect without a Location header")
-                    url = str(response.url.join(location))
-                    continue
-                response.raise_for_status()
-                body = bytearray()
-                async for piece in response.aiter_bytes():
-                    body.extend(piece)
-                    if len(body) > MAX_URL_BYTES:
-                        raise UnsafeURLError(f"response exceeds {MAX_URL_BYTES} bytes")
-                return bytes(body)
-    raise UnsafeURLError(f"more than {MAX_URL_REDIRECTS} redirects")
 
 
 async def _ingest_url(ctx: dict[str, Any], session: AsyncSession, job: IngestJob) -> dict[str, Any]:

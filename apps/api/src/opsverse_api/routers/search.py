@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from opsverse_api.deps import get_retriever
+from opsverse_api.ratelimit import rate_limit
 from opsverse_rag import RetrievedChunk, Retriever, SearchFilters, SearchMode
 
 router = APIRouter(prefix="/search", tags=["search"])
@@ -21,7 +22,7 @@ class SearchResponse(BaseModel):
     hits: list[RetrievedChunk]
 
 
-@router.post("", response_model=SearchResponse)
+@router.post("", response_model=SearchResponse, dependencies=[Depends(rate_limit("search"))])
 async def search(
     body: SearchRequest, retriever: Annotated[Retriever, Depends(get_retriever)]
 ) -> SearchResponse:

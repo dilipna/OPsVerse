@@ -100,6 +100,12 @@ class Settings(BaseSettings):
     # any other environment refuses ingestion rather than run it open.
     admin_api_key: str | None = None
 
+    # Per-client requests per minute, by route group (threat model T-10).
+    # 0 disables a group's limit.
+    rate_limit_chat_per_minute: int = 20
+    rate_limit_search_per_minute: int = 60
+    rate_limit_ingest_per_minute: int = 10
+
     # Browser origins allowed to call the API (the Next.js dev server).
     cors_origins: list[str] = ["http://localhost:3000"]
 

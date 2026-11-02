@@ -1,11 +1,12 @@
 """API-level security controls: ingest authentication, SSRF guard, upload names."""
 
+import httpcore
 import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from opsverse_api.routers.ingest import safe_filename
-from opsverse_api.worker import fetch_public_url
+from opsverse_api.safe_fetch import PinnedNetworkBackend, PinnedTransport, fetch_public_url
 from opsverse_core.settings import get_settings
 from opsverse_security.netguard import UnsafeURLError
 
@@ -143,3 +144,60 @@ async def test_chat_and_search_reject_oversized_input(env):
     assert chat.status_code == 422
     assert search.status_code == 422
     assert history.status_code == 422
+
+
+class RecordingBackend(httpcore.AsyncMockBackend):
+    """Mock network that records which address a connection was opened to."""
+
+    def __init__(self, response: bytes):
+        super().__init__([response])
+        self.hosts: list[str] = []
+
+    async def connect_tcp(self, host, port, timeout=None, local_address=None, socket_options=None):
+        self.hosts.append(host)
+        return await super().connect_tcp(host, port, timeout, local_address, socket_options)
+
+
+OK_RESPONSE = b"HTTP/1.1 200 OK\r\nContent-Length: 7\r\n\r\n# Pods\n"
+
+
+async def test_connection_goes_to_the_checked_address_not_a_new_lookup():
+    inner = RecordingBackend(OK_RESPONSE)
+    backend = PinnedNetworkBackend(resolver=public_resolver, inner=inner)
+    body = await fetch_public_url(
+        "http://docs.example.org/pods",
+        transport=PinnedTransport(backend),
+        resolver=public_resolver,
+    )
+    assert body == b"# Pods\n"
+    # The socket was opened to the validated IP, never to the hostname, so no
+    # second DNS lookup happened between check and connect.
+    assert inner.hosts == ["93.184.215.14"]
+    assert backend.connected == [("docs.example.org", "93.184.215.14", 80)]
+
+
+async def test_dns_rebinding_between_check_and_connect_is_refused():
+    answers = iter([["93.184.215.14"], ["169.254.169.254"]])
+
+    def rebinding(host: str, port: int) -> list[str]:
+        return next(answers)  # public for the pre-check, metadata IP at connect
+
+    inner = RecordingBackend(OK_RESPONSE)
+    with pytest.raises(UnsafeURLError, match="non-public"):
+        await fetch_public_url(
+            "http://rebind.example.org/",
+            transport=PinnedTransport(PinnedNetworkBackend(resolver=rebinding, inner=inner)),
+            resolver=rebinding,
+        )
+    assert inner.hosts == []  # no connection was ever opened
+
+
+async def test_pinned_transport_ignores_proxy_environment(monkeypatch):
+    monkeypatch.setenv("HTTPS_PROXY", "http://10.0.0.1:3128")
+    monkeypatch.setenv("HTTP_PROXY", "http://10.0.0.1:3128")
+    inner = RecordingBackend(OK_RESPONSE)
+    backend = PinnedNetworkBackend(resolver=public_resolver, inner=inner)
+    await fetch_public_url(
+        "http://docs.example.org/", transport=PinnedTransport(backend), resolver=public_resolver
+    )
+    assert inner.hosts == ["93.184.215.14"]  # target, not the proxy

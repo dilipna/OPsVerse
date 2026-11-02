@@ -10,7 +10,8 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from opsverse_api.db.session import build_sessionmaker
-from opsverse_api.routers import chat, costs, evals, health, ingest, search
+from opsverse_api.ratelimit import RateLimiter
+from opsverse_api.routers import chat, costs, evals, health, ingest, search, security
 from opsverse_core.object_store import ObjectStore
 from opsverse_core.settings import get_settings
 from opsverse_core.tracing import build_tracer
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
     app.state.db_engine = create_async_engine(settings.database_url)
     app.state.db_sessionmaker = build_sessionmaker(app.state.db_engine)
     app.state.redis = Redis.from_url(settings.redis_url)
+    app.state.rate_limiter.redis = app.state.redis  # shared counters across replicas
     app.state.qdrant = AsyncQdrantClient(url=settings.qdrant_url)
     app.state.http = httpx.AsyncClient(timeout=5.0)
     app.state.object_store = ObjectStore(settings)
@@ -55,6 +57,8 @@ def create_app() -> FastAPI:
         description="LLM engineering platform for the DevOps/MLOps/LLMOps community.",
         lifespan=lifespan,
     )
+    # In-process until the lifespan attaches Redis (tests never start it).
+    app.state.rate_limiter = RateLimiter()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=get_settings().cors_origins,
@@ -67,6 +71,7 @@ def create_app() -> FastAPI:
     app.include_router(chat.router, prefix="/v1")
     app.include_router(costs.router, prefix="/v1")
     app.include_router(evals.router, prefix="/v1")
+    app.include_router(security.router, prefix="/v1")
     return app
 
 

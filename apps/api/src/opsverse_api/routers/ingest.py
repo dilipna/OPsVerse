@@ -12,11 +12,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from opsverse_api.db.models import Document, IngestJob
 from opsverse_api.deps import get_arq_pool, get_object_store, get_session, require_admin
+from opsverse_api.ratelimit import rate_limit
 from opsverse_core.object_store import ObjectStore
 from opsverse_security.netguard import UnsafeURLError, check_url_shape
 
 # Every ingest route writes to, or reports on, the shared corpus: admin only.
-router = APIRouter(prefix="/ingest", tags=["ingest"], dependencies=[Depends(require_admin)])
+router = APIRouter(
+    prefix="/ingest",
+    tags=["ingest"],
+    dependencies=[Depends(require_admin), Depends(rate_limit("ingest"))],
+)
 
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 

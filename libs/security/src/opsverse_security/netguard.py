@@ -13,10 +13,11 @@ Two checks, used at two points:
   be publicly routable. Run in the worker immediately before each fetch,
   including every redirect hop.
 
-Residual risk, stated rather than hidden: a hostile DNS server can return a
-public address to the check and a private one to the HTTP client moments later
-(DNS rebinding). Pinning the connection to the checked address closes that gap
-and is listed in docs/security/threat-model.md.
+A check followed by a separate lookup in the HTTP client would leave a window:
+a hostile DNS server can answer the check with a public address and the client
+moments later with a private one (DNS rebinding). The worker closes it by
+connecting through `opsverse_api.safe_fetch`, whose network backend resolves
+with `resolve_public_host` and connects to exactly the address it checked.
 """
 
 from __future__ import annotations
@@ -82,6 +83,17 @@ def check_url_shape(url: str) -> tuple[str, int]:
 def resolve_public_url(url: str, resolver: Resolver = _default_resolver) -> list[str]:
     """Require every resolved address of the URL's host to be public."""
     host, port = check_url_shape(url)
+    return resolve_public_host(host, port, resolver)
+
+
+def resolve_public_host(host: str, port: int, resolver: Resolver = _default_resolver) -> list[str]:
+    """Resolve `host` and require every address to be publicly routable.
+
+    Callers that then connect should connect to one of the returned addresses,
+    not resolve again: a second lookup is exactly the DNS-rebinding window.
+    """
+    if host in _BLOCKED_HOSTNAMES or host.endswith(_BLOCKED_SUFFIXES):
+        raise UnsafeURLError(f"host {host!r} is internal")
     try:
         addresses = resolver(host, port)
     except OSError as exc:
