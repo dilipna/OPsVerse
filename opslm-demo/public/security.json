@@ -4,8 +4,9 @@
     "docs/reports/security-robustness-v1-summary.json",
     "docs/reports/security-redteam-v1-summary.json",
     "docs/security/threat-model.md",
-    "docs/reports/security-benchmark-regex-v1-summary.json"
+    "docs/reports/security-classifier-v1-summary.json"
   ],
+  "classifier_model": "openai/gpt-4o-mini",
   "external": [
     {
       "name": "deepset-test",
@@ -16,11 +17,17 @@
         0.0466,
         0.2015
       ],
-      "fpr": 0,
-      "fpr_ci95": [
+      "layered_tpr": 0.45,
+      "layered_tpr_ci95": [
+        0.3309,
+        0.5751
+      ],
+      "layered_fpr": 0,
+      "layered_fpr_ci95": [
         0,
         0.0642
-      ]
+      ],
+      "llm_errors": 0
     },
     {
       "name": "deepset-train",
@@ -31,11 +38,17 @@
         0.0453,
         0.1183
       ],
-      "fpr": 0,
-      "fpr_ci95": [
+      "layered_tpr": 0.5862,
+      "layered_tpr_ci95": [
+        0.5175,
+        0.6517
+      ],
+      "layered_fpr": 0,
+      "layered_fpr_ci95": [
         0,
         0.0111
-      ]
+      ],
+      "llm_errors": 0
     }
   ],
   "redteam": {

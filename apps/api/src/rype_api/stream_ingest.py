@@ -32,6 +32,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from rype_api.db.models import Chunk, Document, IngestJob, utcnow
 from rype_api.db.session import build_sessionmaker
+from rype_api.injection_layer import pipeline_options
 from rype_core.settings import get_settings
 from rype_core.streaming import StreamConsumer, StreamEvent, StreamProducer, StreamRedis
 from rype_ingestion import PipelineResult, ingest_bytes
@@ -74,7 +75,7 @@ class DbStreamHandler:
         filename = event.filename or PurePosixPath(event.uri).name or "event.txt"
         try:
             result: PipelineResult = await anyio.to_thread.run_sync(
-                partial(ingest_bytes, raw, filename, event.tool)
+                partial(ingest_bytes, raw, filename, event.tool, **pipeline_options())
             )
         except (UnsupportedDocumentError, DecodingError, ImportError):
             # Non-retryable: the bytes will never parse. Raise so the consumer

@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from rype_api.db.models import Chunk, Document, IngestJob, utcnow
 from rype_api.db.session import build_sessionmaker
+from rype_api.injection_layer import pipeline_options
 from rype_api.safe_fetch import fetch_public_url
 from rype_core.object_store import ObjectStore
 from rype_core.settings import get_settings
@@ -51,7 +52,10 @@ def _get_embedder() -> FastEmbedEmbedder:
 
 
 async def _run_pipeline(raw: bytes, source: str, tool: str | None) -> PipelineResult:
-    return await anyio.to_thread.run_sync(partial(ingest_bytes, raw, source, tool))
+    # pipeline_options() adds the optional LLM injection layer (threat model T-01).
+    return await anyio.to_thread.run_sync(
+        partial(ingest_bytes, raw, source, tool, **pipeline_options())
+    )
 
 
 def _apply_result(session: AsyncSession, document: Document, result: PipelineResult) -> None:

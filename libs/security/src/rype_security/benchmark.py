@@ -264,11 +264,12 @@ def evaluate(
             progress(n)
     result: dict[str, Any] = {name: s.summary() for name, s in scores.items()}
     if llm is not None:
+        # Unrounded: an exact p of ~1e-31 must not be stored as 0.0.
         result["layering"] = {
             "attacks_gained": gained,
-            "attacks_gained_p": round(mcnemar_exact(0, gained), 6),
+            "attacks_gained_p": mcnemar_exact(0, gained),
             "false_alarms_added": added_false_alarms,
-            "false_alarms_added_p": round(mcnemar_exact(0, added_false_alarms), 6),
+            "false_alarms_added_p": mcnemar_exact(0, added_false_alarms),
         }
     return result
 
@@ -281,6 +282,10 @@ def _fmt(summary: dict[str, Any], key: str) -> str:
     if value is None or ci is None:
         return "n/a"
     return f"{value:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]"
+
+
+def _p(value: float) -> str:
+    return "< 1e-6" if value < 1e-6 else f"= {value:.3g}"
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -317,8 +322,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines += [
                 "",
                 f"Layering the LLM on the regexes caught {m['attacks_gained']} more attacks "
-                f"(exact McNemar p = {m['attacks_gained_p']}) and raised "
-                f"{m['false_alarms_added']} more false alarms (p = {m['false_alarms_added_p']}).",
+                f"(exact McNemar p {_p(m['attacks_gained_p'])}) and raised "
+                f"{m['false_alarms_added']} more false alarms (p {_p(m['false_alarms_added_p'])}).",
             ]
         lines.append("")
     lines += [

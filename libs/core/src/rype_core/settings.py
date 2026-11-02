@@ -105,6 +105,17 @@ class Settings(BaseSettings):
     # any other environment refuses ingestion rather than run it open.
     admin_api_key: str | None = None
 
+    # Optional second injection layer at ingest (threat model T-01): an LLM
+    # classifier over an OpenAI-compatible API, applied to every chunk the regex
+    # scan passes. Off unless a model is set; see security-classifier-v1.
+    injection_llm_model: str | None = None
+    injection_llm_base_url: str = "https://openrouter.ai/api/v1"
+    injection_llm_fail_closed: bool = True
+    openrouter_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("OPENROUTER_API_KEY", "RYPE_OPENROUTER_API_KEY"),
+    )
+
     # Per-client requests per minute, by route group (threat model T-10).
     # 0 disables a group's limit.
     rate_limit_chat_per_minute: int = 20

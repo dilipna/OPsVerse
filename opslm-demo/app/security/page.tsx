@@ -127,19 +127,21 @@ export default function SecurityPage() {
         <section className="evidence">
           <h2>And on data it was never tuned on?</h2>
           <p className="intake-note">
-            The same regex detector, scored on an external, openly licensed dataset
-            (deepset/prompt-injections, pinned to a commit and file hash). Recall with 95% Wilson
-            intervals.
+            Both layers scored on an external, openly licensed dataset (deepset/prompt-injections,
+            pinned to a commit and file hash). Recall with 95% Wilson intervals; the second layer is{" "}
+            <code>{security.classifier_model}</code> reading each text as data inside a random
+            boundary.
           </p>
           <div className="study-table-wrap">
             <table className="study-table">
-              <caption>Regex detector on external data</caption>
+              <caption>Injection recall on external data</caption>
               <thead>
                 <tr>
                   <th scope="col">Split</th>
                   <th scope="col">Attacks</th>
-                  <th scope="col">Recall</th>
-                  <th scope="col">False-positive rate</th>
+                  <th scope="col">Regex only</th>
+                  <th scope="col">Regex + LLM layer</th>
+                  <th scope="col">False-positive rate, layered</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,7 +153,12 @@ export default function SecurityPage() {
                       {pct(row.tpr)} ({pct(row.tpr_ci95[0])}–{pct(row.tpr_ci95[1])})
                     </td>
                     <td>
-                      {pct(row.fpr)} ({pct(row.fpr_ci95[0])}–{pct(row.fpr_ci95[1])})
+                      {pct(row.layered_tpr)} ({pct(row.layered_tpr_ci95[0])}–
+                      {pct(row.layered_tpr_ci95[1])})
+                    </td>
+                    <td>
+                      {pct(row.layered_fpr)} ({pct(row.layered_fpr_ci95[0])}–
+                      {pct(row.layered_fpr_ci95[1])})
                     </td>
                   </tr>
                 ))}
@@ -159,11 +166,12 @@ export default function SecurityPage() {
             </table>
           </div>
           <p className="intake-note">
-            Perfect on its own test set, under one attack in ten on someone else&apos;s. The regexes
-            are a precise filter for the phrasings they were written for, not a detector of
-            injection in general. That gap is why an LLM classifier is being benchmarked as a second
-            layer, and why it ships only if it measurably earns its cost.{" "}
-            <a href={`${REPO}/docs/reports/security-benchmark-regex-v1.md`}>Full report ↗</a>
+            Perfect on its own test set, the regex layer catches under one attack in ten on someone
+            else&apos;s. Adding the LLM layer lifts recall to roughly half or more with no added
+            false alarms (exact McNemar tests in the report), so it now runs at ingest when
+            configured, failing closed. Roughly four in ten attacks still pass both layers, which is
+            why output handling, least privilege and monitoring stay in place behind them.{" "}
+            <a href={`${REPO}/docs/reports/security-classifier-v1.md`}>Full report ↗</a>
           </p>
         </section>
 

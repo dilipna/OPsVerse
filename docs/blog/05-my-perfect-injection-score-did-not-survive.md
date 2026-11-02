@@ -73,6 +73,19 @@ shipping it: the harness scores an LLM classifier on the same pinned rows, repor
 layering *adds* (attacks gained and false alarms added, each with an exact McNemar test), and
 counts classifier errors separately instead of letting them pass as benign.
 
+Then I ran it, with `openai/gpt-4o-mini` reading each text as data inside a random boundary:
+
+| Split | Regex only | Regex + LLM layer | False alarms added |
+|---|---|---|---|
+| train (203 attacks) | 0.074 | **0.586** [0.517, 0.652] | 0 of 343 |
+| test (60 attacks) | 0.10 | **0.45** [0.33, 0.58] | 0 of 56 |
+
+The layer caught 125 more attacks across both splits (exact McNemar p < 1e-6), raised no
+new false alarms, never failed to return a verdict, and cost $0.03 for the whole run. That
+cleared the bar I had set before running it, so it now runs at ingest when configured, failing
+closed. It is not a solution: about four in ten attacks still pass both layers, which is why the
+controls behind ingest (output guard, no state-changing tools, telemetry) are not optional.
+
 ## The bigger hole was on the way out
 
 Re-testing inputs led to the question I had never asked about outputs. The research console

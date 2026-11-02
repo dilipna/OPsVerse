@@ -201,3 +201,33 @@ async def test_pinned_transport_ignores_proxy_environment(monkeypatch):
         "http://docs.example.org/", transport=PinnedTransport(backend), resolver=public_resolver
     )
     assert inner.hosts == ["93.184.215.14"]  # target, not the proxy
+
+
+def test_injection_layer_is_off_without_a_model():
+    from rype_api.injection_layer import build_injection_classifier
+    from rype_core.settings import Settings
+
+    assert build_injection_classifier(Settings(injection_llm_model=None)) is None
+
+
+def test_injection_layer_refuses_a_model_without_a_key(monkeypatch):
+    from rype_api.injection_layer import build_injection_classifier
+    from rype_core.settings import Settings
+
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("RYPE_OPENROUTER_API_KEY", raising=False)
+    with pytest.raises(ValueError, match="OPENROUTER_API_KEY is not"):
+        build_injection_classifier(Settings(injection_llm_model="openai/gpt-4o-mini"))
+
+
+def test_injection_layer_builds_a_classifier_when_configured():
+    from rype_api.injection_layer import build_injection_classifier
+    from rype_core.settings import Settings
+
+    # The key field reads from its environment-variable alias, like GEMINI_API_KEY.
+    settings = Settings.model_validate(
+        {"injection_llm_model": "openai/gpt-4o-mini", "OPENROUTER_API_KEY": "k-test"}
+    )
+    assert settings.openrouter_api_key == "k-test"
+    classify = build_injection_classifier(settings)
+    assert callable(classify)

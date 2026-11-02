@@ -12,7 +12,7 @@ const json = (p) => JSON.parse(text(p));
 const robustness = json("docs/reports/security-robustness-v1-summary.json");
 const redteam = json("docs/reports/security-redteam-v1-summary.json");
 const threatModel = text("docs/security/threat-model.md");
-const external = json("docs/reports/security-benchmark-regex-v1-summary.json");
+const external = json("docs/reports/security-classifier-v1-summary.json");
 
 const transforms = Object.keys(robustness.results)
   .filter((key) => key.startsWith("raw/"))
@@ -56,8 +56,9 @@ const data = {
     "docs/reports/security-robustness-v1-summary.json",
     "docs/reports/security-redteam-v1-summary.json",
     "docs/security/threat-model.md",
-    "docs/reports/security-benchmark-regex-v1-summary.json",
+    "docs/reports/security-classifier-v1-summary.json",
   ],
+  classifier_model: external.model,
   external: Object.entries(external.datasets)
     .filter(([name]) => name.startsWith("deepset"))
     .map(([name, block]) => ({
@@ -66,8 +67,11 @@ const data = {
       benign: block.meta.benign,
       tpr: block.results.regex.tpr,
       tpr_ci95: block.results.regex.tpr_ci95,
-      fpr: block.results.regex.fpr,
-      fpr_ci95: block.results.regex.fpr_ci95,
+      layered_tpr: block.results.regex_or_llm.tpr,
+      layered_tpr_ci95: block.results.regex_or_llm.tpr_ci95,
+      layered_fpr: block.results.regex_or_llm.fpr,
+      layered_fpr_ci95: block.results.regex_or_llm.fpr_ci95,
+      llm_errors: block.results.llm.errors,
     })),
   redteam: {
     attacks: redteam.detail.attacks,

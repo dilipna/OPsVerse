@@ -45,6 +45,7 @@ class PipelineStats(BaseModel):
     secrets_redacted: int = 0
     quarantined: bool = False  # ingest-time injection scan flagged this document
     quarantine_reasons: list[str] = Field(default_factory=list)
+    llm_checked_chunks: int = 0  # chunks sent to the optional LLM classifier layer
 
 
 def estimate_tokens(text: str) -> int:

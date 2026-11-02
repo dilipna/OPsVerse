@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from pydantic import BaseModel
 
 from rype_ingestion.chunking import chunk_document
@@ -30,7 +32,19 @@ class PipelineResult(BaseModel):
     stats: PipelineStats
 
 
-def ingest_bytes(raw: bytes, source: str, tool: str | None = None) -> PipelineResult:
+# Second injection layer: chunk text -> True (injection), False (clean) or None
+# (the classifier failed). Kept as a plain callable so this library does no I/O.
+InjectionClassifier = Callable[[str], bool | None]
+
+
+def ingest_bytes(
+    raw: bytes,
+    source: str,
+    tool: str | None = None,
+    *,
+    llm_classifier: InjectionClassifier | None = None,
+    llm_fail_closed: bool = True,
+) -> PipelineResult:
     """Full pipeline for one document: parse -> chunk -> quality gates.
 
     Raises UnsupportedDocumentError / DecodingError for input the pipeline
@@ -55,6 +69,20 @@ def ingest_bytes(raw: bytes, source: str, tool: str | None = None) -> PipelineRe
     if verdict.is_suspicious:
         stats.quarantined = True
         stats.quarantine_reasons = verdict.matched
+    elif llm_classifier is not None:
+        # Second layer (security-classifier-v1): on external data the regexes
+        # catch ~7% of injections; adding this layer raised recall to ~59% with
+        # no added false alarms. Checked per chunk, the unit closest to the short
+        # texts it was benchmarked on; stops at the first flag. An error fails
+        # closed by default, so an outage cannot wave documents through.
+        for draft in kept:
+            stats.llm_checked_chunks += 1
+            flagged = llm_classifier(draft.text)
+            if flagged or (flagged is None and llm_fail_closed):
+                stats.quarantined = True
+                stats.quarantine_reasons = ["llm_classifier" if flagged else "llm_classifier_error"]
+                break
+    if stats.quarantined:
         stats.chunks_kept = 0
         kept = []
 
