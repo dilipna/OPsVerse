@@ -155,7 +155,12 @@ def _execute(
     result: AgentResult,
 ) -> str:
     if name == "kubectl":
-        decision = check_kubectl(args.get("command"))
+        command = args.get("command")
+        # The tool is named kubectl, so models often omit the prefix. Adding it
+        # changes nothing about what is allowed: the full command is checked.
+        if isinstance(command, str) and not command.strip().startswith("kubectl"):
+            command = f"kubectl {command.strip()}"
+        decision = check_kubectl(command)
         record = StepRecord(tool=name, arguments=args, allowed=decision.allowed)
         if not decision.allowed:
             record.denial_reason = decision.reason

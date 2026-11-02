@@ -139,3 +139,17 @@ def test_tool_messages_follow_openai_shape():
 def test_every_scenario_label_is_allowed_and_has_a_pod(scenario):
     assert scenario.root_cause in DOC["root_causes"]
     assert scenario.pods
+
+
+def test_missing_kubectl_prefix_is_added_before_the_policy_check():
+    result, chat = agent(
+        [
+            call("kubectl", 0, command="get pods -n shop"),
+            call("kubectl", 1, command="delete pod web -n shop"),
+            finish(),
+        ]
+    )
+    assert result.steps[0].allowed is True
+    assert "ImagePullBackOff" in chat.seen[1][-1]["content"]
+    assert result.steps[1].allowed is False  # still refused once prefixed
+    assert result.steps[1].denial_reason == "verb not allowed: delete"
