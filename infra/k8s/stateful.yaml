@@ -14,10 +14,24 @@ spec:
     metadata:
       labels: { app: postgres }
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 70 # the alpine image's postgres user
+        runAsGroup: 70
+        fsGroup: 70 # makes the PVC writable by that user
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: postgres
           image: postgres:16-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
           env:
+            # A subdirectory: the volume root may hold lost+found, which initdb rejects.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_USER
               value: opsverse
             - name: POSTGRES_DB
@@ -31,9 +45,21 @@ spec:
             exec: { command: ["pg_isready", "-U", "opsverse", "-d", "opsverse"] }
             initialDelaySeconds: 5
             periodSeconds: 5
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "1Gi" }
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql/data
+            - name: run # unix socket and lock file
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: { sizeLimit: 256Mi }
   volumeClaimTemplates:
     - metadata: { name: pgdata }
       spec:
@@ -63,18 +89,42 @@ spec:
     metadata:
       labels: { app: qdrant }
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000 # the -unprivileged image's user
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: qdrant
-          image: qdrant/qdrant:v1.12.4
+          # Qdrant's official non-root variant; the default tag runs as root.
+          image: qdrant/qdrant:v1.12.4-unprivileged
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
           ports:
             - containerPort: 6333
           readinessProbe:
             tcpSocket: { port: 6333 }
             initialDelaySeconds: 5
             periodSeconds: 5
+          resources:
+            requests: { cpu: "250m", memory: "512Mi" }
+            limits: { cpu: "2", memory: "2Gi" }
           volumeMounts:
             - name: qdrant-data
               mountPath: /qdrant/storage
+            - name: snapshots
+              mountPath: /qdrant/snapshots
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: snapshots
+          emptyDir: { sizeLimit: 2Gi }
+        - name: tmp
+          emptyDir: { sizeLimit: 256Mi }
   volumeClaimTemplates:
     - metadata: { name: qdrant-data }
       spec:
@@ -104,11 +154,26 @@ spec:
     metadata:
       labels: { app: minio }
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: minio
           image: minio/minio:latest
           args: ["server", "/data", "--console-address", ":9001"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
           env:
+            # MinIO and its `mc` readiness check keep config under $HOME, and an
+            # arbitrary non-root UID has no writable home on a read-only root.
+            - name: HOME
+              value: /tmp
             - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef: { name: opsverse-secrets, key: MINIO_ROOT_USER }
@@ -121,9 +186,17 @@ spec:
             exec: { command: ["mc", "ready", "local"] }
             initialDelaySeconds: 5
             periodSeconds: 5
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "1Gi" }
           volumeMounts:
             - name: minio-data
               mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 256Mi }
   volumeClaimTemplates:
     - metadata: { name: minio-data }
       spec:

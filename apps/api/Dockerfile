@@ -15,9 +15,12 @@ RUN uv sync --frozen --no-dev --package opsverse-api
 
 FROM python:3.12-slim-bookworm
 WORKDIR /app
-RUN groupadd -r opsverse && useradd -r -g opsverse opsverse
+# Fixed numeric UID/GID: Kubernetes can only verify runAsNonRoot against a number
+# (infra/k8s sets runAsUser: 10001 to match).
+RUN groupadd -r -g 10001 opsverse && useradd -r -u 10001 -g opsverse opsverse
 COPY --from=builder --chown=opsverse:opsverse /app /app
-ENV PATH="/app/.venv/bin:$PATH"
-USER opsverse
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1
+USER 10001
 EXPOSE 8000
 CMD ["uvicorn", "opsverse_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

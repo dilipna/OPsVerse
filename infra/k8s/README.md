@@ -30,6 +30,19 @@ Namespace: opsverse
 | `worker.yaml` | arq worker Deployment (no Service; consumes the Redis queue) |
 | `ingress.yaml` | Ingress routing `/` → API (TLS annotation left to the cluster) |
 
+## Security posture
+
+Every workload runs as a non-root numeric UID (the API image pins UID 10001) with a
+read-only root filesystem, all Linux capabilities dropped, privilege escalation off,
+the default seccomp profile, no service-account token, and resource limits. Each
+container gets writable `emptyDir` mounts only where its software must write (temp
+files, sockets, the embedding-model cache). Qdrant uses its official `-unprivileged`
+image. CI scans these manifests with Trivy and fails on any HIGH or CRITICAL finding.
+
+Trivy validates the configuration; it does not prove the pods start. The manifests
+are still not applied to a live cluster (see above), so a first deployment should
+watch for permission errors on the writable paths listed in each manifest.
+
 ## Production notes (what would change from Compose)
 
 - **Secrets**: `Secret/opsverse-secrets` here is a placeholder; in a real

@@ -4,8 +4,10 @@ metadata:
   name: opsverse-config
   namespace: opsverse
 data:
+  OPSVERSE_ENVIRONMENT: prod # ingestion fails closed without an admin key
+  # OPSVERSE_DATABASE_URL is set per container in api.yaml / worker.yaml: it
+  # embeds DB_PASSWORD, and $(VAR) expansion does not work in ConfigMap data.
   # In-cluster service DNS names (see stateful.yaml / redis.yaml).
-  OPSVERSE_DATABASE_URL: postgresql+asyncpg://opsverse:$(DB_PASSWORD)@postgres:5432/opsverse
   OPSVERSE_REDIS_URL: redis://redis:6379/0
   OPSVERSE_QDRANT_URL: http://qdrant:6333
   OPSVERSE_MINIO_ENDPOINT: http://minio:9000
@@ -26,3 +28,4 @@ stringData:
   GEMINI_API_KEY: "change-me"
   MINIO_ROOT_USER: "opsverse"
   MINIO_ROOT_PASSWORD: "change-me"
+  ADMIN_API_KEY: "change-me" # required for /v1/ingest and /v1/security

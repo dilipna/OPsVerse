@@ -14,6 +14,15 @@ spec:
     metadata:
       labels: { app: opsverse-worker }
     spec:
+      # Least privilege (Trivy KSV-0014/0118): non-root with a fixed UID matching
+      # the image, no service-account token (nothing here calls the k8s API),
+      # default seccomp profile.
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: worker
           image: ghcr.io/dilipna/opsverse-api:latest
@@ -24,9 +33,33 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef: { name: opsverse-secrets, key: DB_PASSWORD }
+            # $(VAR) expansion works only inside `env`, after the variable it
+            # references, never in ConfigMap data loaded with envFrom.
+            - name: OPSVERSE_DATABASE_URL
+              value: postgresql+asyncpg://opsverse:$(DB_PASSWORD)@postgres:5432/opsverse
             - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef: { name: opsverse-secrets, key: GEMINI_API_KEY }
+            - name: OPSVERSE_ADMIN_API_KEY
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: ADMIN_API_KEY }
+            - name: OPSVERSE_MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: MINIO_ROOT_USER }
+            - name: OPSVERSE_MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef: { name: opsverse-secrets, key: MINIO_ROOT_PASSWORD }
           resources:
             requests: { cpu: "500m", memory: "1Gi" }
             limits: { cpu: "2", memory: "2Gi" }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            # The only writable path: temp files and the fastembed model cache.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 2Gi }
