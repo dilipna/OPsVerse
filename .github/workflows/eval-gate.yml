@@ -10,6 +10,7 @@ name: Eval Gate
 # shared with development and a CI consumer could starve it (ADR-0005).
 
 on:
+  workflow_dispatch: # manual runs, e.g. to verify a branch before opening a PR
   pull_request:
     paths:
       - "libs/rag/**"

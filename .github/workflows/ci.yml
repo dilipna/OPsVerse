@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch: # manual runs, e.g. to verify a branch before opening a PR
   push:
     branches: [main]
   pull_request:
