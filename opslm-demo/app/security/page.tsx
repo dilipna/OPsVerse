@@ -65,7 +65,8 @@ export default function SecurityPage() {
         <nav aria-label="Main navigation">
           <a href="/troubleshoot">Troubleshoot</a>
           <a href="/study">Evaluation</a>
-          <a href="/engineering">Engineering</a>
+          <a href="/lab">Lab</a>
+          <a href="/agent">Agent</a>
           <a href="https://github.com/dilipna/OPsVerse">GitHub ↗</a>
         </nav>
       </header>

@@ -5,7 +5,9 @@
 to show that an agent's security properties can be enforced in code and measured,
 not just requested in a prompt.
 
-Results: [agent-v1 report](reports/agent-v1.md). Threat model rows: T-01, T-03, T-08 in
+Results: [agent-v1 report](reports/agent-v1.md). Recorded runs can be stepped through on the
+live site at [/agent](https://ops-verse.vercel.app/agent); the command policy can be tried at
+[/lab](https://ops-verse.vercel.app/lab). Threat model rows: T-01, T-03, T-08 in
 [threat-model.md](security/threat-model.md).
 
 ## Loop

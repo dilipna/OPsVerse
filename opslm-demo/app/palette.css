@@ -1,0 +1,159 @@
+/* Site-wide command palette (⌘K). Loaded from the root layout. */
+.palette-hint {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #2f4a3a;
+  background: rgba(11, 14, 17, 0.88);
+  backdrop-filter: blur(8px);
+  color: #cfe9da;
+  font:
+    600 13px Arial,
+    sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  min-height: 0;
+}
+.palette-hint:hover {
+  border-color: #9ce5b8;
+}
+.palette-hint kbd,
+.palette kbd,
+.hero-hint kbd {
+  font:
+    11px "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+  padding: 2px 6px;
+  border: 1px solid #3b4b42;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  color: #cfe9da;
+  background: #121915;
+}
+.palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(3, 6, 5, 0.66);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+  animation: palette-fade 0.12s ease;
+}
+@keyframes palette-fade {
+  from {
+    opacity: 0;
+  }
+}
+.palette {
+  width: min(640px, 100%);
+  background: #0d1210;
+  border: 1px solid #2f4a3a;
+  border-radius: 12px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  color: #e9edef;
+  animation: palette-in 0.16s ease;
+}
+@keyframes palette-in {
+  from {
+    transform: translateY(-8px) scale(0.98);
+    opacity: 0;
+  }
+}
+.palette input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #22302a;
+  background: transparent;
+  color: #f2f7f4;
+  font-size: 17px;
+  padding: 18px 20px;
+  outline: none;
+}
+.palette ul {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  max-height: min(52vh, 440px);
+  overflow-y: auto;
+}
+.palette li {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-areas: "g l" "g h";
+  column-gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.palette li.active {
+  background: #15241c;
+  box-shadow: inset 2px 0 0 #9ce5b8;
+}
+.palette li small {
+  grid-area: g;
+  font:
+    10px "SFMono-Regular",
+    Menlo,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #e9c46a;
+  padding-top: 3px;
+}
+.palette li span {
+  grid-area: l;
+  font-size: 14.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.palette li em {
+  grid-area: h;
+  font-style: normal;
+  font-size: 12px;
+  color: #7f9488;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.palette .palette-empty {
+  display: block;
+  color: #7f9488;
+  cursor: default;
+}
+.palette footer {
+  padding: 10px 16px;
+  border-top: 1px solid #22302a;
+  font-size: 12px;
+  color: #7f9488;
+}
+@media (max-width: 650px), (hover: none) {
+  .palette-hint {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .palette li {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "g" "l" "h";
+  }
+}
+@media print {
+  .palette-hint,
+  .palette-backdrop {
+    display: none !important;
+  }
+}

@@ -99,7 +99,7 @@ Evidence: [failure-taxonomy-v1](reports/failure-taxonomy-v1.md) · [ADR-0020](ad
 ## Where everything else lives
 
 **1. The overturns** — `docs/evidence.md`  
-This page. Seven claims the project tested and had to withdraw.
+This page. Eight claims the project tested and had to withdraw.
 
 **2. The measured inference result** — `docs/reports/inference-benchmark-v1.md`  
 vLLM vs Ollama on one Tesla T4, one harness. Raw JSON in `benchmarks/results/`; visual dashboard in `benchmarks/dashboard.html` (self-contained).

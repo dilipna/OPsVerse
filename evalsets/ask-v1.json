@@ -1,0 +1,32 @@
+{
+  "name": "ask-v1",
+  "note": "Questions a recruiter or interviewer might ask about the project, each with the files that answer it. Written before the retriever was run. The dev split may be used to tune lib/ask.mjs; the heldout split is reported but never used for tuning.",
+  "dev": [
+    {"q": "How do you defend against prompt injection in retrieved documents?", "expect": ["docs/security/threat-model.md", "docs/adr/0007-layered-security-heuristics-over-presidio.md", "docs/blog/02-the-document-is-the-attack-surface.md", "docs/blog/05-my-perfect-injection-score-did-not-survive.md"]},
+    {"q": "Why did you choose Qdrant instead of pgvector?", "expect": ["docs/adr/0002-qdrant-over-pgvector-and-pinecone.md"]},
+    {"q": "Which embedding model do you use and why?", "expect": ["docs/adr/0003-fastembed-bge-base-hybrid.md", "docs/adr/0021-embedding-model-ablation.md", "docs/reports/embedding-ablation-v1.md"]},
+    {"q": "How was the LLM judge validated against human labels?", "expect": ["docs/adr/0022-judge-validation-against-a-second-rater.md", "docs/reports/judge-validation-v2.md", "docs/reports/judge-validation-v1.md", "docs/blog/04-who-grades-the-grader.md"]},
+    {"q": "What can the Kubernetes agent not do?", "expect": ["docs/agent.md", "docs/reports/agent-v1.md"]},
+    {"q": "How do you prevent SSRF when fetching URLs?", "expect": ["docs/security/threat-model.md"]},
+    {"q": "What are the known limitations?", "expect": ["docs/limitations.md", "docs/agent.md", "docs/claims.md"]},
+    {"q": "Did a reranker improve retrieval?", "expect": ["docs/reports/retrieval-ablation-v3.md", "docs/reports/retrieval-ablation-v2.md", "docs/adr/0003-fastembed-bge-base-hybrid.md", "docs/evidence.md"]},
+    {"q": "How does the CI evaluation gate work?", "expect": ["docs/adr/0005-ci-eval-gate-committed-fixture.md"]},
+    {"q": "What happens if the injection classifier returns an error?", "expect": ["docs/security/threat-model.md", "docs/reports/security-classifier-v1.md"]},
+    {"q": "How was the OpsLM model fine-tuned?", "expect": ["docs/adr/0009-qwen3-4b-qlora-for-opslm.md", "docs/model-registry.md", "docs/adr/0015-dpo-preference-alignment.md"]},
+    {"q": "How are model weights protected from tampering?", "expect": ["docs/security/threat-model.md", "docs/model-registry.md"]}
+  ],
+  "heldout": [
+    {"q": "Why use hybrid search instead of only dense vectors?", "expect": ["docs/adr/0003-fastembed-bge-base-hybrid.md", "docs/reports/retrieval-ablation-v3.md", "docs/reports/retrieval-ablation-v2.md", "docs/reports/retrieval-ablation-v1.md", "docs/blog/01-eval-first-changed-my-retrieval-twice.md"]},
+    {"q": "How do you measure serving capacity?", "expect": ["docs/adr/0017-slo-constrained-goodput-as-the-capacity-metric.md", "docs/reports/capacity-and-slo-v1.md", "docs/inference-design.md"]},
+    {"q": "Is there rate limiting on the API?", "expect": ["docs/security/threat-model.md"]},
+    {"q": "How are secrets redacted from documents?", "expect": ["docs/security/threat-model.md", "docs/adr/0007-layered-security-heuristics-over-presidio.md"]},
+    {"q": "How is the agent evaluated?", "expect": ["docs/agent.md", "docs/reports/agent-v1.md"]},
+    {"q": "What did the external prompt injection benchmark show?", "expect": ["docs/reports/security-classifier-v1.md", "docs/reports/security-benchmark-regex-v1.md", "docs/blog/05-my-perfect-injection-score-did-not-survive.md"]},
+    {"q": "Why Langfuse for observability?", "expect": ["docs/adr/0010-observability-langfuse-v2-facade.md"]},
+    {"q": "How does ingestion handle large uploads?", "expect": ["docs/adr/0013-streaming-ingestion-redis-streams.md"]},
+    {"q": "How did chunk size affect retrieval quality?", "expect": ["docs/adr/0020-chunking-and-multiturn-ablations.md", "docs/reports/chunking-ablation-v1.md"]},
+    {"q": "Why was DPO used after fine-tuning?", "expect": ["docs/adr/0015-dpo-preference-alignment.md"]},
+    {"q": "How do you avoid evaluation set contamination?", "expect": ["docs/eval-contamination-policy.md"]},
+    {"q": "Was continuous batching faster?", "expect": ["docs/blog/03-measuring-continuous-batching-on-a-free-t4.md", "docs/adr/0014-inference-optimization-techniques.md", "docs/reports/inference-benchmark-v1.md"]}
+  ]
+}

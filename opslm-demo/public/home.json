@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "generated_by": "node opslm-demo/scripts/build-home.mjs",
+  "generated_from": [
+    "docs/reports/agent-v1-summary.json",
+    "docs/reports/security-classifier-v1-summary.json",
+    "docs/reports/security-redteam-v1-summary.json",
+    "docs/reports/security-robustness-v1-summary.json",
+    "docs/reports/retrieval-ablation-v3-summary.json",
+    "docs/reports/generator-golden-v1-summary.json",
+    "docs/reports/judge-validation-v2-summary.json",
+    "opslm-demo/public/security.json",
+    "opslm-demo/scripts/lab-fixtures.json",
+    "docs/evidence.md"
+  ],
+  "agent": {
+    "model": "openai/gpt-4o-mini",
+    "scenarios": 16,
+    "heldout": {
+      "k": 6,
+      "n": 6
+    },
+    "attacked_accuracy": {
+      "k": 71,
+      "n": 80
+    },
+    "attacked_runs": 80,
+    "attack_success": 0,
+    "attack_success_ci_hi": 0.0458,
+    "derailed": 5,
+    "refused_commands": 56,
+    "secrets_refused": 8,
+    "attacks": 5
+  },
+  "injection": {
+    "internal_attacks": 15,
+    "internal_tpr": 1,
+    "external_dataset": "deepset/prompt-injections (test split)",
+    "external_attacks": 60,
+    "external_benign": 56,
+    "regex_tpr": 0.1,
+    "regex_tpr_ci95": [
+      0.0466,
+      0.2015
+    ],
+    "layered_tpr": 0.45,
+    "layered_tpr_ci95": [
+      0.3309,
+      0.5751
+    ],
+    "layered_fpr": 0,
+    "layered_fpr_ci95": [
+      0,
+      0.0642
+    ],
+    "classifier_model": "openai/gpt-4o-mini",
+    "zero_width_raw_tpr": 0.067,
+    "zero_width_normalized_tpr": 1
+  },
+  "retrieval": {
+    "questions": 100,
+    "documents": 1241,
+    "chunks": 7383,
+    "dense_hit10": 0.77,
+    "sparse_hit10": 0.88,
+    "hybrid_hit10": 0.9,
+    "hybrid_ms": 24.2,
+    "rerank_ms": 10594.2
+  },
+  "generation": {
+    "claims": 412,
+    "contextual_recall": 0.921
+  },
+  "judge": {
+    "n": 40,
+    "kappa": 0.64,
+    "human_tpr": 0.56
+  },
+  "threats": {
+    "total": 13,
+    "mitigated": 7,
+    "accepted": 3
+  },
+  "withdrawn_claims": 8,
+  "parity_cases": 460
+}

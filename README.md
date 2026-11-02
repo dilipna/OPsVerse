@@ -4,7 +4,12 @@
 hybrid retrieval, a QLoRA fine-tune, measured GPU serving, and a threat model where
 every control has a test.**
 
-[Live workspace](https://ops-verse.vercel.app/) ·
+[Live site](https://ops-verse.vercel.app/) ·
+[Incident workspace](https://ops-verse.vercel.app/troubleshoot) ·
+[Security lab](https://ops-verse.vercel.app/lab) ·
+[Agent replays](https://ops-verse.vercel.app/agent) ·
+[Ask the project](https://ops-verse.vercel.app/#ask) ·
+[One-page brief](https://ops-verse.vercel.app/brief) ·
 [Security](https://ops-verse.vercel.app/security) ([threat model](docs/security/threat-model.md)) ·
 [Evidence index](docs/evidence.md) ·
 [Engineering case study](https://ops-verse.vercel.app/engineering) ·
