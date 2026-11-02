@@ -39,7 +39,8 @@ EXTRA_SCAN = [
 ]
 REDACT = [
     "export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE",
-    "token: ghp_abcdefghijklmnopqrstuvwxyz0123456789",
+    # Synthetic tokens are concatenated so secret scanners do not flag this source.
+    "token: ghp_" + "abcdefghijklmnopqrstuvwxyz0123456789",
     "api_key = 's3cr3t_v4lue_that_is_quite_long_000'",
     'aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"',
     "ANTHROPIC_API_KEY=sk-ant-api03-" + "a" * 40,
