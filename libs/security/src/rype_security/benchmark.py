@@ -334,6 +334,11 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _report_progress(scored: int) -> None:
+    if scored % 100 == 0:
+        print(f"  {scored} rows", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -389,9 +394,7 @@ def main() -> None:
                     f"`{pin['revision'][:12]}`, file SHA-256 `{pin['sha256'][:12]}`."
                 )
             print(f"{name}: {len(rows)} rows", flush=True)
-            results = evaluate(
-                rows, llm, progress=lambda n: n % 100 == 0 and print(f"  {n} rows", flush=True)
-            )
+            results = evaluate(rows, llm, progress=_report_progress)
             datasets[name] = {
                 "meta": {
                     "description": description,
