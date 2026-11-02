@@ -10,12 +10,6 @@ name: Security benchmark
 #   layer runs only when the OPENROUTER_API_KEY repository secret is set;
 #   without it, the regex detector is scored alone.
 on:
-  # TEMPORARY: run once on this branch, because a workflow can only be
-  # dispatched by name after it reaches the default branch. Removed in the
-  # next commit, which will not trigger it (triggers come from the pushed file).
-  push:
-    branches: [claude/amazing-rubin-p4r0xz]
-    paths: [.github/workflows/security-benchmark.yml]
   workflow_dispatch:
     inputs:
       model:
